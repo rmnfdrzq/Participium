@@ -1,6 +1,7 @@
 # commands
 terminal BE : cd server;npm i;nodemon index.mjs
 terminal FE : cd client;npm i;npm run dev 
+connection to db: docker compose up -d
 
 # mail - password
 giulia001@gmail.com - password

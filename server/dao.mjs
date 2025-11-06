@@ -7,6 +7,34 @@ const db = new sqlite3.Database('db.sqlite', (err) => {
   if (err) throw err;
 });
 
+/*
+const { Client } = require('pg');
+require('dotenv').config();
+
+const client = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+client.connect()
+  .then(() => console.log("✅ Connected to PostgreSQL on Neon"))
+  .catch(err => console.error("❌ Connection error:", err.stack));
+
+module.exports = client;
+// LA VARIABILE client E' L'EQUIVALENTE DEL db DI SQLITE3
+
+
+*/
+
+/*
+
+------ESEMPIO DI QUERY ------
+
+client.query('SELECT * FROM citizens', (err, res) => {
+  if (err) throw err;
+  console.log(res.rows);
+});
+*/
 export const getUser = (username, password) => {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM user WHERE mail = ?';

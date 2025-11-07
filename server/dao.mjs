@@ -76,11 +76,6 @@ client.connect()
 module.exports = client;
 // LA VARIABILE client E' L'EQUIVALENTE DEL db DI SQLITE3
 
-
-*/
-
-/*
-
 ------ESEMPIO DI QUERY ------
 
 client.query('SELECT * FROM citizens', (err, res) => {

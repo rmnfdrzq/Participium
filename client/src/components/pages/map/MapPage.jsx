@@ -297,7 +297,7 @@ export function MapPage(props) {
         >
           <MapView center={mapCenter} zoom={mapZoom} />
           <MapClickHandler onMapClick={handleMapClick} />
-          <LayersControl position="topright">
+          <LayersControl position="bottomleft">
             <LayersControl.BaseLayer checked name="OpenStreetMap">
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

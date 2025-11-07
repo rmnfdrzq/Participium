@@ -24,6 +24,12 @@
   gap: 8px;
 }
 
+@media (max-width: 640px) {
+  .searchBar {
+    width: 90%;
+  }
+}
+
 .searchForm {
   display: flex;
   gap: 8px;
@@ -31,6 +37,8 @@
   padding: 8px;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .searchInputWrapper {
@@ -39,6 +47,7 @@
   align-items: center;
   gap: 4px;
   padding-left: 4px;
+  min-width: 0;
 }
 
 .searchIcon {
@@ -49,11 +58,19 @@
 
 .searchInput {
   flex: 1;
+  min-width: 0;
   padding: 10px 12px;
   border: none;
   font-size: 14px;
   outline: none;
   transition: border-bottom-color 0.2s;
+  width: 100%;
+}
+
+@media (min-width: 641px) {
+  .searchInput {
+    min-width: 160px;
+  }
 }
 
 .searchInput:focus {
@@ -75,6 +92,14 @@
   font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .searchButton {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
 }
 
 .searchButton:hover:not(:disabled) {
@@ -117,6 +142,51 @@
 
 .createReportButton:hover {
   background-color: #357abd;
+}
+
+/* Leaflet controls styling - matching search bar */
+:global(.leaflet-control-layers),
+:global(.leaflet-control-zoom) {
+  background: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  padding: 8px !important;
+}
+
+:global(.leaflet-control-layers-expanded) {
+  padding: 8px !important;
+}
+
+:global(.leaflet-control-layers-toggle) {
+  width: 28px !important;
+  height: 28px !important;
+  background-size: 20px 20px !important;
+  background-position: center !important;
+}
+
+:global(.leaflet-control-zoom a) {
+  background-color: white !important;
+  border: none !important;
+  color: var(--static-black) !important;
+  border-radius: 6px !important;
+  width: 30px !important;
+  height: 30px !important;
+  line-height: 30px !important;
+  transition: background-color 0.2s !important;
+}
+
+:global(.leaflet-control-zoom a:hover) {
+  background-color: #f5f5f5 !important;
+}
+
+:global(.leaflet-control-layers label) {
+  font-size: 14px !important;
+  margin-bottom: 4px !important;
+}
+
+:global(.leaflet-control-layers input[type="radio"]) {
+  margin-right: 6px !important;
 }
 
 /* Leaflet popup content styling */

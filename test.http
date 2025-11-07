@@ -1,116 +1,8 @@
-### 1. GET player by ID
-GET http://localhost:3001/api/players/1
+### 1. GET all roles : id+name
+GET http://localhost:3001/api/offices
 Content-Type: application/json
 
 ###
-
-### 2.a GET public player
-GET http://localhost:3001/api/players/0
-Content-Type: application/json
-
-###
-
-### 2.b GET NaN player
-GET http://localhost:3001/api/players/casa
-Content-Type: application/json
-
-###
-
-### 2.c GET non existent player
-GET http://localhost:3001/api/players/3
-Content-Type: application/json
-
-###
-
-### 3.a POST create new game (authenticated)
-POST http://localhost:3001/api/games
-Content-Type: application/json
-
-{
-  "playerId": 3
-}
-
-###
-
-### 3.b POST create new game (authenticated)
-POST http://localhost:3001/api/games
-Content-Type: application/json
-
-{
-  "playerId": 2
-}
-
-
-### 4. POST create new game (guest)
-POST http://localhost:3001/api/games
-Content-Type: application/json
-
-{
-  "playerId": 0
-}
-
-###
-
-### 5. GET game state
-GET http://localhost:3001/api/games/1/1
-Content-Type: application/json
-
-###
-
-### 5. GET game state
-GET http://localhost:3001/api/games/1/0
-Content-Type: application/json
-
-###
-
-### 5. GET game state
-GET http://localhost:3001/api/games/1/1
-Content-Type: application/json
-
-###
-
-### 6. PUT quit game with penalty
-PUT http://localhost:3001/api/games/3/3/quit
-Content-Type: application/json
-
-{
-  "penalty": 0
-}
-
-###
-
-### 7. PUT check full phrase
-PUT http://localhost:3001/api/games/1/0/checkPhrase
-Content-Type: application/json
-
-{
-  "phrase": [
-    [{"value":"A","final":true}],
-    [{"value":"M","final":false},{"value":"I","final":false},{"value":"N","final":false},{"value":"D","final":true}],
-    [{"value":"M","final":false},{"value":"O","final":false},{"value":"R","final":false},{"value":"E","final":false}],
-    [{"value":"D","final":true},{"value":"A","final":true},{"value":"N","final":false},{"value":"G","final":false},{"value":"E","final":false},{"value":"R","final":false},{"value":"O","final":false},{"value":"U","final":false},{"value":"S","final":false}],
-    [{"value":"T","final":false},{"value":"H","final":false},{"value":"A","final":true},{"value":"N","final":false}],
-    [{"value":"A","final":true}],
-    [{"value":"W","final":false},{"value":"E","final":false},{"value":"A","final":true},{"value":"P","final":false},{"value":"O","final":false},{"value":"N","final":false}],
-    [{"value":"I","final":false},{"value":"S","final":false}],
-    [{"value":"P","final":false},{"value":"A","final":true},{"value":"R","final":false},{"value":"A","final":true},{"value":"M","final":false},{"value":"O","final":false},{"value":"U","final":false},{"value":"N","final":false},{"value":"T","final":false}]
-  ],
-  "timer": 45
-}
-
-
-
-###
-
-### 8. PUT check letter
-PUT http://localhost:3001/api/games/1/0/checkLetter
-Content-Type: application/json
-
-{
-  "id": 26,
-  "timer": 45
-}
-
 
 ###
 
@@ -121,6 +13,17 @@ content-type: application/json
 {
   "username": "aaaaaaaa@aaaaaaaaaaaa.com",
   "password": "password"
+}
+
+###
+
+# Login admin
+POST http://localhost:3001/api/sessions
+content-type: application/json
+
+{
+  "username": "admin@participium.local",
+  "password": "participium"
 }
 
 ### 
@@ -139,7 +42,26 @@ POST http://localhost:3001/api/registration
 content-type: application/json
 
 {
-  "name": "alessioVivaldi",
+  "username": "alessioVialdi",
+  "first_name": "alessio",
+  "last_name": "vivaldi",
+  "email": "aaaaaaaa@aaaaaaaaaaa.com",
+  "email_notifications": true,
+  "password": "password"
+}
+
+###
+
+# Registration user
+POST http://localhost:3001/api/operators
+content-type: application/json
+
+{
+  "username": "alessioVivaldi",
+  "first_name": "alessio",
+  "last_name" : "vivaldi",
   "email" : "aaaaaaaa@aaaaaaaaaaaa.com",
   "password": "password"
 }
+
+###

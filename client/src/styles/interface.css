@@ -48,3 +48,7 @@ p {
   line-height: 20px;
   color: var(--static-black);
 }
+
+.pointer {
+  cursor: pointer;
+}

@@ -126,3 +126,44 @@ INSERT INTO statuses (name) VALUES
 ('Suspended'),
 ('Rejected'),
 ('Resolved');
+
+
+-- Funzione per controllare email duplicate tra citizens e operators
+CREATE OR REPLACE FUNCTION check_email_uniqueness()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_TABLE_NAME = 'citizens' THEN
+        IF EXISTS (SELECT 1 FROM operators WHERE email = NEW.email) THEN
+            RAISE EXCEPTION 'Email already in use: %', NEW.email;
+        END IF;
+    ELSIF TG_TABLE_NAME = 'operators' THEN
+        IF EXISTS (SELECT 1 FROM citizens WHERE email = NEW.email) THEN
+            RAISE EXCEPTION 'Email already in use: %', NEW.email;
+        END IF;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger su citizens
+CREATE TRIGGER check_email_on_citizens
+BEFORE INSERT OR UPDATE ON citizens
+FOR EACH ROW
+EXECUTE FUNCTION check_email_uniqueness();
+
+-- Trigger su operators
+CREATE TRIGGER check_email_on_operators
+BEFORE INSERT OR UPDATE ON operators
+FOR EACH ROW
+EXECUTE FUNCTION check_email_uniqueness();
+
+
+-- 4. Operatore admin
+INSERT INTO operators (email, username, password_hash, salt, office_id)
+VALUES (
+  'admin@participium.local',
+  'admin',
+  'f746cd28ba22bc7f3bbd4f62f152180f17236d0463d70888c4881d154c7526af',
+  '4c999d4a2a78113f997cc7fd2cd05043',
+  (SELECT office_id FROM offices WHERE name = 'Organization Office')
+);

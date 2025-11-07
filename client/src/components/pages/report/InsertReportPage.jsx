@@ -204,7 +204,7 @@ function InsertReportForm({ handleInsertReport, message, location }) {
       )}
 
       <div className={styles.formContainer}>
-        <h1 className={styles.title}>Submit a Report</h1>
+        <h1 className={styles.title}>Submit Report</h1>
 
         <form action={formAction} className={styles.form}>
           {/* Map Section */}

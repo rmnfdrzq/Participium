@@ -110,7 +110,7 @@ app.get('/api/admin', async (req, res) => {
   }
 });
 
-// POST /api/admin/createuser
+// POST /api/admin/createuser -> admin creates municipality user
 app.post('/api/admin/createuser', [
   check('username').notEmpty().withMessage('Username is required'),
   check('email').isEmail().withMessage('Invalid email format'),

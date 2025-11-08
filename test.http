@@ -11,7 +11,7 @@ POST http://localhost:3001/api/sessions
 content-type: application/json
 
 {
-  "username": "aaaaaaaa@aaaaaaaaaaaa.com",
+  "username": "aaaaaaaa@aaaaaaaaaaa.com",
   "password": "password"
 }
 
@@ -53,15 +53,14 @@ content-type: application/json
 ###
 
 # Registration user
-POST http://localhost:3001/api/operators
+POST http://localhost:3001/api/admin/createuser
 content-type: application/json
 
 {
   "username": "alessioVivaldi",
-  "first_name": "alessio",
-  "last_name" : "vivaldi",
-  "email" : "aaaaaaaa@aaaaaaaaaaaa.com",
-  "password": "password"
+  "email" : "aaaaaaaa@aaaaaaaaaa.com",
+  "password": "password",
+  "office_id": 2
 }
 
 ###

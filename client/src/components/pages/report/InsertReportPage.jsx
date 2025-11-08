@@ -6,6 +6,11 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import API from "../../../API/API.mjs";
 import styles from "./insertReportPage.module.css";
+import { supabase } from "../../../data/supabaseClient";
+
+const BUCKET_NAME = "Reports";
+
+console.log(import.meta.env);
 
 // Fix for default marker icons in Leaflet with React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -70,25 +75,57 @@ export default function InsertReportPage() {
   }, [location, navigate]);
 
   const handleInsertReport = async (reportData) => {
-    try {
-      // Simula chiamata API
-      // const result = await API.createReport(reportData);
-
-      // Simulo una risposta di successo
-      const result = {
-        ...reportData,
-        latitude: location.coordinates?.lat,
-        longitude: location.coordinates?.lng,
-        user: user,
-      };
-
-      setReportCreated(result);
-
-      // NAVIGATEEEEEEEEEEEEEEEEEEEEEEEEEEE
-    } catch (err) {
-      setMessage({ msg: err.message || err, type: "danger" });
+  try {
+    if (!reportData.images || reportData.images.length === 0) {
+      throw new Error("No images selected for upload.");
     }
-  };
+
+    const imageUrls = [];
+
+    for (const file of reportData.images) {
+      // Sanitize filename
+      const cleanFileName = file.name.replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
+      const uniqueName = `${Date.now()}-${cleanFileName}`;
+
+      console.log("Uploading to Supabase with name:", uniqueName);
+
+      // Convert File to Blob (safer for binary images)
+      const fileData = new Blob([file], { type: file.type });
+
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .upload(uniqueName, fileData, { upsert: true });
+
+      if (error) {
+        throw new Error("Error uploading image: " + error.message);
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(uniqueName);
+      imageUrls.push(urlData.publicUrl);
+
+      console.log("Uploaded image URL:", urlData.publicUrl);
+    }
+
+    // Combine report data with uploaded image URLs
+    const reportWithUrls = {
+      ...reportData,
+      images: imageUrls,
+      latitude: location.coordinates?.lat,
+      longitude: location.coordinates?.lng,
+      user: user,
+    };
+
+    // API call to save the report
+    // await API.createReport(reportWithUrls);
+
+    setReportCreated(reportWithUrls);
+  } catch (err) {
+    setMessage({ msg: err.message || err, type: "danger" });
+    console.error(err);
+  }
+};
 
   return (
     <>
@@ -108,6 +145,7 @@ export default function InsertReportPage() {
 function InsertReportForm({ handleInsertReport, message, location }) {
   const navigate = useNavigate();
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
   const [state, formAction, isPending] = useActionState(insertReportFunction, {
     title: "",
     description: "",
@@ -149,6 +187,9 @@ function InsertReportForm({ handleInsertReport, message, location }) {
       return;
     }
     setSelectedFiles(files);
+
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(urls);
   };
 
   const mapCenter = location.position || [45.0703, 7.6868];
@@ -275,6 +316,19 @@ function InsertReportForm({ handleInsertReport, message, location }) {
               {selectedFiles.length > 0 &&
                 `${selectedFiles.length} file(s) selected.`}
             </p>
+            {previewUrls.length > 0 && (
+              <div className={styles.previewContainer}>
+                {previewUrls.map((url, index) => (
+                  <img
+                    key={index}
+                    src={url}
+                    alt={`Preview ${index + 1}`}
+                    className={styles.previewImage}
+                  />
+                ))}
+              </div>
+            )}
+
           </div>
 
           <div className={styles.formGroup}>

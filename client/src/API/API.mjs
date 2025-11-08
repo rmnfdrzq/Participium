@@ -1,3 +1,4 @@
+
 const SERVER_URL = "http://localhost:3001";
 
 /**
@@ -82,5 +83,43 @@ const signUp = async (userData) => {
   }
 };
 
-const API = { logIn, getUserInfo, logOut, signUp };
+const getAllOperators = async () => {
+  const response = await fetch(`${SERVER_URL}/api/admin`, {
+    credentials: 'include'
+  });
+  if (!response.ok) {
+    const errDetail = await response.json();
+    throw errDetail.error;
+  }
+  return await response.json();
+};
+
+
+const createMunicipalityUser = async (userData) => {
+  const response = await fetch(`${SERVER_URL}/api/admin/createuser`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(userData)
+  });
+  if (!response.ok) {
+    const errDetail = await response.json();
+    throw errDetail.error;
+  }
+  return await response.json();
+};
+
+const getAllOffices = async () => {
+  const response = await fetch(`${SERVER_URL}/api/offices`, {
+    credentials: "include",
+  });
+  if (response.ok) {
+    return await response.json();
+  } else {
+    const text = await response.text();
+    throw new Error(text);
+  }
+};
+
+const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, createMunicipalityUser };
 export default API;

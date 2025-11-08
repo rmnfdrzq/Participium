@@ -1,0 +1,263 @@
+/* Importante: assicurati che il font 'Public Sans' sia disponibile (es. tramite Google Fonts) */
+
+/* --- LAYOUT GENERALE: .createuser-page --- */
+.createuser-page {
+  font-family: 'Public Sans', sans-serif;
+  background-color: #FFFFFF; /* Sfondo generale bianco */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+/* --- HEADER: .createuser-header --- */
+.createuser-header {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 40px;
+    height: 48px;
+    width: 100%;
+    border-bottom: 1px solid #E6E8EB;
+    background-color: #ffffff;
+}
+
+/* BACK BUTTON: .back-button */
+.back-button {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 23px;
+    color: #121417;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* USER GREETING: .user-greeting */
+.user-greeting {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 23px;
+    color: #121417;
+}
+
+/* --- CONTENUTO PAGINA: .createuser-content --- */
+.createuser-content {
+    /* Centra il contenuto orizzontalmente */
+    display: flex;
+    flex-direction: row;
+    justify-content: center; /* **MODIFICA CHIAVE:** Centra il contenuto orizzontalmente */
+    align-items: flex-start;
+    padding: 20px 0; /* Riduci il padding orizzontale per lasciare il centering al flexbox */
+    
+    width: 100%;
+    box-sizing: border-box;
+    flex-grow: 1; 
+}
+
+/* CONTENITORE PRINCIPALE: .createuser-card */
+.createuser-card {
+    /* La larghezza del modulo è definita dal contenuto (480px) */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0px; 
+    
+    /* Larghezza del container principale per contenere il modulo */
+    width: 960px;
+    max-width: 960px;
+}
+
+/* --- TITOLI E SOTTOTITOLI --- */
+.createuser-title {
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 40px;
+    color: #121417;
+    text-align: center;
+    width: 100%;
+    margin: 0;
+}
+
+.createuser-subtitle {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 21px;
+    color: #61758A;
+    margin-top: 12px;
+    margin-bottom: 32px; /* Aggiunto spazio dopo il sottotitolo */
+    text-align: center; /* Allinea al centro come nell'immagine */
+}
+
+/* --- FORM E CAMPI --- */
+.createuser-form {
+    /* **MODIFICA CHIAVE:** Rende il form stretto (480px) e verticale */
+    display: flex;
+    flex-direction: column; /* I campi sono uno sotto l'altro */
+    width: 480px; /* Larghezza centrale per allinearsi al design Figma */
+    max-width: 100%;
+    margin: 0 auto; /* Centra orizzontalmente il modulo nell'area 960px */
+}
+
+/* CAMPO SINGOLO: .form-field */
+.form-field {
+    /* **MODIFICA:** Occupa il 100% della larghezza del form (480px) */
+    width: 100%; 
+    box-sizing: border-box;
+    
+    /* Padding verticale per separare i campi. Rimosso padding orizzontale. */
+    padding: 12px 0; 
+    
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* LABEL: label */
+.form-field label {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #121417;
+    padding-bottom: 8px;
+}
+
+/* INPUT / SELECT */
+.form-field input, 
+.form-field select {
+    box-sizing: border-box;
+    padding: 0 15px; 
+    
+    /* Occupa il 100% della larghezza del campo (480px) */
+    width: 100%;
+    height: 56px;
+    
+    background: #FFFFFF;
+    border: 1px solid #DBE0E6;
+    border-radius: 8px;
+    
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    color: #121417; 
+}
+
+/* Stile specifico per l'icona della freccia nel SELECT */
+.form-field select {
+    /* Rimuove l'aspetto della freccia predefinita in alcuni browser per mostrare solo quella di Figma se necessario */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* Aggiungere uno sfondo o un'icona personalizzata per replicare la freccia a V capovolta */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="22" viewBox="0 0 12 22" fill="%2361758A"><path d="M6 8.5L9 5.5H3L6 8.5Z" transform="translate(0 7)"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+}
+
+/* Placeholder */
+.form-field input::placeholder {
+    color: #61758A;
+}
+
+/* TESTO DI AIUTO */
+.form-text {
+    font-size: 0.85em;
+    color: #61758A;
+    margin-top: 5px;
+}
+
+/* --- PULSANTE SUBMIT: .btn-createuser --- */
+.btn-createuser {
+    flex: 1;
+    /* Rimuovi tutte le proprietà in conflitto */
+    width: auto; /* Cambiato da 100% */
+    padding: 0 16px; /* Uguale al pulsante Cancel */
+    margin-top: 0; /* Rimosso per evitare spostamento verticale */
+    margin-left: 0;
+    
+    /* Mantieni le altre proprietà */
+    height: 40px;
+    background: #1280ED; 
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 21px;
+    color: #FFFFFF;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    transition: background-color 0.2s;
+}
+
+.btn-createuser:hover:not(:disabled) {
+    background: #0d6edc;
+}
+
+.btn-createuser:disabled {
+    background: #a0c4f8; 
+    cursor: not-allowed;
+}
+
+/* --- ALERT (Visualizzazione Errore) --- */
+.alert {
+    width: 480px; /* Larghezza del modulo */
+    max-width: 100%;
+    margin: 0 auto 20px auto; /* Centra l'alert sopra il modulo */
+    box-sizing: border-box;
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-align: center;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.btn-cancel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 16px;
+  height: 40px;
+  background: #F0F2F5;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 21px;
+  color: #121417;
+  transition: background-color 0.2s;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #e3e6ea;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import logo from "../../../images/logo.svg";
 import styles from "./header.module.css";
+import { Link } from "react-router";
 
 export function Header(props) {
   const [showLogout, setShowLogout] = useState(false);
@@ -36,19 +37,23 @@ export function Header(props) {
     };
   }, [showLogout]);
 
+
   return (
     <header className={styles.header}>
       <div className={styles.headerLogoContainer}>
         <img src={logo} alt="Logo" className={styles.headerLogo} />
-        <span className={styles.headerBrand}>Participium</span>
+
+        <span className={styles.headerBrand}>
+          <Link to={"/"} className="navbar-brand">Participium</Link>
+        </span>
       </div>
-      {props.user?.name && (
+      {props.user && (
         <div className={`${styles.userSection} pointer`} ref={userSectionRef}>
           <div
             className={styles.headerGreeting}
             onClick={() => setShowLogout(!showLogout)}
           >
-            Hello, {props.user.name}
+            Hello, {props.user.username || props.user.name || props.user.email}
           </div>
           {showLogout && (
             <div className={styles.logoutPopup} ref={popupRef}>

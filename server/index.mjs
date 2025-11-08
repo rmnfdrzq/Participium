@@ -2,7 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import {check, validationResult} from 'express-validator';
-import {getUser, createUser, getAllOffices, createOperator, getOperator} from './dao.mjs';
+import {getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators} from './dao.mjs';
 import cors from 'cors';
 
 import passport from 'passport';
@@ -80,7 +80,6 @@ app.post('/api/registration', [
   }
 });
 
-
 // GET /api/offices
 app.get('/api/offices', async (req, res) => {
   try {
@@ -91,9 +90,28 @@ app.get('/api/offices', async (req, res) => {
   }
 });
 
+// GET /api/admin - Get all users
+app.get('/api/admin', async (req, res) => {
+  try {
 
-// POST /api/operators
-app.post('/api/operators', [
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    if (req.user.username !== 'admin') {
+     return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const users = await getAllOperators(); 
+    res.json(users);
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// POST /api/admin/createuser
+app.post('/api/admin/createuser', [
   check('username').notEmpty().withMessage('Username is required'),
   check('email').isEmail().withMessage('Invalid email format'),
   check('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
@@ -109,7 +127,7 @@ app.post('/api/operators', [
 
   try {
     const { username, email, password, office_id } = req.body;
-    const operator = await createOperator(email, username, password, office_id);
+    const operator = await createMunicipalityUser(email, username, password, office_id);
     res.status(201).json(operator);
   } catch (err) {
     if (err.code === '23505') { // PostgreSQL unique violation

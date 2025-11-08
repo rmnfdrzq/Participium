@@ -1,10 +1,12 @@
 import { useState, useActionState } from "react";
+import { useNavigate } from "react-router";
 import API from "../../../API/API.mjs";
 import styles from "./loginPage.module.css";
 
 export function LoginPage(props) {
   const [isLogin, setIsLogin] = useState(true);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate(); 
 
   /**
    * Handles user login by sending credentials to the API.
@@ -18,6 +20,12 @@ export function LoginPage(props) {
       const user = await API.logIn(credentials);
       setMessage({ msg: `Welcome, ${user.name}!`, type: "success" });
       props.setUser(user);
+
+      if(user.username === 'admin'){
+        navigate(`/admin`);
+      }else{
+        navigate(`/map`);
+      }
     } catch (err) {
       setMessage({ msg: err, type: "error" });
     }

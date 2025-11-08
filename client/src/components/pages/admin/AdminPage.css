@@ -1,0 +1,250 @@
+/* Importante: assicurati che il font 'Public Sans' sia disponibile (es. tramite Google Fonts) */
+/* Stili generali del container (.admin-page) */
+.admin-page {
+  font-family: 'Public Sans', sans-serif;
+  background-color: #ffffff; /* Sfondo generale bianco, se non specificato altrimenti */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- HEADER: .admin-header (Dettagli da richiesta precedente) --- */
+.admin-header {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 40px;
+    height: 48px;
+    width: 100%;
+    border-bottom: 1px solid #E6E8EB; /* Bordo separatore */
+    background-color: #ffffff;
+}
+
+/* LOGO CONTAINER: .header-left */
+.header-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+}
+
+/* TESTO LOGO: .logo (Participium) */
+.logo {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 23px;
+    color: #121417;
+}
+
+/* USER GREETING: .user-greeting (Hello, Rebecca) */
+.user-greeting {
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 23px;
+    color: #121417;
+}
+
+/* --- CONTENUTO PRINCIPALE: .admin-content (Depth 2, Frame 1) --- */
+.admin-content {
+    /* Depth 2, Frame 1: padding: 20px 160px; */
+    padding: 20px 160px;
+    
+    /* Depth 3, Frame 0: width: 960px; max-width: 960px; */
+    max-width: 1280px; /* Larghezza massima del container esterno */
+    width: 100%;
+    margin: 0 auto;
+    
+    /* Flex settings */
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+/* --- INTESTAZIONE PAGINA + PULSANTE (.content-header - Depth 4, Frame 0) --- */
+.content-header {
+    /* Auto layout: display: flex, flex-direction: row, justify-content: space-between, align-items: flex-start, gap: 12px */
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    
+    /* padding: 16px; */
+    padding: 16px 0; /* Rimuovo i padding laterali qui per centrare il contenuto di Depth 3 */
+    
+    /* width: 960px; height: 72px; */
+    width: 960px; 
+    max-width: 100%; /* Assicura che si adatti al contenitore */
+    
+    margin-bottom: 0; /* Rimuovo il margin-bottom predefinito */
+}
+
+/* TITOLO: .page-title (Users - Depth 5, Frame 0) */
+.page-title {
+    /* font-weight: 700; font-size: 32px; line-height: 40px; color: #121417; */
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 40px;
+    color: #121417;
+    margin: 0; /* Rimuovo margini predefiniti */
+}
+
+/* PULSANTE: .btn-create (Depth 5, Frame 1) */
+.btn-create {
+    /* Auto layout: justify-content: center; align-items: center; padding: 0px 16px; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 16px; 
+    
+    /* height: 32px; background: #F0F2F5; border-radius: 8px; */
+    height: 32px;
+    background: #F0F2F5; /* Sfondo grigio del pulsante */
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    
+    /* Testo: font-weight: 500; font-size: 14px; line-height: 21px; text-align: center; color: #121417; */
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 21px;
+    color: #121417;
+    transition: background-color 0.2s;
+}
+
+.btn-create:hover {
+    background: #e3e6ea;
+}
+
+
+/* --- TABELLA UTENTI: .users-table-container (Depth 5, Frame 0) --- */
+.users-table-container {
+    /* background: #FFFFFF; border: 1px solid #DBE0E6; border-radius: 8px; */
+    background: #FFFFFF;
+    border: 1px solid #DBE0E6;
+    border-radius: 8px;
+    
+    /* Contiene la tabella all'interno dell'area di 960px */
+    width: 960px;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden; /* Per contenere i bordi arrotondati */
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* --- INTESTAZIONE TABELLA (TH - Depth 9, Frames 0-2) --- */
+.users-table th {
+    /* padding: 12px 16px; */
+    padding: 12px 16px;
+    
+    /* font-weight: 500; font-size: 14px; line-height: 21px; color: #121417; */
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 21px;
+    color: #121417;
+    text-align: left; /* Il tuo layout Figma specifica l'allineamento a sinistra per gli header */
+    
+    /* Sfondo bianco, nessun bordo inferiore per l'header stesso (il bordo è sulla riga sottostante) */
+    background: #FFFFFF;
+}
+
+/* Larghezze specifiche delle colonne (applica su TH per una migliore coerenza) */
+.users-table thead tr th:nth-child(1) { width: 349px; } /* Name & Surname */
+.users-table thead tr th:nth-child(2) { width: 356px; } /* Login */
+.users-table thead tr th:nth-child(3) { width: 220px; } /* Role */
+
+/* --- CORPO TABELLA (TD - Depth 8, Frame X) --- */
+.users-table td {
+    /* Depth 9, Frame 0: padding: 8px 16px; e giustificazione al centro verticale */
+    padding: 8px 16px;
+    vertical-align: middle;
+    height: 72px; /* Altezza fissa della riga (72px) */
+    
+    /* Bordo superiore di ogni riga (border-top: 1px solid #E6E8EB) */
+    border-top: 1px solid #E6E8EB;
+    
+    /* font-weight: 400; font-size: 14px; line-height: 21px; */
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 21px;
+    color: #121417;
+}
+
+/* Stili specifici per le colonne */
+.user-name {
+    color: #121417; /* Nero scuro */
+}
+
+.user-login {
+    /* Colore del login: #61758A */
+    color: #61758A;
+}
+
+/* --- BADGE RUOLO (Depth 10, Frame 0) --- */
+.role-cell span {
+    /* Auto layout: justify-content: center; align-items: center; padding: 0px 16px; */
+    display: inline-flex; /* Usa inline-flex per centratura interna */
+    justify-content: center;
+    align-items: center;
+    padding: 0 16px;
+    
+    /* height: 32px; background: #F0F2F5; border-radius: 8px; */
+    height: 32px;
+    background: #F0F2F5; /* Colore di sfondo comune a tutti i ruoli da Figma */
+    border-radius: 8px;
+    
+    /* Testo: font-weight: 500; font-size: 14px; line-height: 21px; color: #121417; */
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 21px;
+    color: #121417; /* Colore del testo comune a tutti i ruoli da Figma */
+    
+    min-width: 84px; /* Valore minimo specificato in Figma */
+}
+
+/* Dato che Figma specifica lo stesso sfondo (#F0F2F5) e testo (#121417) per tutti i ruoli,
+   non sono necessarie classi specifiche (.role-citizen, .role-organization, ecc.)
+   se non per identificare il tipo di riga, ma useremo lo stile base (.role-cell span). */
+/* Le classi .role-citizen, .role-organization, .role-technical, ecc. nel tuo JSX sono utili
+   se si vuole differenziare lo stile in futuro (es. cambio colore). */
+
+/* --- Alert e Messaggi (Mantenuti dal set precedente) --- */
+.alert {
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9em;
+  width: 960px; /* Allineato alla larghezza del contenuto principale */
+}
+
+.alert-error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.alert-close {
+  background: none;
+  border: none;
+  color: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 15px;
+  font-size: 1.2em;
+}

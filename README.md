@@ -6,7 +6,7 @@ connection to db: (docker-desktop open and running) docker compose up -d
 # mail - password
 admin@participium.local -  participium
 
-
+sofia1@gmail.com - sofia1
 aaaaaaaa@aaaaaaaaaaaa.com - password
 
 # DB

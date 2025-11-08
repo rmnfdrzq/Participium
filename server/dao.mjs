@@ -15,7 +15,7 @@ export const getUser = async (username, password) => {
     const result = await pool.query(sql, [username]);
 
     const row = result.rows[0];
-    if (!row) return await getOperator(username, password);
+    if (!row) return await getOperators(username, password);
 
     const user = { id: row.citizen_id, username: row.username, type: "user" };
 
@@ -36,7 +36,7 @@ export const getUser = async (username, password) => {
   }
 };
 
-export const getOperator = async (username, password) => {
+export const getOperators = async (username, password) => {
   try {
     const sql = 'SELECT * FROM "operators" WHERE email = $1';
     const result = await pool.query(sql, [username]);
@@ -70,7 +70,7 @@ export const createUser = async (username, email,first_name,last_name , email_no
     crypto.scrypt(password, salt, 32, async (err, hashedPassword) => {
       if (err) return reject(err);
 
-      const sql = 'INSERT INTO "citizens"(username, email,first_name,last_name, password_hash,email_notifications, salt) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING citizen_id';
+      const sql = 'INSERT INTO citizens (username, email,first_name,last_name, password_hash,email_notifications, salt) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING citizen_id';
       const values = [username, email,first_name,last_name, hashedPassword.toString('hex'),email_notifications, salt];
 
       try {
@@ -93,8 +93,29 @@ export const getAllOffices = async () => {
   }
 };
 
+export const getAllOperators = async () => {
+  try {
+    const sql = `
+      SELECT o.operator_id, o.email, o.username, o.office_id, off.name as office_name
+      FROM operators o
+      LEFT JOIN offices off ON o.office_id = off.office_id
+      ORDER BY o.operator_id DESC
+    `;
+    const result = await pool.query(sql);
+    return result.rows.map((row) => ({
+      id: row.operator_id,
+      email: row.email,
+      username: row.username,
+      office_id: row.office_id,
+      office_name: row.office_name,
+      role: 'municipality_user'
+    }));
+  } catch (err) {
+    throw err;
+  }
+};
 
-export const createOperator = async (email, username, password, office_id) => {
+export const createMunicipalityUser = async (email, username, password, office_id) => {
   const salt = crypto.randomBytes(16).toString('hex');
 
   return new Promise((resolve, reject) => {
@@ -117,30 +138,3 @@ export const createOperator = async (email, username, password, office_id) => {
     });
   });
 };
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-require('dotenv').config();
-
-const client = new Client({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
-});
-
-client.connect()
-  .then(() => console.log("✅ Connected to PostgreSQL on Neon"))
-  .catch(err => console.error("❌ Connection error:", err.stack));
-
-module.exports = client;
-// LA VARIABILE client E' L'EQUIVALENTE DEL db DI SQLITE3
-*/

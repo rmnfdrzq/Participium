@@ -29,7 +29,7 @@ const HomePage = ({ user }) => {
             </div>
           ) : (
             <div className="hero-actions">
-              <button onClick={() => navigate('/register')} className="btn btn-primary-large">
+              <button onClick={() => navigate('/signup')} className="btn btn-primary-large">
                 Register Now
               </button>
               <button onClick={() => navigate('/login')} className="btn btn-secondary-large">
@@ -186,7 +186,7 @@ const HomePage = ({ user }) => {
           <h2>Join Us</h2>
           <p>Help improve the city of Turin by reporting the problems you encounter daily</p>
           {!user && (
-            <button onClick={() => navigate('/register')} className="btn btn-cta">
+            <button onClick={() => navigate('/signup')} className="btn btn-cta">
               Get Started - Register for Free
             </button>
           )}
@@ -209,7 +209,7 @@ const HomePage = ({ user }) => {
             <div className="footer-section">
               <h4>Useful Links</h4>
               <p><Link to="/login">Login</Link></p>
-              <p><Link to="/register">Register</Link></p>
+              <p><Link to="/signup">Register</Link></p>
             </div>
           </div>
           <div className="footer-bottom">

@@ -1,12 +1,15 @@
 import { useState, useActionState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import API from "../../../API/API.mjs";
 import styles from "./loginPage.module.css";
 
 export function LoginPage(props) {
-  const [isLogin, setIsLogin] = useState(true);
   const [message, setMessage] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine if we're on signup route
+  const isLogin = location.pathname === "/login";
 
   /**
    * Handles user login by sending credentials to the API.
@@ -21,14 +24,15 @@ export function LoginPage(props) {
       setMessage({ msg: `Welcome, ${user.name}!`, type: "success" });
       props.setUser(user);
 
-      if (user.username === 'admin') {
+      if (user.username === "admin") {
         navigate(`/admin`);
       } else {
         navigate(`/map`);
       }
     } catch (err) {
       // ensure we store a string message, not an Error object
-      const text = err?.message || (typeof err === 'string' ? err : JSON.stringify(err));
+      const text =
+        err?.message || (typeof err === "string" ? err : JSON.stringify(err));
       setMessage({ msg: text, type: "error" });
     }
   };
@@ -59,7 +63,8 @@ export function LoginPage(props) {
       } else if (err && err.error) {
         setMessage({ msg: String(err.error), type: "error" });
       } else {
-        const text = err?.message || (typeof err === 'string' ? err : JSON.stringify(err));
+        const text =
+          err?.message || (typeof err === "string" ? err : JSON.stringify(err));
         setMessage({ msg: text || "Registration failed", type: "error" });
       }
     }
@@ -72,7 +77,7 @@ export function LoginPage(props) {
           handleLogin={handleLogin}
           message={message}
           onSwitchToSignUp={() => {
-            setIsLogin(false);
+            navigate("/signup");
             setMessage("");
           }}
         />
@@ -81,7 +86,7 @@ export function LoginPage(props) {
           handleSignUp={handleSignUp}
           message={message}
           onSwitchToLogin={() => {
-            setIsLogin(true);
+            navigate("/login");
             setMessage("");
           }}
         />

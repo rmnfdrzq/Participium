@@ -3,9 +3,9 @@ import { Routes, Route, Navigate } from "react-router";
 import { DefaultLayout } from "./components/common/layout/Layout";
 import InsertReportPage from "./components/pages/report/InsertReportPage";
 import { LoginPage } from "./components/pages/login/LoginPage";
-import  HomePage  from "./components/pages/home/HomePage";
-import  AdminPage  from "./components/pages/admin/AdminPage";
-import  CreateUserPage  from "./components/pages/admin/CreateUserPage";
+import HomePage from "./components/pages/home/HomePage";
+import AdminPage from "./components/pages/admin/AdminPage";
+import CreateUserPage from "./components/pages/admin/CreateUserPage";
 import { MapPage } from "./components/pages/map/MapPage";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
@@ -41,19 +41,34 @@ function App() {
       <Route
         element={<DefaultLayout user={user} handleLogout={handleLogout} />}
       >
-        <Route path="/" element={
-          user ? ( 
-            user.username==='admin' ? <Navigate replace to={`/admin`}/> : <MapPage />
-          ) : <HomePage user={user} />} />
-        
         <Route
-          path="/login"
+          path="/"
           element={
-              <LoginPage user={user} setUser={setUser} />
+            user ? (
+              user.username === "admin" ? (
+                <Navigate replace to={`/admin`} />
+              ) : (
+                <MapPage />
+              )
+            ) : (
+              <HomePage user={user} />
+            )
           }
         />
+
+        <Route
+          path="/login"
+          element={<LoginPage user={user} setUser={setUser} />}
+        />
+        <Route
+          path="/signup"
+          element={<LoginPage user={user} setUser={setUser} />}
+        />
         <Route path="/admin" element={<AdminPage user={user} />} />
-        <Route path="/admin/createuser" element={<CreateUserPage user={user} />} />
+        <Route
+          path="/admin/createuser"
+          element={<CreateUserPage user={user} />}
+        />
 
         <Route path="/map" element={user ? <MapPage /> : <Navigate to="/" />} />
 

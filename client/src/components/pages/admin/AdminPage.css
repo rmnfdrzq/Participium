@@ -133,7 +133,8 @@
     width: 960px;
     max-width: 100%;
     box-sizing: border-box;
-    overflow: hidden; 
+    overflow-x: auto;
+    overflow-y: visible;
 }
 
 .users-table {
@@ -208,7 +209,8 @@
     line-height: 21px;
     color: var(--static-black); 
     
-    min-width: 84px; 
+    min-width: 84px;
+    white-space: nowrap;
 }
 
 
@@ -245,4 +247,74 @@
   cursor: pointer;
   margin-left: 15px;
   font-size: 1.2em;
+}
+
+@media (max-width: 768px) {
+  .admin-content {
+    padding: 20px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .content-header {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .users-table-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .users-table {
+    width: auto;
+    min-width: 600px;
+  }
+
+  .users-table thead tr th:nth-child(1),
+  .users-table tbody tr td:nth-child(1) {
+    width: auto;
+    min-width: 150px;
+    max-width: 200px;
+  }
+
+  .users-table thead tr th:nth-child(2),
+  .users-table tbody tr td:nth-child(2) {
+    width: auto;
+    min-width: 180px;
+    max-width: 220px;
+  }
+
+  .users-table thead tr th:nth-child(3),
+  .users-table tbody tr td:nth-child(3) {
+    width: auto;
+    min-width: 120px;
+    max-width: 150px;
+  }
+
+  .users-table th {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .users-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+    height: auto;
+    min-height: 60px;
+  }
+
+  .role-cell span {
+    padding: 0 10px;
+    font-size: 12px;
+    min-width: 70px;
+  }
+
+  .alert {
+    width: 100%;
+    max-width: 100%;
+  }
 }

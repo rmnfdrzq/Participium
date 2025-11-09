@@ -2,3 +2,9 @@
 @import "./styles/variables.css";
 @import "./styles/layout.css";
 @import "./styles/interface.css";
+
+body {
+  background-color: var(--static-white);
+  margin: 0;
+  padding: 0;
+}

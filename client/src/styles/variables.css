@@ -1,11 +1,33 @@
 :root {
+  
   --static-white: #fff;
-  --static-black: #121417;
-  --accent-default: #1280ed;
-  --accent-hover: #0d569f;
-  --link-default: #2c2ff2;
-  --link-hover: #2123b1;
-  --background-default: #f0f2f5;
-  --foreground-default: #61758a;
-  --border-default: #e5e8eb;
+  --static-black: #2c3e50;
+  --accent-primary: #667eea;
+  --accent-secondary: #764ba2;
+  --accent-default: #667eea;
+  --accent-hover: #5568d3;
+  --link-default: #667eea;
+  --link-hover: #5568d3;
+  --background-default: #f8f9fa;
+  --background-light: #ffffff;
+  --foreground-default: #666;
+  --foreground-dark: #2c3e50;
+  --border-default: rgba(0, 0, 0, 0.08);
+  --border-light: rgba(0, 0, 0, 0.1);
+  
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.2);
+  
+  
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 50%;
+  
+  
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-card: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }

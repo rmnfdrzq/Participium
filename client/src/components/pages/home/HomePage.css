@@ -3,7 +3,7 @@
   overflow-x: hidden;
 }
 
-/* Hero Section */
+
 .hero-section {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -80,14 +80,14 @@
   color: #667eea;
 }
 
-/* Container */
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-/* How it Works Section */
+
 .how-it-works {
   padding: 80px 20px;
   background-color: #f8f9fa;
@@ -164,7 +164,7 @@
   font-size: 15px;
 }
 
-/* Categories Section */
+
 .categories-section {
   padding: 80px 20px;
   background-color: white;
@@ -208,7 +208,7 @@
   margin: 0;
 }
 
-/* Lifecycle Section */
+
 .lifecycle-section {
   padding: 80px 20px;
   background-color: #f8f9fa;
@@ -283,7 +283,7 @@
   font-size: 15px;
 }
 
-/* CTA Section */
+
 .cta-section {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -320,7 +320,7 @@
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-/* Footer */
+
 .home-footer {
   background-color: #2c3e50;
   color: white;
@@ -368,7 +368,7 @@
   margin: 0;
 }
 
-/* Responsive */
+
 @media (max-width: 768px) {
   .hero-title {
     font-size: 36px;

@@ -9,7 +9,7 @@ export function LoginPage(props) {
   const location = useLocation();
 
   // Determine if we're on signup route
-  const isLogin = location.pathname === "/login";
+  const isLogin = location.pathname === "/login"; //it's true if we are in login and not in sign up
 
   /**
    * Handles user login by sending credentials to the API.
@@ -24,7 +24,7 @@ export function LoginPage(props) {
       setMessage({ msg: `Welcome, ${user.name}!`, type: "success" });
       props.setUser(user);
 
-      if (user.username === "admin") {
+      if (user.username === "admin" && user.type === 'operator' ) {
         navigate(`/admin`);
       } else {
         navigate(`/map`);
@@ -61,7 +61,7 @@ export function LoginPage(props) {
       props.setUser(user);
 
       // Navigate based on user type
-      if (user.username === "admin") {
+      if (user.username === "admin" && user.type === 'operator' ) {
         navigate(`/admin`);
       } else {
         navigate(`/map`);
@@ -116,6 +116,7 @@ export function LoginPage(props) {
  * @returns {JSX.Element} LoginForm component
  */
 function LoginForm(props) {
+  const navigate = useNavigate();
   const [state, formAction, isPending] = useActionState(loginFunction, {
     username: "",
     password: "",

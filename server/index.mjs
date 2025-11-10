@@ -2,7 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import {check, validationResult} from 'express-validator';
-import {getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators} from './dao.mjs';
+import {getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, getAllCategories} from './dao.mjs';
 import cors from 'cors';
 
 import passport from 'passport';
@@ -89,6 +89,18 @@ app.get('/api/offices', async (req, res) => {
     res.status(503).json({ error: 'Database error during office retrieval' });
   }
 });
+
+// GET /api/categories -> all categories
+app.get('/api/categories', async (req, res) => {
+  try {
+    const categories = await getAllCategories(); 
+    res.status(200).json(categories);
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    res.status(503).json({ error: 'Database error during category retrieval' });
+  }
+});
+
 
 // GET /api/admin - Get all (and only) operators
 app.get('/api/admin', async (req, res) => {

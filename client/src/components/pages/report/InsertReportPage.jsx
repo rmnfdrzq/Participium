@@ -35,23 +35,13 @@ const redIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
-const CATEGORIES = [
-  "Water Supply – Drinking Water",
-  "Architectural Barriers",
-  "Sewer System",
-  "Public Lighting",
-  "Waste",
-  "Road Signs and Traffic Lights",
-  "Roads and Urban Furnishings",
-  "Public Green Areas and Playgrounds",
-  "Other",
-];
 
 export default function InsertReportPage() {
   const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [reportCreated, setReportCreated] = useState(null);
   const [user, setUser] = useState(null);
+  const [categories, setCategories] = useState([]);
   const location = useSelector((state) => state.location);
 
   // Get user info
@@ -127,22 +117,38 @@ export default function InsertReportPage() {
   }
 };
 
+useEffect(() => {
+  const fetchCategories = async () => {
+    try {
+      const data = await API.getAllCategories(); // returns [{id, name},...]
+      setCategories(data);
+    } catch (error) {
+      console.error("Error in get all offices:", error);
+      setCategories([]); // fallback vuoto
+    }
+  };
+
+  fetchCategories();
+}, []);
+
+
   return (
     <>
-      {reportCreated ? (
-        <ReportSummary report={reportCreated} user={user} message={message} />
+      {reportCreated? (
+        <ReportSummary report={reportCreated} user={user} message={message} categories={categories} />
       ) : (
         <InsertReportForm
           handleInsertReport={handleInsertReport}
           message={message}
           location={location}
+          categories={categories}
         />
       )}
     </>
   );
 }
 
-function InsertReportForm({ handleInsertReport, message, location }) {
+function InsertReportForm({ handleInsertReport, message, location ,categories }) {
   const navigate = useNavigate();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
@@ -154,11 +160,13 @@ function InsertReportForm({ handleInsertReport, message, location }) {
     images: [],
   });
 
+  
+
   async function insertReportFunction(prevState, formData) {
     const reportData = {
       title: formData.get("title"),
       description: formData.get("description"),
-      category: formData.get("category"),
+      category: parseInt(formData.get("category")),
       anonymous: formData.get("anonymous") === "on",
       images: selectedFiles,
       latitude: location.coordinates?.lat,
@@ -274,9 +282,9 @@ function InsertReportForm({ handleInsertReport, message, location }) {
               required
             >
               <option value="">Select report type</option>
-              {CATEGORIES.map((cat, index) => (
-                <option key={index} value={cat}>
-                  {cat}
+              {categories.map((cat, index) => (
+                <option key={index} value={cat.id}>
+                  {cat.name}
                 </option>
               ))}
             </select>
@@ -368,7 +376,7 @@ function InsertReportForm({ handleInsertReport, message, location }) {
   );
 }
 
-function ReportSummary({ report, user, message }) {
+function ReportSummary({ report, user, message, categories }) {
   const navigate = useNavigate();
 
   return (
@@ -393,7 +401,7 @@ function ReportSummary({ report, user, message }) {
             <strong>Description:</strong> {report.description}
           </p>
           <p>
-            <strong>Category:</strong> {report.category}
+            <strong>Category:</strong> {categories.find(cat => cat.id === report.category)?.name || "Unknown"}
           </p>
           <p>
             <strong>Anonymous:</strong> {report.anonymous ? "Yes" : "No"}

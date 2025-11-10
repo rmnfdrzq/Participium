@@ -145,3 +145,21 @@ export const createMunicipalityUser = async (email, username, password, office_i
     });
   });
 };
+
+
+// returns all categories
+export const getAllCategories = async () => {
+  try {
+    const sql = 'SELECT * FROM categories';
+    const result = await pool.query(sql);
+    
+    return result.rows.map((e) => ({
+      id: e.category_id,
+      name: e.name,
+      office_id: e.office_id
+    }));
+  } catch (err) {
+    throw err;
+  }
+};
+

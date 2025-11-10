@@ -4,7 +4,7 @@ import styles from "./header.module.css";
 import { Link } from "react-router";
 
 export function Header(props) {
-  const [showLogout, setShowLogout] = useState(false);
+  const [showLogout, setShowLogout] = useState(false); //boolean -> true if popup logout is shown
   const userSectionRef = useRef(null);
   const popupRef = useRef(null);
 
@@ -15,6 +15,7 @@ export function Header(props) {
     setShowLogout(false);
   };
 
+  //if you click outside , it closes the popup
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (

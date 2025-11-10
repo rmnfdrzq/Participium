@@ -2,7 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import {check, validationResult} from 'express-validator';
-import {getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, insertReport} from './dao.mjs';
+import {getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, getAllCategories, insertReport} from './dao.mjs';
 import cors from 'cors';
 
 import passport from 'passport';
@@ -65,9 +65,9 @@ app.use(passport.authenticate('session'));
 
 /* ROUTES */
 
-// can use let id= req.user? req.user.id:0; in the APIs
+// can use req.user ={ id, username,type}
 
-// POST /api/registration
+// POST /api/registration 
 app.post('/api/registration', [
   check('username').notEmpty().withMessage('Username is required'),
   check('first_name').notEmpty().withMessage('First name is required'),
@@ -95,7 +95,7 @@ app.post('/api/registration', [
   }
 });
 
-// GET /api/offices
+// GET /api/offices -> all default offices
 app.get('/api/offices', async (req, res) => {
   try {
     const offices = await getAllOffices();
@@ -105,7 +105,19 @@ app.get('/api/offices', async (req, res) => {
   }
 });
 
-// GET /api/admin - Get all users
+// GET /api/categories -> all categories
+app.get('/api/categories', async (req, res) => {
+  try {
+    const categories = await getAllCategories(); 
+    res.status(200).json(categories);
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+    res.status(503).json({ error: 'Database error during category retrieval' });
+  }
+});
+
+
+// GET /api/admin - Get all (and only) operators
 app.get('/api/admin', async (req, res) => {
   try {
 

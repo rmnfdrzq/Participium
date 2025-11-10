@@ -13,6 +13,8 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+
+//given username (email) and password does the login -> searches in citizen and then onperators tables
 export const getUser = async (username, password) => {
   try {
     const sql = 'SELECT * FROM "citizens" WHERE email = $1';
@@ -40,6 +42,7 @@ export const getUser = async (username, password) => {
   }
 };
 
+//given username (email) and password does the login -> searches only in the onperators tables
 export const getOperators = async (username, password) => {
   try {
     const sql = 'SELECT * FROM "operators" WHERE email = $1';
@@ -67,6 +70,7 @@ export const getOperators = async (username, password) => {
   }
 };
 
+//ginen user data creates a citizen
 export const createUser = async (username, email,first_name,last_name , email_notifications, password) => {
   const salt = crypto.randomBytes(16).toString('hex');
 
@@ -87,6 +91,7 @@ export const createUser = async (username, email,first_name,last_name , email_no
   });
 };
 
+//returns all default offices 
 export const getAllOffices = async () => {
   try {
     const sql = 'SELECT * FROM offices';
@@ -97,6 +102,7 @@ export const getAllOffices = async () => {
   }
 };
 
+//returns all operators with its data 
 export const getAllOperators = async () => {
   try {
     const sql = `
@@ -140,6 +146,7 @@ export const insertReport = async ({citizen_id, description, image_name, image_b
   }
 };
 
+//given operator data creates an operator
 export const createMunicipalityUser = async (email, username, password, office_id) => {
   const salt = crypto.randomBytes(16).toString('hex');
 
@@ -164,4 +171,20 @@ export const createMunicipalityUser = async (email, username, password, office_i
   });
 };
 
+
+// returns all categories
+export const getAllCategories = async () => {
+  try {
+    const sql = 'SELECT * FROM categories';
+    const result = await pool.query(sql);
+    
+    return result.rows.map((e) => ({
+      id: e.category_id,
+      name: e.name,
+      office_id: e.office_id
+    }));
+  } catch (err) {
+    throw err;
+  }
+};
 

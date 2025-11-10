@@ -177,8 +177,8 @@ export function MapPage(props) {
     const address = await reverseGeocode(lat, lng);
 
     // Log to console
-    console.log("Coordinates:", { lat, lng });
-    console.log("Address:", address);
+    //console.log("Coordinates:", { lat, lng });
+    //console.log("Address:", address);
 
     // Save to Redux store
     dispatch(
@@ -195,7 +195,7 @@ export function MapPage(props) {
    */
   const handleCreateReport = () => {
     if (location.position && location.address) {
-      console.log("Create report for:", location);
+      //console.log("Create report for:", location);
       navigate("/create_report");
     }
   };

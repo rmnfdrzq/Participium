@@ -1,23 +1,25 @@
 .btn {
   display: inline-block;
-  padding: 12px 12px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
-  background-color: #eee;
-  color: var(--foreground-default);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background-color: var(--background-default);
+  color: var(--static-black);
 }
 
 .btn-primary {
-  background-color: var(--accent-default);
+  background: var(--gradient-primary);
   color: var(--static-white);
 }
 
 .btn:hover,
 .btn-primary:hover {
-  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
   color: var(--static-white);
 }
 

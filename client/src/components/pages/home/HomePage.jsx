@@ -193,30 +193,6 @@ const HomePage = ({ user }) => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="home-footer">
-        <div className="container">
-          <div className="footer-content">
-            <div className="footer-section">
-              <h4>Participium</h4>
-              <p>Citizen participation platform of the Municipality of Turin</p>
-            </div>
-            <div className="footer-section">
-              <h4>Contact</h4>
-              <p>Email: info@participium.torino.it</p>
-              <p>Tel: +39 011 XXX XXXX</p>
-            </div>
-            <div className="footer-section">
-              <h4>Useful Links</h4>
-              <p><Link to="/login">Login</Link></p>
-              <p><Link to="/signup">Register</Link></p>
-            </div>
-          </div>
-          <div className="footer-bottom">
-            <p>&copy; 2025 Municipality of Turin - Participium. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

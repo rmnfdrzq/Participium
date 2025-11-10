@@ -9,13 +9,13 @@ const initialState = {
 const locationSlice = createSlice({
   name: 'location',
   initialState,
-  reducers: {
+  reducers: { //update location slice
     setLocation: (state, action) => {
       state.position = action.payload.position;
       state.address = action.payload.address;
       state.coordinates = action.payload.coordinates;
     },
-    clearLocation: (state) => {
+    clearLocation: (state) => { //clear location slice
       state.position = null;
       state.address = null;
       state.coordinates = null;

@@ -9,7 +9,7 @@ export function LoginPage(props) {
   const location = useLocation();
 
   // Determine if we're on signup route
-  const isLogin = location.pathname === "/login";
+  const isLogin = location.pathname === "/login"; //it's true if we are in login and not in sign up
 
   /**
    * Handles user login by sending credentials to the API.
@@ -24,7 +24,7 @@ export function LoginPage(props) {
       setMessage({ msg: `Welcome, ${user.name}!`, type: "success" });
       props.setUser(user);
 
-      if (user.username === "admin") {
+      if (user.username === "admin" && user.type === 'operator' ) {
         navigate(`/admin`);
       } else {
         navigate(`/map`);
@@ -40,6 +40,7 @@ export function LoginPage(props) {
   /**
    * Handles user registration by sending user data to the API.
    * Sets success message and updates user state on success, or error message on failure.
+   * Automatically logs in the user after successful registration.
    * Handles different error formats from the server (validation errors, constraint errors, etc.).
    * @param {Object} userData - User registration data
    * @param {string} userData.name - User full name
@@ -48,12 +49,23 @@ export function LoginPage(props) {
    */
   const handleSignUp = async (userData) => {
     try {
-      const user = await API.signUp(userData);
-      setMessage({
-        msg: `Account created successfully! Welcome, ${user.name}!`,
-        type: "success",
-      });
+      await API.signUp(userData);
+      
+      // Automatically log in after successful registration
+      const credentials = {
+        username: userData.email,
+        password: userData.password,
+      };
+      
+      const user = await API.logIn(credentials);
       props.setUser(user);
+
+      // Navigate based on user type
+      if (user.username === "admin" && user.type === 'operator' ) {
+        navigate(`/admin`);
+      } else {
+        navigate(`/map`);
+      }
     } catch (err) {
       if (err && err.errors) {
         setMessage({
@@ -104,6 +116,7 @@ export function LoginPage(props) {
  * @returns {JSX.Element} LoginForm component
  */
 function LoginForm(props) {
+  const navigate = useNavigate();
   const [state, formAction, isPending] = useActionState(loginFunction, {
     username: "",
     password: "",
@@ -214,11 +227,14 @@ function SignUpForm(props) {
   async function signUpFunction(_prevState, formData) {
     const name = formData.get("name");
     const surname = formData.get("surname");
-    const fullName = surname ? `${name} ${surname}`.trim() : name;
+    const emailNotifications = formData.get("email_notifications") === "on";
 
     const userData = {
-      name: fullName,
+      username: formData.get("email").split("@")[0] || name,
+      first_name: name,
+      last_name: surname || "",
       email: formData.get("email"),
+      email_notifications: emailNotifications,
       password: formData.get("password"),
     };
 
@@ -281,6 +297,17 @@ function SignUpForm(props) {
         minLength={6}
         disabled={isPending}
       />
+
+      <label className={styles.checkboxLabel}>
+        <input
+          type="checkbox"
+          name="email_notifications"
+          className={styles.checkbox}
+          defaultChecked={true}
+          disabled={isPending}
+        />
+        <span>I want to receive email notifications</span>
+      </label>
 
       <button
         type="submit"

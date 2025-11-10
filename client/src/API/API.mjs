@@ -42,7 +42,7 @@ const logOut = async () => { //Logs out the current user by destroying the sessi
   if (response.ok) return null;
 };
 
-// userdata {username, first_name,last_name,email_notification,email,password}
+// registration userdata {username, first_name,last_name,email_notification,email,password}
 const signUp = async (userData) => { // Registers a new user 
   const response = await fetch(SERVER_URL + "/api/registration", {
     method: "POST",
@@ -61,6 +61,7 @@ const signUp = async (userData) => { // Registers a new user
   }
 };
 
+//get only and all operators
 const getAllOperators = async () => { //get all and only operators
   const response = await fetch(`${SERVER_URL}/api/admin`, {
     credentials: 'include'
@@ -72,7 +73,7 @@ const getAllOperators = async () => { //get all and only operators
   return await response.json();
 };
 
-// userdata {username, email, password,office_id}
+// registration of municipality user given userdata {username, email, password,office_id}
 const createMunicipalityUser = async (userData) => { // admin creates municipality user
   const response = await fetch(`${SERVER_URL}/api/admin/createuser`, {
     method: 'POST',
@@ -87,7 +88,8 @@ const createMunicipalityUser = async (userData) => { // admin creates municipali
   return await response.json();
 };
 
-const getAllOffices = async () => { //get all roles
+//get all default offices 
+const getAllOffices = async () => { 
   const response = await fetch(`${SERVER_URL}/api/offices`, {
     credentials: "include",
   });
@@ -99,5 +101,20 @@ const getAllOffices = async () => { //get all roles
   }
 };
 
-const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, createMunicipalityUser };
+// get all categories
+const getAllCategories = async () => {
+  const response = await fetch(`${SERVER_URL}/api/categories`, {
+    credentials: "include", 
+  });
+
+  if (response.ok) {
+    return await response.json();
+  } else {
+    const text = await response.text();
+    throw new Error(text); 
+  }
+};
+
+
+const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, createMunicipalityUser, getAllCategories };
 export default API;

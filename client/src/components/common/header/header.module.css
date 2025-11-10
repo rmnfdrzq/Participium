@@ -5,7 +5,9 @@
   padding: 16px 24px;
   background-color: var(--static-white);
   color: var(--static-black);
-  border-bottom: 1px solid var(--border-default);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1000;
 }
 
 .headerLogoContainer {
@@ -38,9 +40,9 @@
   margin-top: 8px;
   padding: 16px;
   background-color: var(--static-white);
-  border: 1px solid var(--border-default);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
   z-index: 9999;
   min-width: 120px;
   display: flex;
@@ -50,16 +52,18 @@
 
 .logoutButton {
   padding: 8px 16px;
-  background-color: var(--accent-default);
+  background: var(--gradient-primary);
   color: var(--static-white);
   border: none;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 0.875rem;
-  transition: background-color 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
   white-space: nowrap;
 }
 
 .logoutButton:hover {
-  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
 }

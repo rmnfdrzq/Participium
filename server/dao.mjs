@@ -13,6 +13,9 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+// console.log("Loaded dao.mjs and changed insertReport");
+
+
 
 //given username (email) and password does the login -> searches in citizen and then onperators tables
 export const getUser = async (username, password) => {
@@ -125,24 +128,42 @@ export const getAllOperators = async () => {
   }
 };
 
-export const insertReport = async ({citizen_id, description, image_name, image_bytes, latitude, longitude}, supabase) => {
-  try {
-    // Upload image to Supabase Storage
-    const storageUtils = await utils(supabase);
-    console.log("storage utils:", storageUtils);
-    await storageUtils.uploadImage(image_bytes, image_name);
+export const insertReport = async ({ title, citizen_id, description, image_urls, latitude, longitude }) => {
 
-    // Insert report into database
-    const sql = `
-      INSERT INTO reports (citizen_id, title, description, image_name, latitude, longitude, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, NOW())
-      RETURNING report_id, citizen_id, title, description, image_name, latitude, longitude, created_at
+  //console.log("Running updated insertReport with citizen_id:", citizen_id);
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const reportSql = `
+      INSERT INTO reports (citizen_id, title, description, latitude, longitude, created_at)
+      VALUES ($1, $2, $3, $4, $5, NOW())
+      RETURNING report_id, citizen_id, title, description, latitude, longitude, created_at
     `;
-    const values = [citizen_id, title, description, image_name, latitude, longitude];
-    const result = await pool.query(sql, values);
-    return result.rows[0];
+    const reportValues = [citizen_id, title, description, latitude, longitude];
+    const reportResult = await client.query(reportSql, reportValues);
+    const report = reportResult.rows[0];
+
+    const imagesSql = `
+      INSERT INTO photos (report_id, image_url, uploaded_at)
+      VALUES ($1, $2, NOW())
+      RETURNING photo_id, report_id, image_url, uploaded_at
+    `;
+    const images = [];
+    for (const url of image_urls){
+      const imageResult = await client.query(imagesSql, [report.report_id, url]);
+      images.push(imageResult.rows[0]);
+    }
+
+    await client.query('COMMIT');
+
+    return { ...report, images };
   } catch (err) {
+    await client.query('ROLLBACK');
     throw err;
+  } finally {
+    client.release();
   }
 };
 

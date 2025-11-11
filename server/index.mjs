@@ -1,8 +1,8 @@
 // import
 import express from 'express';
 import morgan from 'morgan';
-import {check, validationResult} from 'express-validator';
-import {getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, getAllCategories, insertReport} from './dao.mjs';
+import { check, validationResult } from 'express-validator';
+import { getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, getAllCategories, insertReport } from './dao.mjs';
 import cors from 'cors';
 
 import passport from 'passport';
@@ -14,15 +14,15 @@ dotenv.config();
 //supabase client
 import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = process.env.SUPABASE_URL
-const supabaseKey = process.env.SUPABASE_KEY
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-const {data, error} = await supabase
-.storage
-.createBucket('participium', { 
-  public: true,
-  allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
-});
+/*const { data, error } = await supabase
+  .storage
+  .createBucket('participium', {
+    public: true,
+    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
+  });*/
 
 // init
 const app = express();
@@ -42,9 +42,9 @@ app.use(cors(corsOptions));
 
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
   const user = await getUser(username, password);
-  if(!user)
+  if (!user)
     return cb(null, false, 'Incorrect username or password.');
-    
+
   return cb(null, user);
 }));
 
@@ -108,7 +108,7 @@ app.get('/api/offices', async (req, res) => {
 // GET /api/categories -> all categories
 app.get('/api/categories', async (req, res) => {
   try {
-    const categories = await getAllCategories(); 
+    const categories = await getAllCategories();
     res.status(200).json(categories);
   } catch (err) {
     console.error("Error fetching categories:", err);
@@ -125,11 +125,11 @@ app.get('/api/admin', async (req, res) => {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    if (req.user.username !== 'admin' && req.user.type!== 'operator') {
-     return res.status(403).json({ error: 'Forbidden' });
+    if (req.user.username !== 'admin' && req.user.type !== 'operator') {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
-    const users = await getAllOperators(); 
+    const users = await getAllOperators();
     res.json(users);
   } catch (err) {
     console.error('Error fetching users:', err);
@@ -145,7 +145,7 @@ app.post('/api/admin/createuser', [
   check('office_id').isInt().withMessage('Office ID must be an integer')
 ], async (req, res) => {
 
-  if (!req.isAuthenticated() || req.user.username!=='admin' || req.user.type!=='operator') return res.status(401).json({error: 'Not authorized'});
+  if (!req.isAuthenticated() || req.user.username !== 'admin' || req.user.type !== 'operator') return res.status(401).json({ error: 'Not authorized' });
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -165,32 +165,61 @@ app.post('/api/admin/createuser', [
   }
 });
 
+// POST /api/upload-url -> get signed URL for image upload
+app.post('/api/upload-url', async (req, res) => {
+  const { filename } = req.body;
+  const cleanName = filename.replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
+  const uniqueName = `${Date.now()}-${cleanName}`;
+
+  try {
+    const { data, error } = await supabase
+      .storage
+      .from(process.env.SUPABASE_BUCKET)
+      .createSignedUploadUrl(uniqueName);
+
+    if (error) throw error;
+
+    const publicUrl = process.env.SUPABASE_URL + '/storage/v1/object/public/' + process.env.SUPABASE_BUCKET + '/' + uniqueName;
+
+    res.json({
+      signedUrl: data.signedUrl,
+      path: uniqueName,
+      publicUrl: publicUrl
+    });
+  } catch (err) {
+    console.error("Error creating signed URL:", err);
+    res.status(500).json({ error: "Could not create signed URL" });
+  }
+});
+
+
 //POST /api/reports
 app.post('/api/reports', async (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({ error: 'Not authenticated' });
   }
   try {
-    const { title, description, image_name, image_bytes, latitude, longitude } = req.body;
-    const report = await insertReport({ citizen_id: req.user.id, title, description, image_name, image_bytes, latitude, longitude }, supabase);
+    const { title, description, image_urls, latitude, longitude } = req.body;
+    const report = await insertReport({ title, citizen_id: req.user.id, description, image_urls, latitude, longitude });
     res.status(201).json(report);
   } catch (err) {
     console.error('Error inserting report:', err);
-    res.status(503).json({ error: 'Database error during report insertion' });
+    res.status(503).json({ error: err.message || 'Database error during report insertion' });
   }
 });
 
 // POST /api/sessions
-app.post('/api/sessions', passport.authenticate('local'), function(req, res) {
+app.post('/api/sessions', passport.authenticate('local'), function (req, res) {
   return res.status(201).json(req.user);
 });
 
 // GET /api/sessions/current
 app.get('/api/sessions/current', (req, res) => {
-  if(req.isAuthenticated()) {
-    res.json(req.user);}
+  if (req.isAuthenticated()) {
+    res.json(req.user);
+  }
   else
-    res.status(401).json({error: 'Not authenticated'});
+    res.status(401).json({ error: 'Not authenticated' });
 });
 
 // DELETE /api/session/current

@@ -6,9 +6,6 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import API from "../../../API/API.mjs";
 import styles from "./insertReportPage.module.css";
-import { supabase } from "../../../data/supabaseClient";
-
-const BUCKET_NAME = "Reports";
 
 console.log(import.meta.env);
 
@@ -73,44 +70,38 @@ export default function InsertReportPage() {
     const imageUrls = [];
 
     for (const file of reportData.images) {
-      // Sanitize filename
       const cleanFileName = file.name.replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
-      const uniqueName = `${Date.now()}-${cleanFileName}`;
 
-      console.log("Uploading to Supabase with name:", uniqueName);
+      // Get signed URL from server and public URL
+      const { signedUrl, publicUrl } = await API.getImageUploadUrl(cleanFileName);
+      if (!signedUrl) throw new Error("Failed to get signed URL.");
 
-      // Convert File to Blob (safer for binary images)
-      const fileData = new Blob([file], { type: file.type });
+      // Upload image to Supabase Storage using the signed URL
+      const uploadResponse = await API.uploadImageToSignedUrl(signedUrl, file);
+      if (!uploadResponse.ok) throw new Error("Image upload failed.");
 
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .upload(uniqueName, fileData, { upsert: true });
-
-      if (error) {
-        throw new Error("Error uploading image: " + error.message);
-      }
-
-      // Get public URL
-      const { data: urlData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(uniqueName);
-      imageUrls.push(urlData.publicUrl);
-
-      console.log("Uploaded image URL:", urlData.publicUrl);
+      //console.log("Uploading to Supabase with name:", signedUrl);
+     
+      // Store the public URL of the uploaded image
+      imageUrls.push(publicUrl);
+      console.log("Uploaded image URL:", publicUrl);
     }
 
     // Combine report data with uploaded image URLs
     const reportWithUrls = {
       ...reportData,
-      images: imageUrls,
+      image_urls: imageUrls,
       latitude: location.coordinates?.lat,
       longitude: location.coordinates?.lng,
       user: user,
     };
 
-    // API call to save the report
-    await API.insertReport(reportWithUrls);
+    //console.log("Final report data to be sent:", reportWithUrls);
 
-    setReportCreated(reportWithUrls);
+    // API call to save the report
+    const created = await API.insertReport(reportWithUrls);
+
+    setReportCreated(created);
   } catch (err) {
     setMessage({ msg: err.message || err, type: "danger" });
     console.error(err);

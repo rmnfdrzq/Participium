@@ -13,8 +13,16 @@ const CreateUserPage = () => {
     username: '',
     email: '',
     password: '',
-    office_id: ''
+    office_id: '',
+    role: ''
   });
+
+  // Mock roles (temporary)
+  const roles = [
+    { id: 1, name: 'Municipality User' },
+    { id: 2, name: 'Urban Planner' },
+    { id: 3, name: 'Administrator' }
+  ];
 
   useEffect(() => {
     loadOffices();
@@ -107,7 +115,7 @@ const CreateUserPage = () => {
             </div>
 
             <div className="form-field">
-              <label htmlFor="office_id">Role</label>
+              <label htmlFor="office_id">Office</label>
               <select
                 id="office_id"
                 name="office_id"
@@ -116,10 +124,29 @@ const CreateUserPage = () => {
                 required
                 className={!newUser.office_id ? 'placeholder' : ''}
               >
-                <option value="" disabled>Select user role</option>
+                <option value="" disabled>Select user office</option>
                 {offices.map(office => (
                   <option key={office.id} value={office.id}>
                     {office.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="role">Role</label>
+              <select
+                id="role"
+                name="role"
+                value={newUser.role}
+                onChange={handleInputChange}
+                required
+                className={!newUser.role ? 'placeholder' : ''}
+              >
+                <option value="" disabled>Select user role</option>
+                {roles.map(role => (
+                  <option key={role.id} value={role.id}>
+                    {role.name}
                   </option>
                 ))}
               </select>

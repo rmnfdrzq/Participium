@@ -115,7 +115,6 @@ const getAllCategories = async () => {
   }
 };
 
-
 const getImageUploadUrl = async (cleanFileName) => {
   const response =  await fetch(`${SERVER_URL}/api/upload-url`, {
         method: "POST",

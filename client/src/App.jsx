@@ -64,10 +64,10 @@ function App() {
           path="/signup"
           element={<LoginPage user={user} setUser={setUser} />}
         />
-        <Route path="/admin" element={<AdminPage user={user} />} />
+        <Route path="/admin" element={<AdminPage  />} />
         <Route
           path="/admin/createuser"
-          element={<CreateUserPage user={user} />}
+          element={<CreateUserPage />}
         />
 
         <Route path="/map" element={user ? <MapPage /> : <Navigate to="/" />} />

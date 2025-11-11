@@ -3,7 +3,7 @@ import API from '../../../API/API.mjs';
 import { useNavigate } from 'react-router';
 import './AdminPage.css';
 
-function AdminPage({user}) {
+function AdminPage() {
     const [users, setUsers] = useState([]);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -92,8 +92,8 @@ function AdminPage({user}) {
                   <td className="user-name">{userItem.username}</td>
                   <td className="user-login">{userItem.email}</td>
                   <td className="role-cell">
-                    <span className={getRoleClass(userItem.role)}>
-                      {getRoleDisplay(userItem.role)}
+                    <span className={getRoleClass(userItem.office_name)}>
+                      {getRoleDisplay(userItem.office_name)}
                     </span>
                   </td>
                 </tr>

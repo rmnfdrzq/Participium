@@ -116,5 +116,42 @@ const getAllCategories = async () => {
 };
 
 
-const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, createMunicipalityUser, getAllCategories };
+const getImageUploadUrl = async (cleanFileName) => {
+  const response =  await fetch(`${SERVER_URL}/api/upload-url`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: cleanFileName }),
+      });
+  if (response.ok) {
+    const url = await response.json();
+    return url;
+  } else {
+    const errDetails = await response.text();
+    throw errDetails;
+  }
+};
+
+const uploadImageToSignedUrl = async (uploadURL, fileBlob) => {
+  const response = await fetch(uploadURL, {
+    method: "PUT",
+    body: fileBlob,
+  });
+  return response;
+};
+
+const insertReport = async (reportData) => {
+  const response = await fetch(`${SERVER_URL}/api/reports`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(reportData)
+  });
+  if (!response.ok) {
+    const errDetail = await response.json();
+    throw errDetail.error;
+  }
+  return await response.json();
+};
+
+const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, createMunicipalityUser, getAllCategories, insertReport, getImageUploadUrl, uploadImageToSignedUrl };
 export default API;

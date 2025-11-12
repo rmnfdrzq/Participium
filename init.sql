@@ -147,11 +147,15 @@ RETURNS TRIGGER AS $$
 BEGIN
     IF TG_TABLE_NAME = 'citizens' THEN
         IF EXISTS (SELECT 1 FROM operators WHERE email = NEW.email) THEN
-            RAISE EXCEPTION 'Email already in use: %', NEW.email;
+            RAISE EXCEPTION USING
+                MESSAGE = format('Email already in use: %s', NEW.email),
+                ERRCODE = '23505';
         END IF;
     ELSIF TG_TABLE_NAME = 'operators' THEN
         IF EXISTS (SELECT 1 FROM citizens WHERE email = NEW.email) THEN
-            RAISE EXCEPTION 'Email already in use: %', NEW.email;
+            RAISE EXCEPTION USING
+                MESSAGE = format('Email already in use: %s', NEW.email),
+                ERRCODE = '23505';
         END IF;
     END IF;
     RETURN NEW;

@@ -35,58 +35,87 @@ jest.mock('pg', () => {
     return { Pool, __queryMock: mQuery };
 });
 
-describe('API (index.mjs) - Jest tests with pg/crypto mocks (fixed)', () => {
+describe('API (index.mjs) - improved coverage', () => {
     let agent;
     let queryMock;
-    
-beforeAll(async () => {
-  // get the mock query reference from the mocked module
-  const pg = require('pg');
-  queryMock = pg.__queryMock;
 
-  // --- MOCK dao.mjs to bypass crypto.scrypt and provide deterministic users ---
-  await jest.unstable_mockModule('../dao.mjs', () => {
-    return {
-      getUser: async (username, password) => {
-        if (username === 'admin' && password === 'correct') {
-          return { username: 'admin', role: 'Admin', id: 900, type: 'operator' };
-        }
-        if (username === 'found@operator' && password === 'correct') {
-          return { username: 'operator_user', role: 'Operator', id: 201, type: 'operator' };
-        }
-        // emulate failed auth
-        return null;
-      },
-      createUser: async (username, email, first_name, last_name, email_notifications, password) => {
-        return { id: 111, username };
-      },
-      getAllOffices: async () => [{ id: 1, name: 'Office A' }, { id: 2, name: 'Office B' }],
-      createMunicipalityUser: async (email, username, password, office_id, role_id) => ({ id: 222, username }),
-      getAllOperators: async () => [{ operator_id: 301, email: 'op1@example.com', username: 'op1', office_id: 1, role: 'municipality_user' }],
-      getAllRoles: async () => [{ role_id: 1, name: 'municipality_user' }],
-      getAllCategories: async () => [],
-      insertReport: async (obj) => ({ report_id: 555, description: obj.description || 'desc', image_name: (obj.image_urls && obj.image_urls[0]) || 'img.png' })
-    };
-  });
+    beforeAll(async () => {
+        // set env values used by index.mjs
+        process.env.SUPABASE_BUCKET = 'participium';
+        process.env.SUPABASE_URL = 'https://supabase.test';
 
-  // deterministic crypto.scrypt stub (optional, keep or remove)
-  jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, len, cb) => {
-    const hex = (password === 'correct') ? '01'.repeat(32) : '02'.repeat(32);
-    const buf = Buffer.from(hex, 'hex');
-    process.nextTick(() => cb(null, buf));
-  });
+        // get the mock query reference from the mocked module
+        const pg = require('pg');
+        queryMock = pg.__queryMock;
 
-  // configure pg query behaviour (you can keep this or remove if dao is fully mocked)
-  queryMock.mockImplementation((sql, values) => { /* ...existing implementation... */ });
+        // --- MOCK dao.mjs to bypass crypto.scrypt and provide deterministic users ---
+        await jest.unstable_mockModule('../dao.mjs', () => {
+            return {
+                getUser: async (username, password) => {
+                    if (username === 'admin' && password === 'correct') {
+                      return { username: 'admin', role: 'Admin', id: 900, type: 'operator' };
+                    }
+                    if (username === 'found@operator' && password === 'correct') {
+                      return { username: 'operator_user', role: 'Operator', id: 201, type: 'operator' };
+                    }
+                    if (username === 'plain' && password === 'correct') {
+                      return { username: 'plainuser', role: 'User', id: 555, type: 'user' };
+                    }
+                    // emulate failed auth
+                    return null;
+                },
+                createUser: async (username, email, first_name, last_name, email_notifications, password) => {
+                    return { id: 111, username };
+                },
+                getAllOffices: async () => [{ id: 1, name: 'Office A' }, { id: 2, name: 'Office B' }],
+                createMunicipalityUser: async (email, username, password, office_id, role_id) => ({ id: 222, username }),
+                getAllOperators: async () => [{ operator_id: 301, email: 'op1@example.com', username: 'op1', office_id: 1, role: 'municipality_user' }],
+                getAllRoles: async () => [{ role_id: 1, name: 'municipality_user' }],
+                getAllCategories: async () => [{ category_id: 1, name: 'Noise' }],
+                insertReport: async (obj) => ({ report_id: 555, description: obj.description || 'desc', image_name: (obj.image_urls && obj.image_urls[0]) || 'img.png' })
+            };
+        });
 
-  // import the ESM index after mocks are ready
-  await import('../index.mjs');
+        // --- MOCK supabase client used by index.mjs (createSignedUploadUrl) ---
+        await jest.unstable_mockModule('@supabase/supabase-js', () => {
+            return {
+                createClient: () => ({
+                    storage: {
+                        from: (bucket) => ({
+                            createSignedUploadUrl: async (name) => ({ data: { signedUrl: `https://signed.example/${name}` }, error: null })
+                        })
+                    }
+                })
+            };
+        });
 
-  agent = request.agent('http://localhost:3001');
+        // deterministic crypto.scrypt stub (keeps other tests stable)
+        jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, len, cb) => {
+            const hex = (password === 'correct') ? '01'.repeat(32) : '02'.repeat(32);
+            const buf = Buffer.from(hex, 'hex');
+            process.nextTick(() => cb(null, buf));
+        });
 
-  // small delay to ensure server listening
-  await new Promise((r) => setTimeout(r, 100));
-});
+        // configure pg query behaviour (kept minimal; dao is mocked)
+        queryMock.mockImplementation((sql, values) => {
+            const s = (sql || '').toString().toLowerCase();
+            if (s.includes('select * from offices') || s.includes('from offices')) {
+                return Promise.resolve({ rows: [{ office_id: 1, name: 'Office A' }, { office_id: 2, name: 'Office B' }] });
+            }
+            if (s.includes('select * from roles') || s.includes('from roles')) {
+                return Promise.resolve({ rows: [{ role_id: 1, name: 'municipality_user' }] });
+            }
+            return Promise.resolve({ rows: [] });
+        });
+
+        // import the ESM index after mocks are ready
+        await import('../index.mjs');
+
+        agent = request.agent('http://localhost:3001');
+
+        // small delay to ensure server listening
+        await new Promise((r) => setTimeout(r, 100));
+    });
 
     afterAll(async () => {
         jest.restoreAllMocks();
@@ -140,17 +169,38 @@ beforeAll(async () => {
         expect(res.body[0]).toEqual({ id: 1, name: 'Office A' });
     });
 
+    test('GET /api/roles -> 200 roles', async () => {
+        const res = await agent.get('/api/roles');
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body[0]).toEqual({ role_id: 1, name: 'municipality_user' });
+    });
+
+    test('GET /api/categories -> 200 categories', async () => {
+        const res = await agent.get('/api/categories');
+        expect(res.status).toBe(200);
+        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body[0]).toEqual({ category_id: 1, name: 'Noise' });
+    });
+
+    test('POST /api/upload-url returns signed url', async () => {
+        const res = await agent.post('/api/upload-url').send({ filename: 'my img.png' });
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('signedUrl');
+        expect(res.body).toHaveProperty('path');
+        expect(res.body).toHaveProperty('publicUrl');
+    });
+
     test('GET /api/sessions/current unauthenticated -> 401', async () => {
         const res = await request('http://localhost:3001').get('/api/sessions/current');
         expect(res.status).toBe(401);
         expect(res.body).toMatchObject({ error: 'Not authenticated' });
     });
-    
+
     test('DELETE /api/sessions/current logs out', async () => {
         const res = await agent.delete('/api/sessions/current');
         expect([200, 204]).toContain(res.status);
     });
-
 
     test('login as admin, access /api/admin and create user', async () => {
         const loginRes = await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
@@ -194,9 +244,33 @@ beforeAll(async () => {
         expect(res.body.errors.length).toBeGreaterThan(0);
     });
 
+    test('plain user cannot access /api/admin -> 403', async () => {
+        // log in as plain user
+        await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+        const res = await agent.get('/api/admin');
+        expect(res.status).toBe(403);
+        expect(res.body).toMatchObject({ error: 'Forbidden' });
+    });
+
+    test('POST /api/reports with authenticated user -> 201 created report', async () => {
+        // login as admin (dao.insertReport mocked) to obtain session
+        await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+        const payload = {
+            title: 'T',
+            description: 'desc',
+            image_urls: ['img.png'],
+            latitude: 12.34,
+            longitude: 56.78,
+            category_id: 1,
+            anonymous: false
+        };
+        const res = await agent.post('/api/reports').send(payload);
+        expect(res.status).toBe(201);
+        expect(res.body).toMatchObject({ report_id: 555, description: 'desc', image_name: 'img.png' });
+    });
+
     test('GET /api/sessions/current after login returns authenticated user', async () => {
         let res = await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
-        console.log("Logged in:", res.status, res.body);
         res = await agent.get('/api/sessions/current');
         expect(res.status).toBe(200);
         expect(res.body).toMatchObject({ username: 'admin', type: 'operator' });
@@ -206,6 +280,4 @@ beforeAll(async () => {
         const res = await agent.delete('/api/sessions/current');
         expect([200, 204]).toContain(res.status);
     });
-
-
 });

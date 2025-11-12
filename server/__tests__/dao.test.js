@@ -1,14 +1,15 @@
-// ...existing code...
 const crypto = require('crypto');
 const { Pool } = require('pg');
 
 let dao;
 let queryMock;
 let poolQuerySpy;
+let connectSpy;
 let scryptSpy;
 
 beforeAll(async () => {
   queryMock = jest.fn();
+  // route Pool.prototype.query calls to our queryMock for simple DAO methods
   poolQuerySpy = jest.spyOn(Pool.prototype, 'query').mockImplementation(function (...args) {
     return queryMock(...args);
   });
@@ -19,6 +20,7 @@ beforeAll(async () => {
 
 afterAll(() => {
   poolQuerySpy && poolQuerySpy.mockRestore();
+  connectSpy && connectSpy.mockRestore();
 });
 
 beforeEach(() => {
@@ -53,7 +55,8 @@ test('getOperators: returns operator object when password matches', async () => 
     username: 'opuser',
     salt: 'somesalt',
     password_hash: passwordHashHex,
-    email: 'op@example.com'
+    email: 'op@example.com',
+    role_name: 'municipality_user'
   };
 
   queryMock.mockResolvedValueOnce({ rows: [fakeRow] });
@@ -63,7 +66,7 @@ test('getOperators: returns operator object when password matches', async () => 
   });
 
   const res = await dao.getOperators(fakeRow.email, 'irrelevant');
-  expect(res).toEqual({ id: fakeRow.operator_id, username: fakeRow.username, type: 'operator' });
+  expect(res).toEqual({ id: fakeRow.operator_id, username: fakeRow.username, role: fakeRow.role_name, type: 'operator' });
 });
 
 test('getOperators: returns false when password does not match', async () => {
@@ -73,7 +76,8 @@ test('getOperators: returns false when password does not match', async () => {
     username: 'opuser2',
     salt: 'othersalt',
     password_hash: passwordHashHex,
-    email: 'op2@example.com'
+    email: 'op2@example.com',
+    role_name: 'municipality_user'
   };
 
   queryMock.mockResolvedValueOnce({ rows: [fakeRow] });
@@ -94,7 +98,8 @@ test('getOperators: propagates scrypt error', async () => {
     username: 'opuser3',
     salt: 'salt3',
     password_hash: passwordHashHex,
-    email: 'op3@example.com'
+    email: 'op3@example.com',
+    role_name: 'municipality_user'
   };
 
   queryMock.mockResolvedValueOnce({ rows: [fakeRow] });
@@ -107,49 +112,48 @@ test('getOperators: propagates scrypt error', async () => {
   await expect(dao.getOperators(fakeRow.email, 'any')).rejects.toBe(testErr);
 });
 
-test('getUser: returns user when citizen found and password matches', async () => {
-  const passwordHashHex = mkHex32(0x66);
-  const fakeOperator = {
+test('getUser: returns operator when operator found and password matches', async () => {
+  const opHashHex = mkHex32(0x66);
+  const opRow = {
     operator_id: 101,
-    username: 'citizen1',
-    salt: 'salt-citizen',
-    password_hash: passwordHashHex,
-    email: 'citizen@example.com'
-  };
-
-  // first query is citizens -> return the citizen row
-  queryMock.mockResolvedValueOnce({ rows: [fakeOperator] });
-
-  scryptSpy = jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, len, cb) => {
-    cb(null, Buffer.from(passwordHashHex, 'hex'));
-  });
-
-  const res = await dao.getUser(fakeOperator.email, 'pw');
-  expect(res).toEqual({ id: fakeOperator.operator_id, username: fakeOperator.username, type: 'operator' });
-});
-
-test('getUser: falls back to operators when citizen not found', async () => {
-  const opHashHex = mkHex32(0x77);
-  const fakeOperator = {
-    operator_id: 202,
-    username: 'opfallback',
+    username: 'opuserX',
     salt: 'salt-op',
     password_hash: opHashHex,
-    email: 'opfallback@example.com'
+    email: 'opx@example.com',
+    role_name: 'Admin'
   };
 
-  // first call (citizens) -> no rows, second call (operators) -> operator row
-  queryMock.mockImplementation((sql, params) => {
-    if (sql && sql.includes('"citizens"')) return Promise.resolve({ rows: [] });
-    return Promise.resolve({ rows: [fakeOperator] });
-  });
+  // first query (operators) -> return the operator row
+  queryMock.mockResolvedValueOnce({ rows: [opRow] });
 
   scryptSpy = jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, len, cb) => {
     cb(null, Buffer.from(opHashHex, 'hex'));
   });
 
-  const res = await dao.getUser(fakeOperator.email, 'pw');
-  expect(res).toEqual({ id: fakeOperator.operator_id, username: fakeOperator.username, type: 'operator' });
+  const res = await dao.getUser(opRow.email, 'pw');
+  expect(res).toEqual({ id: opRow.operator_id, username: opRow.username, type: 'operator', role: opRow.role_name });
+});
+
+test('getUser: falls back to citizens when no operator and citizen matches', async () => {
+  const citizenHash = mkHex32(0x77);
+  const citizenRow = {
+    citizen_id: 201,
+    username: 'citizen1',
+    salt: 'salt-cit',
+    password_hash: citizenHash,
+    email: 'citizen@example.com'
+  };
+
+  // first call (operators) -> no rows, second call (citizens) -> citizen row
+  queryMock.mockImplementationOnce(() => Promise.resolve({ rows: [] }))
+           .mockImplementationOnce(() => Promise.resolve({ rows: [citizenRow] }));
+
+  scryptSpy = jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, len, cb) => {
+    cb(null, Buffer.from(citizenHash, 'hex'));
+  });
+
+  const res = await dao.getUser(citizenRow.email, 'pw');
+  expect(res).toEqual({ id: citizenRow.citizen_id, username: citizenRow.username, type: 'user' });
 });
 
 test('createUser: inserts and returns new citizen id', async () => {
@@ -176,7 +180,7 @@ test('createMunicipalityUser: inserts and returns operator id', async () => {
 
   queryMock.mockResolvedValueOnce({ rows: [{ operator_id: fakeOpId }] });
 
-  const res = await dao.createMunicipalityUser('op@example.com', 'opname', 'opPass', 3);
+  const res = await dao.createMunicipalityUser('op@example.com', 'opname', 'opPass', 3, 2);
   expect(res.id).toBe(fakeOpId);
 });
 
@@ -194,6 +198,14 @@ test('getAllOffices: maps rows to id/name', async () => {
   ]);
 });
 
+test('getAllRoles: maps rows to id/name', async () => {
+  const rows = [{ role_id: 1, name: 'municipality_user' }];
+  queryMock.mockResolvedValueOnce({ rows });
+
+  const res = await dao.getAllRoles();
+  expect(res).toEqual([{ id: 1, name: 'municipality_user' }]);
+});
+
 test('getAllOperators: maps rows and includes office_name', async () => {
   const rows = [
     { operator_id: 10, email: 'a@x', username: 'a', office_id: 5, office_name: 'Off1', role_name: 'municipality_user'  },
@@ -208,68 +220,80 @@ test('getAllOperators: maps rows and includes office_name', async () => {
   ]);
 });
 
+test('getAllCategories: maps rows to id/name/office_id', async () => {
+  const rows = [{ category_id: 1, name: 'Noise', office_id: 2 }];
+  queryMock.mockResolvedValueOnce({ rows });
 
-test('returns false when no operator found', async () => {
-  queryMock.mockResolvedValue({ rows: [] });
-
-  const result = await dao.getOperators('noone@example.com', 'password');
-  expect(result).toBe(false);
+  const res = await dao.getAllCategories();
+  expect(res).toEqual([{ id: 1, name: 'Noise', office_id: 2 }]);
 });
 
-test('returns operator object when password matches', async () => {
-  const passwordHashHex = 'a'.repeat(64);
-  const fakeRow = {
-    operator_id: 42,
-    username: 'opuser',
-    salt: 'somesalt',
-    password_hash: passwordHashHex,
-    email: 'op@example.com'
+
+test('insertReport: success path commits and returns report with images', async () => {
+  // stub pool.connect to return a client with query/release
+  const clientQuery = jest.fn()
+    // BEGIN
+    .mockResolvedValueOnce({}) 
+    // categorySql -> returns office_id
+    .mockResolvedValueOnce({ rows: [{ office_id: 7 }] })
+    // statusSql -> returns status_id
+    .mockResolvedValueOnce({ rows: [{ status_id: 99 }] })
+    // report INSERT -> returns report row
+    .mockResolvedValueOnce({ rows: [{ report_id: 123, citizen_id: 5, category_id: 1, office_id: 7, status_id: 99, title: 'T', description: 'desc', latitude: 1, longitude: 2, anonymous: false, created_at: new Date().toISOString() }] })
+    // images insert (for each image) -> returns photo row (called once)
+    .mockResolvedValueOnce({ rows: [{ photo_id: 9, report_id: 123, image_url: 'img.png', uploaded_at: new Date().toISOString() }] })
+    // COMMIT
+    .mockResolvedValueOnce({});
+
+  const client = {
+    query: clientQuery,
+    release: jest.fn()
   };
-  queryMock.mockResolvedValue({ rows: [fakeRow] });
 
-  cryptoScryptSpy = jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, len, cb) => {
-    cb(null, Buffer.from(passwordHashHex, 'hex'));
-  });
+  connectSpy = jest.spyOn(Pool.prototype, 'connect').mockResolvedValue(client);
 
-  const result = await dao.getOperators(fakeRow.email, 'irrelevant');
-  expect(result).toEqual({ id: fakeRow.operator_id, username: fakeRow.username, type: 'operator' });
+  const input = {
+    title: 'T',
+    citizen_id: 5,
+    description: 'desc',
+    image_urls: ['img.png'],
+    latitude: 1,
+    longitude: 2,
+    category_id: 1,
+    anonymous: false
+  };
+
+  const res = await dao.insertReport(input);
+  expect(res).toHaveProperty('report_id', 123);
+  expect(Array.isArray(res.images)).toBe(true);
+  expect(res.images[0]).toHaveProperty('image_url', 'img.png');
+
+  // ensure client.connect was used and COMMIT was attempted
+  expect(clientQuery).toHaveBeenCalled();
+  connectSpy.mockRestore();
+  connectSpy = null;
 });
 
-test('returns false when password does not match', async () => {
-  const passwordHashHex = 'a'.repeat(64);
-  const fakeRow = {
-    operator_id: 43,
-    username: 'opuser2',
-    salt: 'othersalt',
-    password_hash: passwordHashHex,
-    email: 'op2@example.com'
+test('insertReport: invalid category causes rollback and throws', async () => {
+  const clientQuery = jest.fn()
+    // BEGIN
+    .mockResolvedValueOnce({})
+    // categorySql -> no rows -> invalid
+    .mockResolvedValueOnce({ rows: [] })
+    // ROLLBACK
+    .mockResolvedValueOnce({});
+
+  const client = {
+    query: clientQuery,
+    release: jest.fn()
   };
-  queryMock.mockResolvedValue({ rows: [fakeRow] });
 
-  // Return a different 32-byte buffer so timingSafeEqual is false
-  cryptoScryptSpy = jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, len, cb) => {
-    cb(null, Buffer.from('b'.repeat(64), 'hex'));
-  });
+  connectSpy = jest.spyOn(Pool.prototype, 'connect').mockResolvedValue(client);
 
-  const result = await dao.getOperators(fakeRow.email, 'wrongpass');
-  expect(result).toBe(false);
-});
+  const input = { title: 'T', citizen_id: 5, description: 'd', image_urls: ['i'], latitude: 1, longitude: 2, category_id: 999, anonymous: false };
 
-test('propagates scrypt error', async () => {
-  const passwordHashHex = 'a'.repeat(64);
-  const fakeRow = {
-    operator_id: 44,
-    username: 'opuser3',
-    salt: 'salt3',
-    password_hash: passwordHashHex,
-    email: 'op3@example.com'
-  };
-  queryMock.mockResolvedValue({ rows: [fakeRow] });
+  await expect(dao.insertReport(input)).rejects.toThrow('Invalid category_id');
 
-  const testErr = new Error('scrypt failed');
-  cryptoScryptSpy = jest.spyOn(crypto, 'scrypt').mockImplementation((password, salt, len, cb) => {
-    cb(testErr);
-  });
-
-  await expect(dao.getOperators(fakeRow.email, 'any')).rejects.toBe(testErr);
+  connectSpy.mockRestore();
+  connectSpy = null;
 });

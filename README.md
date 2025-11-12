@@ -7,42 +7,37 @@ test: cd server; npm test (node --experimental-test-coverage --test)
 # mail - password
 admin@participium.local -  participium
 
-sofia1@gmail.com - sofia1
-aaaaaaaa@aaaaaaaaaaaa.com - password
 
-# PROBLEM : ROLES
 
 # DB
 
-citizens
-( citizen_id, email, username, first_name, last_name, password_hash, salt, email_notifications, created_at )
+citizens( citizen_id, email, username, first_name, last_name, password_hash, salt, email_notifications, created_at )
 
-offices
-( office_id, name, description )
+offices( office_id, name, description )
 
-operators
-( operator_id, email, username, password_hash, salt, office_id )
+categories( category_id, name, office_id )
 
-categories
-( category_id, name, office_id )
+statuses( status_id, name )
 
-statuses
-( status_id, name )
+reports( report_id, citizen_id, category_id, office_id, status_id, title, description, latitude, longitude, anonymous rejection_reason, created_at, updated_at )
 
-reports
-( report_id, citizen_id, category_id, office_id, status_id, title, description, latitude, longitude, anonymous, rejection_reason, created_at, updated_at )
+photos( photo_id, report_id, image_url, uploaded_at )
 
-photos
-( photo_id, report_id, image_url, uploaded_at )
+roles( role_id, name, description )
 
-comments
-( comment_id, report_id, operator_id, content, created_at )
+operators(operator_id, email, username, password_hash, salt, office_id, role_id)
 
-messages
-( message_id, report_id, sender_type, sender_id, content, sent_at )
+comments( comment_id, report_id, operator_id, content, created_at)
 
-notifications
-( notification_id, citizen_id, report_id, message, sent_at, seen )
+messages(message_id, report_id, sender_type, sender_id, content, sent_at)
+
+notifications (notification_id, citizen_id, report_id, message,sent_at, seen)
+
+-- (opzionale/commentata)
+telegram_users(
+    telegram_user_id, citizen_id, chat_id, linked_at
+)
+
 
 
 # PROBLEMS (or not) for the report

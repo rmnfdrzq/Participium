@@ -114,6 +114,7 @@ const CreateUserPage = () => {
                 name="password"
                 value={newUser.password}
                 onChange={handleInputChange}
+                minLength={6}
                 placeholder="Enter password"
                 required
               />
@@ -155,7 +156,7 @@ const CreateUserPage = () => {
                   </option>
                 ))}
               </select>
-              <small className="form-text">Note: Role cannot be modified after user creation.</small>
+              <small className="form-text">Note: Role and office cannot be modified after user creation.</small>
             </div>
 
             <div className="button-group">

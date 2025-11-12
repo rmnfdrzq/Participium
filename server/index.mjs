@@ -2,7 +2,7 @@
 import express from 'express';
 import morgan from 'morgan';
 import { check, validationResult } from 'express-validator';
-import { getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, getAllCategories, insertReport } from './dao.mjs';
+import { getUser, createUser, getAllOffices, createMunicipalityUser, getAllOperators, getAllRoles, getAllCategories, insertReport } from './dao.mjs';
 import cors from 'cors';
 
 import passport from 'passport';
@@ -105,6 +105,17 @@ app.get('/api/offices', async (req, res) => {
   }
 });
 
+//GET /api/roles -> all roles
+app.get('/api/roles', async (req, res) => {
+  try{
+  const roles = await getAllRoles();
+  res.status(200).json(roles);
+  }catch (err) {
+    console.error("Error fetching roles:", err);
+    res.status(503).json({ error: 'Database error during role retrieval' });
+  }
+});
+
 // GET /api/categories -> all categories
 app.get('/api/categories', async (req, res) => {
   try {
@@ -125,7 +136,7 @@ app.get('/api/admin', async (req, res) => {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    if (req.user.username !== 'admin' && req.user.type !== 'operator') {
+    if (req.user.role !== 'Admin' && req.user.role !== 'Operator') {
       return res.status(403).json({ error: 'Forbidden' });
     }
 
@@ -142,10 +153,15 @@ app.post('/api/admin/createuser', [
   check('username').notEmpty().withMessage('Username is required'),
   check('email').isEmail().withMessage('Invalid email format'),
   check('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  check('office_id').isInt().withMessage('Office ID must be an integer')
+  check('office_id').isInt().withMessage('Office ID must be an integer'),
+  check('role').isInt().withMessage('Role ID must be an integer')
 ], async (req, res) => {
 
-  if (!req.isAuthenticated() || req.user.username !== 'admin' || req.user.type !== 'operator') return res.status(401).json({ error: 'Not authorized' });
+
+  if (!req.isAuthenticated() || req.user.role !== 'Admin' || req.user.type !== 'operator') {
+    
+    return res.status(401).json({ error: 'Not authorized' });
+  }
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -153,14 +169,15 @@ app.post('/api/admin/createuser', [
   }
 
   try {
-    const { username, email, password, office_id } = req.body;
-    const operator = await createMunicipalityUser(email, username, password, office_id);
-    res.status(201).json(operator);
+    const { username, email, password, office_id, role } = req.body;
+    const user = await createMunicipalityUser(email, username, password, office_id, role);
+    res.status(201).json(user);
   } catch (err) {
-    if (err.code === '23505') { // PostgreSQL unique violation
-      res.status(409).json({ error: 'Email or username already exists' });
+    if (err.code === '23505') {
+      res.status(409).json({ error: 'Username or email already exists' });
     } else {
-      res.status(503).json({ error: 'Database error during operator creation' });
+      console.error('Error creating user:', err);
+      res.status(503).json({ error: 'Database error during user creation' });
     }
   }
 });
@@ -199,8 +216,17 @@ app.post('/api/reports', async (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   }
   try {
-    const { title, description, image_urls, latitude, longitude } = req.body;
-    const report = await insertReport({ title, citizen_id: req.user.id, description, image_urls, latitude, longitude });
+    const { title, description, image_urls, latitude, longitude, category_id, anonymous } = req.body;
+    const report = await insertReport({ 
+      title, 
+      citizen_id: req.user.id, 
+      description, 
+      image_urls, 
+      latitude, 
+      longitude,
+      category_id,
+      anonymous 
+    });
     res.status(201).json(report);
   } catch (err) {
     console.error('Error inserting report:', err);

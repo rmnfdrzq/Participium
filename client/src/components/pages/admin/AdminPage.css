@@ -1,5 +1,3 @@
-
-
 .admin-page {
   font-family: 'Public Sans', sans-serif;
   background-color: var(--static-white); 
@@ -191,26 +189,97 @@
 }
 
 
+/* Role badges */
 .role-cell span {
-    
-    display: inline-flex; 
-    justify-content: center;
-    align-items: center;
-    padding: 0 16px;
-    
-    
-    height: 32px;
-    background: #F0F2F5; 
-    border-radius: var(--radius-md);
-    
-    
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 21px;
-    color: var(--static-black); 
-    
-    min-width: 84px;
-    white-space: nowrap;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.role-admin {
+  background-color: #8E44AD;
+  color: var(--static-white);
+}
+
+.role-organization {
+  background-color: #6C5CE7;
+  color: var(--static-white);
+}
+
+.role-technical {
+  background-color: #0984E3;
+  color: var(--static-white);
+}
+
+.role-default {
+  background-color: #B2BEC3;
+  color: #2d3436;
+}
+
+/* Office badges */
+.office-cell span {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.office-organization {
+  background-color: #6c5ce7;
+  color: white;
+}
+
+.office-water {
+  background-color: #0984e3;
+  color: white;
+}
+
+.office-accessibility {
+  background-color: #00b894;
+  color: white;
+}
+
+.office-sewage {
+  background-color: #8b572a;
+  color: white;
+}
+
+.office-lighting {
+  background-color: #fdcb6e;
+  color: #2d3436;
+}
+
+.office-waste {
+  background-color: #a29bfe;
+  color: white;
+}
+
+.office-traffic {
+  background-color: #fd79a8;
+  color: white;
+}
+
+.office-public-works {
+  background-color: #ff7675;
+  color: white;
+}
+
+.office-parks {
+  background-color: #55efc4;
+  color: #2d3436;
+}
+
+.office-general {
+  background-color: #74b9ff;
+  color: white;
+}
+
+.office-default {
+  background-color: #b2bec3;
+  color: #2d3436;
 }
 
 

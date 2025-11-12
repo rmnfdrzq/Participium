@@ -62,50 +62,50 @@ export default function InsertReportPage() {
   }, [location, navigate]);
 
   const handleInsertReport = async (reportData) => {
-  try {
-    if (!reportData.images || reportData.images.length === 0) {
-      throw new Error("No images selected for upload.");
+    try {
+      if (!reportData.images || reportData.images.length === 0) {
+        throw new Error("No images selected for upload.");
+      }
+
+      const imageUrls = [];
+
+      for (const file of reportData.images) {
+        const cleanFileName = file.name.replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
+
+        // Get signed URL from server and public URL
+        const { signedUrl, publicUrl } = await API.getImageUploadUrl(cleanFileName);
+        if (!signedUrl) throw new Error("Failed to get signed URL.");
+
+        // Upload image to Supabase Storage using the signed URL
+        const uploadResponse = await API.uploadImageToSignedUrl(signedUrl, file);
+        if (!uploadResponse.ok) throw new Error("Image upload failed.");
+
+        // Store the public URL of the uploaded image
+        imageUrls.push(publicUrl);
+        console.log("Uploaded image URL:", publicUrl);
+      }
+
+      // Combine report data with uploaded image URLs
+      const reportWithUrls = {
+        title: reportData.title,
+        description: reportData.description,
+        category_id: reportData.category,
+        anonymous: reportData.anonymous,
+        image_urls: imageUrls,
+        latitude: location.coordinates?.lat,
+        longitude: location.coordinates?.lng,
+      };
+
+      console.log("Final report data to be sent:", reportWithUrls);
+
+      // API call to save the report
+      const created = await API.insertReport(reportWithUrls);
+
+      setReportCreated(created);
+    } catch (err) {
+      setMessage({ msg: err.message || err, type: "danger" });
+      console.error(err);
     }
-
-    const imageUrls = [];
-
-    for (const file of reportData.images) {
-      const cleanFileName = file.name.replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
-
-      // Get signed URL from server and public URL
-      const { signedUrl, publicUrl } = await API.getImageUploadUrl(cleanFileName);
-      if (!signedUrl) throw new Error("Failed to get signed URL.");
-
-      // Upload image to Supabase Storage using the signed URL
-      const uploadResponse = await API.uploadImageToSignedUrl(signedUrl, file);
-      if (!uploadResponse.ok) throw new Error("Image upload failed.");
-
-      //console.log("Uploading to Supabase with name:", signedUrl);
-     
-      // Store the public URL of the uploaded image
-      imageUrls.push(publicUrl);
-      console.log("Uploaded image URL:", publicUrl);
-    }
-
-    // Combine report data with uploaded image URLs
-    const reportWithUrls = {
-      ...reportData,
-      image_urls: imageUrls,
-      latitude: location.coordinates?.lat,
-      longitude: location.coordinates?.lng,
-      user: user,
-    };
-
-    //console.log("Final report data to be sent:", reportWithUrls);
-
-    // API call to save the report
-    const created = await API.insertReport(reportWithUrls);
-
-    setReportCreated(created);
-  } catch (err) {
-    setMessage({ msg: err.message || err, type: "danger" });
-    console.error(err);
-  }
 };
 
 useEffect(() => {
@@ -330,7 +330,7 @@ function InsertReportForm({ handleInsertReport, message, location ,categories })
 
           </div>
 
-          <div className={styles.formGroup}>
+          <div className={styles.formGroup} style={{ display: 'none' }}>
             <label className={styles.checkboxLabel}>
               <input
                 type="checkbox"
@@ -392,11 +392,11 @@ function ReportSummary({ report, user, message, categories }) {
             <strong>Description:</strong> {report.description}
           </p>
           <p>
-            <strong>Category:</strong> {categories.find(cat => cat.id === report.category)?.name || "Unknown"}
+            <strong>Category:</strong> {categories.find(cat => cat.id === report.category_id)?.name || "Unknown"}
           </p>
-          <p>
+          {/*<p>
             <strong>Anonymous:</strong> {report.anonymous ? "Yes" : "No"}
-          </p>
+          </p>*/}
           <p>
             <strong>Images:</strong> {report.images.length} file(s) attached
           </p>

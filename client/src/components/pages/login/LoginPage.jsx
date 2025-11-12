@@ -24,7 +24,7 @@ export function LoginPage(props) {
       setMessage({ msg: `Welcome, ${user.name}!`, type: "success" });
       props.setUser(user);
 
-      if (user.username === "admin" && user.type === 'operator' ) {
+      if (user.role === 'Admin' && user.type === 'operator' ) {
         navigate(`/admin`);
       } else {
         navigate(`/map`);
@@ -60,12 +60,8 @@ export function LoginPage(props) {
       const user = await API.logIn(credentials);
       props.setUser(user);
 
-      // Navigate based on user type
-      if (user.username === "admin" && user.type === 'operator' ) {
-        navigate(`/admin`);
-      } else {
-        navigate(`/map`);
-      }
+      navigate(`/map`);
+      
     } catch (err) {
       if (err && err.errors) {
         setMessage({

@@ -101,6 +101,19 @@ const getAllOffices = async () => {
   }
 };
 
+//get all roles
+const getAllRoles = async () => {
+  const response = await fetch(`${SERVER_URL}/api/roles`, {
+    credentials: "include", 
+  });
+  if(response.ok){
+    return await response.json();
+  } else {
+    const text = await response.text();
+    throw new Error(text);
+  }
+};
+
 // get all categories
 const getAllCategories = async () => {
   const response = await fetch(`${SERVER_URL}/api/categories`, {
@@ -152,5 +165,5 @@ const insertReport = async (reportData) => {
   return await response.json();
 };
 
-const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, createMunicipalityUser, getAllCategories, insertReport, getImageUploadUrl, uploadImageToSignedUrl };
+const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, getAllRoles, createMunicipalityUser, getAllCategories, insertReport, getImageUploadUrl, uploadImageToSignedUrl };
 export default API;

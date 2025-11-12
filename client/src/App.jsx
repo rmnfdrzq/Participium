@@ -20,10 +20,9 @@ function App() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const user = await API.getUserInfo(); // we have the user info here
+        const user = await API.getUserInfo();
         setUser(user);
       } catch (err) {
-        // do nothing
         setUser(null);
       }
     };
@@ -45,7 +44,7 @@ function App() {
           path="/"
           element={
             user ? (
-              user.username === "admin" ? (
+              user.role === "Admin" && user.type === "operator" ? (
                 <Navigate replace to={`/admin`} />
               ) : (
                 <MapPage />

@@ -8,7 +8,7 @@ const CreateUserPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [offices, setOffices] = useState([]);
-
+  const [roles, setRoles] = useState([]);
   const [newUser, setNewUser] = useState({
     username: '',
     email: '',
@@ -17,15 +17,10 @@ const CreateUserPage = () => {
     role: ''
   });
 
-  // Mock roles (temporary)
-  const roles = [
-    { id: 1, name: 'Municipality User' },
-    { id: 2, name: 'Urban Planner' },
-    { id: 3, name: 'Administrator' }
-  ];
-
+ 
   useEffect(() => {
     loadOffices();
+    loadRoles();
   }, []);
 
   const loadOffices = async () => {
@@ -34,6 +29,16 @@ const CreateUserPage = () => {
       setOffices(data);
     } catch (err) {
       setError('Failed to load offices');
+    }
+  };
+
+  const loadRoles= async () => {
+    try {
+      const data = await API.getAllRoles();
+      const filteredRoles = data.filter(role => role.name !== 'Admin');
+      setRoles(filteredRoles);
+    } catch (err) {
+      setError('Failed to load roles');
     }
   };
 

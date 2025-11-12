@@ -29,28 +29,69 @@ function AdminPage() {
 
   const getRoleDisplay = (role) => {
     const roleMap = {
-      'citizen': 'Citizen',
-      'organization_office': 'Organization Office',
-      'technical_office': 'Technical Office',
-      'admin': 'Admin',
-      'municipality_user': 'Municipality User',
-      'urban_planner': 'Urban Planner'
+      'Admin': 'Admin',
+      'Organization Office Staff': 'Organization Staff',
+      'Technical Office Staff': 'Technical Staff'
     };
     return roleMap[role] || role;
   };
 
   const getRoleClass = (role) => {
     switch (role) {
-      case 'citizen':
-        return 'role-citizen';
-      case 'organization_office':
+      case 'Admin':
+        return 'role-admin';
+      case 'Organization Office Staff':
         return 'role-organization';
-      case 'technical_office':
+      case 'Technical Office Staff':
         return 'role-technical';
       default:
         return 'role-default';
     }
   };
+
+  const getOfficeDisplay = (office) => {
+  const officeMap = {
+    'Organization Office': 'Organization',
+    'Water Department': 'Water',
+    'Accessibility Office': 'Accessibility',
+    'Sewage Department': 'Sewage',
+    'Lighting Department': 'Lighting',
+    'Waste Management': 'Waste',
+    'Traffic Department': 'Traffic',
+    'Public Works': 'Public Works',
+    'Parks Department': 'Parks',
+    'General Services': 'General'
+  };
+  return officeMap[office] || office;
+};
+
+const getOfficeClass = (office) => {
+  // Puoi personalizzare gli stili per ogni ufficio
+  switch (office) {
+    case 'Organization Office':
+      return 'office-organization';
+    case 'Water Department':
+      return 'office-water';
+    case 'Accessibility Office':
+      return 'office-accessibility';
+    case 'Sewage Department':
+      return 'office-sewage';
+    case 'Lighting Department':
+      return 'office-lighting';
+    case 'Waste Management':
+      return 'office-waste';
+    case 'Traffic Department':
+      return 'office-traffic';
+    case 'Public Works':
+      return 'office-public-works';
+    case 'Parks Department':
+      return 'office-parks';
+    case 'General Services':
+      return 'office-general';
+    default:
+      return 'office-default';
+  }
+};
 
   return (
     <div className="admin-page">
@@ -83,6 +124,7 @@ function AdminPage() {
               <tr>
                 <th>Name & Surname</th>
                 <th>Login</th>
+                <th>Office</th>
                 <th>Role</th>
               </tr>
             </thead>
@@ -91,9 +133,14 @@ function AdminPage() {
                 <tr key={userItem.id}>
                   <td className="user-name">{userItem.username}</td>
                   <td className="user-login">{userItem.email}</td>
+                  <td className="office-cell">
+                    <span className={getOfficeClass(userItem.office_name)}>
+                      {getOfficeDisplay(userItem.office_name)}
+                    </span>
+                  </td>
                   <td className="role-cell">
-                    <span className={getRoleClass(userItem.office_name)}>
-                      {getRoleDisplay(userItem.office_name)}
+                    <span className={getRoleClass(userItem.role)}>
+                      {getRoleDisplay(userItem.role)}
                     </span>
                   </td>
                 </tr>

@@ -50,13 +50,20 @@ CREATE TABLE photos (
     uploaded_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE roles (
+    role_id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    description TEXT
+);
+
 CREATE TABLE operators (
     operator_id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     username VARCHAR(100) NOT NULL,
     password_hash TEXT NOT NULL,
     salt TEXT NOT NULL,
-    office_id INT REFERENCES offices(office_id)
+    office_id INT REFERENCES offices(office_id),
+    role_id INT REFERENCES roles(role_id) NOT NULL
 );
 
 CREATE TABLE comments (
@@ -127,6 +134,12 @@ INSERT INTO statuses (name) VALUES
 ('Rejected'),
 ('Resolved');
 
+-- 4. Roles
+INSERT INTO roles (name, description) VALUES
+('Admin', 'Administrator with full system access and user management capabilities'),
+('Organization Office', 'Organization Office staff - handles preliminary report verification and approval/rejection'),
+('Technical Staff', 'Technical office staff - manages assigned reports, updates status, and resolves issues');
+
 
 -- Funzione per controllare email duplicate tra citizens e operators
 CREATE OR REPLACE FUNCTION check_email_uniqueness()
@@ -159,11 +172,12 @@ EXECUTE FUNCTION check_email_uniqueness();
 
 
 -- 4. Operatore admin
-INSERT INTO operators (email, username, password_hash, salt, office_id)
+INSERT INTO operators (email, username, password_hash, salt, office_id, role_id)
 VALUES (
   'admin@participium.local',
   'admin',
   'f746cd28ba22bc7f3bbd4f62f152180f17236d0463d70888c4881d154c7526af',
   '4c999d4a2a78113f997cc7fd2cd05043',
   (SELECT office_id FROM offices WHERE name = 'Organization Office')
+  (SELECT role_id FROM roles WHERE name = 'Admin')
 );

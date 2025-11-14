@@ -46,11 +46,11 @@ sections:
 | Estimation |  2.18 h    |  2.76 h     | 
 | Actual     |  2.19 h    |  2.78 h     |
 
-- Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1 = 0.43%
+- Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1 = **0.43%**
 
     $$\frac{\sum_i spent_{task_i}}{\sum_i estimation_{task_i}} - 1$$
     
-- Absolute relative task estimation error: sum( abs( spent-task-i / estimation-task-i - 1))/n = 6.02%
+- Absolute relative task estimation error: sum( abs( spent-task-i / estimation-task-i - 1))/n = **6.02%**
 
     $$\frac{1}{n}\sum_i^n \left| \frac{spent_{task_i}}{estimation_task_i}-1 \right| $$
   
@@ -82,8 +82,6 @@ sections:
 
 - What did go wrong in the sprint?
 
-  > better division of task and stories between team members (not a story to only one member)
-
   > Too many people and hours in documentation -> time spent ineffectively
 
 - What caused your errors in estimation (if any)?
@@ -92,13 +90,10 @@ sections:
 
 - What lessons did you learn in this sprint?
 
-  > Fedor -> map and website graphics (he is good at it)
-
-  > Giulia -> not good at website graphics
-
-  > Gabriel -> leaves too much work to the end of the sprint, but good at testing
-
-  > give less hours to documentation and to one person only -> not all the team need to know all about each element
+  > We started to understand and know each other: now we know who is more apt than others at some specific task.
+  That enables more efficient planning and the division of the task in shorter time with a better quality final product
+  
+  > To dedicate less hours to documentation and to give this task to only one person, as not all the team needs to know all about each element
 
 - Which improvement goals set in the previous retrospective were you able to achieve? 
 

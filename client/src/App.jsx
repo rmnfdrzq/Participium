@@ -9,11 +9,14 @@ import CreateUserPage from "./components/pages/admin/CreateUserPage";
 import { MapPage } from "./components/pages/map/MapPage";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { clearLocation } from "./store/locationSlice";
 import API from "./API/API.mjs";
 import "./App.css";
 
 function App() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [user, setUser] = useState(null);
 
@@ -32,6 +35,7 @@ function App() {
   const handleLogout = async () => {
     await API.logOut();
     setUser(null);
+    dispatch(clearLocation());
     navigate("/");
   };
 

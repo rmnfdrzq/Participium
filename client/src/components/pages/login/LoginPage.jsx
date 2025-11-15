@@ -1,5 +1,7 @@
 import { useState, useActionState } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useDispatch } from "react-redux";
+import { clearLocation } from "../../../store/locationSlice";
 import API from "../../../API/API.mjs";
 import styles from "./loginPage.module.css";
 
@@ -7,6 +9,7 @@ export function LoginPage(props) {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   // Determine if we're on signup route
   const isLogin = location.pathname === "/login"; //it's true if we are in login and not in sign up
@@ -23,6 +26,7 @@ export function LoginPage(props) {
       const user = await API.logIn(credentials);
       setMessage({ msg: `Welcome, ${user.name}!`, type: "success" });
       props.setUser(user);
+      dispatch(clearLocation());
 
       if (user.role === 'Admin' && user.type === 'operator' ) {
         navigate(`/admin`);
@@ -59,6 +63,7 @@ export function LoginPage(props) {
       
       const user = await API.logIn(credentials);
       props.setUser(user);
+      dispatch(clearLocation());
 
       navigate(`/map`);
       

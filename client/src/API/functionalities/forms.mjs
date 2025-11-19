@@ -28,3 +28,17 @@ export const insertReport = async (reportData) => {
   }
   return await response.json();
 };
+
+export const updateReportStatus = async (reportId, newStatus, rejection_reason=null) => {
+  const response = await fetch(`${SERVER_URL}/api/reports/${reportId}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ status: newStatus, rejection_reason: rejection_reason })
+  });
+  if (!response.ok) {
+    const errDetail = await response.json();
+    throw errDetail.error;
+  }
+  return await response.json();
+}

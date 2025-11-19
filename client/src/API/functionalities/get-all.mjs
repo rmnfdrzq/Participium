@@ -51,3 +51,15 @@ export const getAllCategories = async () => {
     throw new Error(text); 
   }
 };
+
+// Get all pending reports
+export const getAllPendingReports = async () => {
+  const response = await fetch(`${SERVER_URL}/api/reports`, {
+    credentials: 'include'
+  });
+  if (!response.ok) {
+    const errDetail = await response.json();
+    throw errDetail.error;
+  }
+  return await response.json();
+};

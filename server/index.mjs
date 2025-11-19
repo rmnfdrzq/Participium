@@ -73,7 +73,7 @@ app.use(passport.authenticate('session'));
 app.get('/api/reports', async (req, res) => {
   try {
     if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
-    if (req.user.role !== 'Admin' && req.user.role !== 'Operator' ) return res.status(403).json({ error: 'Forbidden' });
+    if (req.user.role !== 'Municipal public relations officer' ) return res.status(403).json({ error: 'Forbidden' });
 
     const reports = await getAllReports();
     res.status(200).json(reports);
@@ -87,7 +87,7 @@ app.get('/api/reports', async (req, res) => {
 app.put('/api/reports/:id/status', async (req, res) => {
   try {
     if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
-    if (req.user.role !== 'Admin' && req.user.role !== 'Operator' ) return res.status(403).json({ error: 'Forbidden' });
+    if (req.user.role !== 'Municipal public relations officer'  ) return res.status(403).json({ error: 'Forbidden' });
 
     const reportId = parseInt(req.params.id, 10);
     if (isNaN(reportId)) return res.status(422).json({ error: 'Invalid report id' });

@@ -28,11 +28,7 @@ export function LoginPage(props) {
       props.setUser(user);
       dispatch(clearLocation());
 
-      if (user.role === 'Admin' && user.type === 'operator' ) {
-        navigate(`/admin`);
-      } else {
-        navigate(`/map`);
-      }
+      navigate(`/`);
     } catch (err) {
       // ensure we store a string message, not an Error object
       const text =

@@ -3,5 +3,8 @@ import { getAllOperators, getAllOffices, getAllRoles, getAllCategories, getAllPe
 import { getImageUploadUrl, uploadImageToSignedUrl } from "./functionalities/images.mjs";
 import { createMunicipalityUser,  insertReport, updateReportStatus } from "./functionalities/forms.mjs";
 
-const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, getAllRoles, createMunicipalityUser, getAllCategories, insertReport, getImageUploadUrl, uploadImageToSignedUrl, getAllPendingReports, updateReportStatus };
+const API = { logIn, getUserInfo, logOut, signUp, getAllOperators, getAllOffices, getAllRoles, 
+    createMunicipalityUser, getAllCategories, insertReport, getImageUploadUrl, uploadImageToSignedUrl, 
+    getAllPendingReports, updateReportStatus };
+    
 export default API;

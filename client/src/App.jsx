@@ -5,6 +5,7 @@ import InsertReportPage from "./components/pages/report/InsertReportPage";
 import { LoginPage } from "./components/pages/login/LoginPage";
 import HomePage from "./components/pages/home/HomePage";
 import AdminPage from "./components/pages/admin/AdminPage";
+import RelationOfficerPage from "./components/pages/relation-officer/RelatioOfficerPage";
 import CreateUserPage from "./components/pages/admin/CreateUserPage";
 import { MapPage } from "./components/pages/map/MapPage";
 import { useNavigate } from "react-router";
@@ -50,7 +51,12 @@ function App() {
             user ? (
               user.role === "Admin" ? (
                 <Navigate replace to={`/admin`} />
-              ) : (
+              ) : user.role==="Municipal public relations officer"? (
+
+                <RelationOfficerPage/>
+              )
+              
+              :(
                 <MapPage />
               )
             ) : (
@@ -71,6 +77,11 @@ function App() {
         <Route
           path="/admin/createuser"
           element={<CreateUserPage />}
+        />
+
+        <Route
+          path="/relationOfficer"
+          element={<RelationOfficerPage/>}
         />
 
         <Route path="/map" element={user ? <MapPage /> : <Navigate to="/" />} />

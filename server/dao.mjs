@@ -28,7 +28,6 @@ export const getUser = async (username, password) => {
       const user = { 
         id: row.operator_id, 
         username: row.username, 
-        type: "operator",
         role: row.role_name 
       };
 
@@ -53,7 +52,7 @@ export const getUser = async (username, password) => {
     const row = citizenResult.rows[0];
     if (!row) return false;
 
-    const user = { id: row.citizen_id, username: row.username, type: "user" };
+    const user = { id: row.citizen_id, username: row.username, role: "user" };
 
     return new Promise((resolve, reject) => {
       crypto.scrypt(password, row.salt, 32, (err, hashedPassword) => {
@@ -81,7 +80,7 @@ export const getOperators = async (username, password) => {
     const row = result.rows[0];
     if (!row) return false;
 
-    const user = { id: row.operator_id, username: row.username, role: row.role_name, type: "operator" };
+    const user = { id: row.operator_id, username: row.username, role: row.role_name};
 
     return new Promise((resolve, reject) => {
       crypto.scrypt(password, row.salt, 32, (err, hashedPassword) => {

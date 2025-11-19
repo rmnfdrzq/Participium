@@ -1,7 +1,7 @@
 // import
 import express from 'express';
 import morgan from 'morgan';
-import loginRegistration from './router/login-registration_route.mjs';
+import registration from './router/registration_route.mjs';
 import getAll from './router/get-all_route.mjs';
 import forms from './router/forms_route.mjs';
 import { check, validationResult } from 'express-validator';
@@ -66,33 +66,6 @@ app.use(session({
 }));
 app.use(passport.authenticate('session'));
 
-/* ROUTES */
-
-// POST /api/upload-url -> get signed URL for image upload
-app.post('/api/upload-url', async (req, res) => {
-  const { filename } = req.body;
-  const cleanName = filename.replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
-  const uniqueName = `${Date.now()}-${cleanName}`;
-
-  try {
-    const { data, error } = await supabase
-      .storage
-      .from(process.env.SUPABASE_BUCKET)
-      .createSignedUploadUrl(uniqueName);
-
-    if (error) throw error;
-
-    const publicUrl = process.env.SUPABASE_URL + '/storage/v1/object/public/' + process.env.SUPABASE_BUCKET + '/' + uniqueName;
-
-    res.json({
-      signedUrl: data.signedUrl,
-      path: uniqueName,
-      publicUrl: publicUrl
-    });
-  } catch (err) {
-    res.status(500).json({ error: "Could not create signed URL" });
-  }
-});
 
 /* ROUTES OF SECOND SPRINT */
 
@@ -131,11 +104,41 @@ app.put('/api/reports/:id/status', async (req, res) => {
   }
 });
 
+
+
+
+
 /* ROUTES OF THE FIRST SPRINT */
 
 app.use('/api', getAll);
 app.use('/api', forms);
-app.use('/api', loginRegistration);
+app.use('/api', registration);
+
+// POST /api/upload-url -> get signed URL for image upload
+app.post('/api/upload-url', async (req, res) => {
+  const { filename } = req.body;
+  const cleanName = filename.replace(/\s+/g, "_").replace(/[^\w.-]/g, "");
+  const uniqueName = `${Date.now()}-${cleanName}`;
+
+  try {
+    const { data, error } = await supabase
+      .storage
+      .from(process.env.SUPABASE_BUCKET)
+      .createSignedUploadUrl(uniqueName);
+
+    if (error) throw error;
+
+    const publicUrl = process.env.SUPABASE_URL + '/storage/v1/object/public/' + process.env.SUPABASE_BUCKET + '/' + uniqueName;
+
+    res.json({
+      signedUrl: data.signedUrl,
+      path: uniqueName,
+      publicUrl: publicUrl
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Could not create signed URL" });
+  }
+});
 
 
 /* SESSION ROUTES */

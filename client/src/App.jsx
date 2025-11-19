@@ -48,7 +48,7 @@ function App() {
           path="/"
           element={
             user ? (
-              user.role === "Admin" && user.type === "operator" ? (
+              user.role === "Admin" ? (
                 <Navigate replace to={`/admin`} />
               ) : (
                 <MapPage />

@@ -137,8 +137,9 @@ INSERT INTO statuses (name) VALUES
 -- 4. Roles
 INSERT INTO roles (name, description) VALUES
 ('Admin', 'Administrator with full system access and user management capabilities'),
-('Organization Office Staff', 'Handles preliminary report verification and approval/rejection'),
-('Technical Office Staff', 'Manages assigned reports, updates status, and resolves issues');
+('Municipal public relations officer', 'Handles preliminary report verification and approval/rejection'),
+('Technical office staff member', 'Manages assigned reports, updates status, and resolves issues'),
+('Municipal administrator', 'Studies statistics');
 
 
 -- Funzione per controllare email duplicate tra citizens e operators

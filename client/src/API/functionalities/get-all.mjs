@@ -63,3 +63,14 @@ export const getAllPendingReports = async () => {
   }
   return await response.json();
 };
+
+export const getAllApprovedReports = async () => {
+  const response = await fetch (`${SERVER_URL}/api/reports/approved`, {
+    credentials: 'include'
+  });
+  if (!response.ok) {
+    const errDetail = await response.json();
+    throw errDetail.error;
+  }
+  return await response.json(); 
+};

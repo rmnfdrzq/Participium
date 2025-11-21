@@ -3,6 +3,11 @@ import API from '../../../API/API.mjs';
 import { useNavigate } from 'react-router';
 import './RelationOfficerPage.css';
 
+import { useDispatch, useSelector } from "react-redux";
+import { setSelectedReport } from '../../../store/reportSlice';
+
+const dispatch = useDispatch();
+
 function RelationOfficerPage() {
   const [reports, setReports] = useState([]);
   const [error, setError] = useState('');
@@ -59,17 +64,20 @@ function RelationOfficerPage() {
             </thead>
 
             <tbody>
-                {reports.map(report => (
-                    <tr
-                    key={report.id}
-                    className="clickable-row"
-                    onClick={() => navigate('/')}
-                    >
-                    <td className="report-id">{report.id}</td>
-                    <td className="report-title">{report.title}</td>
-                    <td className="report-date">{formatDate(report.created_at)}</td>
-                    </tr>
-                ))}
+              {reports.map(report => (
+                <tr
+                  key={report.id}
+                  className="clickable-row"
+                  onClick={() => {
+                    dispatch(setSelectedReport(report));
+                    navigate('/');
+                  }}
+                >
+                  <td className="report-id">{report.id}</td>
+                  <td className="report-title">{report.title}</td>
+                  <td className="report-date">{formatDate(report.created_at)}</td>
+                </tr>
+              ))}
             </tbody>
 
           </table>

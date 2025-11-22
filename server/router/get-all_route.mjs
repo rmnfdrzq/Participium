@@ -54,6 +54,10 @@ router.get('/admin', async (req, res) => {
 
 //Get /api/operators?operatorId&officeId - Get operators by operatorId and/or officeId
 router.get('/operators', async (req, res) => {
+
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
   try {
     const { operatorId, officeId } = req.query;
     const operators = await getTechnicalOfficersByOffice(operatorId, officeId);

@@ -59,7 +59,7 @@ router.get('/operators', async (req, res) => {
     const operators = await getTechnicalOfficersByOffice(operatorId, officeId);
     res.status(200).json(operators);
   } catch (err) {
-    if (['Either officer_id or office_id must be provided',
+    if (['officer_id  must be provided',
       'Operatot not allowed, he is not a Municipal public relations officer',
       'Either valid officer_id or office_id must be provided'].includes(err.message)) {
       res.status(422).json({ error: err.message });

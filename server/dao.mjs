@@ -15,10 +15,10 @@ const pool = new Pool({
 // console.log("Loaded dao.mjs and changed insertReport");
 
 //get all technical officers by relation officer's office_id
-export const getTechnicalOfficersByOffice = async (officerId) => {
+export const getTechnicalOfficersByOffice = async (officerId, officeId) => {
   let resultOfficers;
   try {
-    if (officerId) {
+    if (officerId && !officeId) {
       const sqlGetOfficer = 'SELECT * FROM operators WHERE operator_id = $1';
       const result = await pool.query(sqlGetOfficer, [officerId]);
       if(result.rows.length === 0) {
@@ -32,8 +32,11 @@ export const getTechnicalOfficersByOffice = async (officerId) => {
       }
       const sqlGetTechnicalOfficers = 'SELECT * FROM operators WHERE office_id = $1 AND role_id = (SELECT role_id FROM roles WHERE name = \'Technical office staff member\')';
       resultOfficers = await pool.query(sqlGetTechnicalOfficers, [result.rows[0].office_id]);
+    } else if ((!officerId && officeId) || (officerId && officeId)) {
+      const sqlGetTechnicalOfficers = 'SELECT * FROM operators WHERE office_id = $1 AND role_id = (SELECT role_id FROM roles WHERE name = \'Technical office staff member\')';
+      resultOfficers = await pool.query(sqlGetTechnicalOfficers, [officeId]);
     } else {
-      throw new Error('officer_id  must be provided');
+      throw new Error('officer_id or office_id must be provided');
     }
   } catch (err) {
     console.error('Error fetching technical officers:', err);

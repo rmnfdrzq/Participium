@@ -20,8 +20,7 @@ import styles from "./mapPage.module.css";
 import Turin_GEOJSON from "../../../data/turin_geojson.json";
 import { GeoJSON } from "react-leaflet";
 import * as turf from "@turf/turf";
-import API from "../../../API/API.mjs";
-
+import API from "../../../API/API.js";
 
 // Fix for default marker icons in Leaflet with React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -45,9 +44,6 @@ const redIcon = new L.Icon({
   popupAnchor: [1, -34],
   shadowSize: [41, 41],
 });
-
-  
-
 
 /**
  * Map component that initializes the map view.
@@ -142,8 +138,8 @@ export function MapPage(props) {
   const defaultCenter = [45.0703, 7.6868]; // Turin, Italy coordinates
   const defaultZoom = 13;
   const turinBounds = [
-  [45.0000, 7.5000], // Southwest corner
-  [45.1500, 7.8000]  // Northeast corner
+    [45.0, 7.5], // Southwest corner
+    [45.15, 7.8], // Northeast corner
   ];
   const cityLayer = L.geoJSON(Turin_GEOJSON);
 
@@ -156,13 +152,13 @@ export function MapPage(props) {
   const [mapZoom, setMapZoom] = useState(defaultZoom);
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
- 
-  const [reports, setReports] = useState([]);
-  const [error, setError] = useState('');
-  const [selectedReport, setSelectedReport] = useState(null);
-  const [isModalOpen, setIsModalOpen]= useState(false);
 
-  useEffect(()=> {
+  const [reports, setReports] = useState([]);
+  const [error, setError] = useState("");
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
     loadReports();
   }, []);
 
@@ -180,7 +176,7 @@ export function MapPage(props) {
     setIsModalOpen(true);
   };
 
-  const handleCloseModal =()=>{
+  const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedReport(null);
   };
@@ -216,12 +212,11 @@ export function MapPage(props) {
     const coordinates = [lat, lng];
 
     // Check if the clicked point is inside Turin city limits
-    const point = turf.point([latlng.lng, latlng.lat]); 
+    const point = turf.point([latlng.lng, latlng.lat]);
     const polygon =
       Turin_GEOJSON.type === "FeatureCollection"
-    ? Turin_GEOJSON.features[0]
-    : Turin_GEOJSON;
-
+        ? Turin_GEOJSON.features[0]
+        : Turin_GEOJSON;
 
     // Check if the point is inside the boundaries of the city polygon
     const isInside = turf.booleanPointInPolygon(point, polygon);
@@ -232,10 +227,6 @@ export function MapPage(props) {
 
     // Get address using reverse geocoding
     const address = await reverseGeocode(lat, lng);
-
-    // Log to console
-    //console.log("Coordinates:", { lat, lng });
-    //console.log("Address:", address);
 
     // Save to Redux store
     dispatch(
@@ -252,7 +243,6 @@ export function MapPage(props) {
    */
   const handleCreateReport = () => {
     if (location.position && location.address) {
-      //console.log("Create report for:", location);
       navigate("/create_report");
     }
   };
@@ -356,7 +346,10 @@ export function MapPage(props) {
         >
           <MapView center={mapCenter} zoom={mapZoom} />
           <MapClickHandler onMapClick={handleMapClick} />
-          <GeoJSON data={Turin_GEOJSON} style={{ color: "blue", weight: 2, fill:false}} />
+          <GeoJSON
+            data={Turin_GEOJSON}
+            style={{ color: "blue", weight: 2, fill: false }}
+          />
           <LayersControl position="bottomleft">
             <LayersControl.BaseLayer checked name="OpenStreetMap">
               <TileLayer
@@ -380,7 +373,10 @@ export function MapPage(props) {
             </LayersControl.BaseLayer>
           </LayersControl>
 
-          <ApprovedReportsLayer reports={reports} onViewDetails={handleViewDetails} />
+          <ApprovedReportsLayer
+            reports={reports}
+            onViewDetails={handleViewDetails}
+          />
 
           {location.position && location.address && (
             <MarkerWithAutoOpen position={location.position} icon={redIcon}>
@@ -407,10 +403,10 @@ export function MapPage(props) {
       </div>
 
       {isModalOpen && selectedReport && (
-        <ReportDetailsModal 
-        report={selectedReport}
-        onClose={handleCloseModal}
-      />
+        <ReportDetailsModal
+          report={selectedReport}
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   );
@@ -418,8 +414,10 @@ export function MapPage(props) {
 
 // Blue Icon for existing reports (to distinguish them from the user's red selection)
 const blueIcon = new L.Icon({
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
@@ -427,7 +425,6 @@ const blueIcon = new L.Icon({
 });
 
 function ApprovedReportsLayer({ reports, onViewDetails }) {
-
   if (!reports || reports.length === 0) {
     return null;
   }
@@ -435,43 +432,44 @@ function ApprovedReportsLayer({ reports, onViewDetails }) {
   return (
     <>
       {reports.map((report) => {
-         if (!report.latitude || !report.longitude || !report.id) {
+        if (!report.latitude || !report.longitude || !report.id) {
           console.warn("Report missing required fields:", report);
           return null;
         }
 
         return (
-          <Marker 
-            key={report.id} 
-            position={[report.latitude, report.longitude]} 
+          <Marker
+            key={report.id}
+            position={[report.latitude, report.longitude]}
             icon={blueIcon}
           >
-          <Popup>
-            <div className={styles.reportPopup}>
-              <h4 onClick={() => onViewDetails(report)} style={{cursor:'pointer', color: '#000000ff'}}>
-                {report.title}
-              </h4>
-              <p>{report.category.name}</p>
-              <p>
-                <strong>Reported by:</strong>{" "}
-                {report.citizen.username || "Anonymous"}
-              </p>
-            </div>
-          </Popup>
-        </Marker>
+            <Popup>
+              <div className={styles.reportPopup}>
+                <h4
+                  onClick={() => onViewDetails(report)}
+                  style={{ cursor: "pointer", color: "#000000ff" }}
+                >
+                  {report.title}
+                </h4>
+                <p>{report.category.name}</p>
+              </div>
+            </Popup>
+          </Marker>
         );
       })}
     </>
   );
 }
 
-function ReportDetailsModal ({report, onClose}){
+function ReportDetailsModal({ report, onClose }) {
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h2>{report.title}</h2>
-          <button className={styles.closeButton} onClick={onClose}>×</button>
+          <button className={styles.closeButton} onClick={onClose}>
+            ×
+          </button>
         </div>
 
         <div className={styles.modalBody}>

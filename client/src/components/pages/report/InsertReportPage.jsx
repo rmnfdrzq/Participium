@@ -5,10 +5,8 @@ import { clearLocation } from "../../../store/locationSlice";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import API from "../../../API/API.mjs";
+import API from "../../../API/API.js";
 import styles from "./insertReportPage.module.css";
-
-console.log(import.meta.env);
 
 // Fix for default marker icons in Leaflet with React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -93,7 +91,6 @@ export default function InsertReportPage() {
 
         // Store the public URL of the uploaded image
         imageUrls.push(publicUrl);
-        console.log("Uploaded image URL:", publicUrl);
       }
 
       // Combine report data with uploaded image URLs
@@ -106,8 +103,6 @@ export default function InsertReportPage() {
         latitude: location.coordinates?.lat,
         longitude: location.coordinates?.lng,
       };
-
-      console.log("Final report data to be sent:", reportWithUrls);
 
       // API call to save the report
       const created = await API.insertReport(reportWithUrls);

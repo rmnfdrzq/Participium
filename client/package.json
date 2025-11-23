@@ -13,6 +13,7 @@
     "@reduxjs/toolkit": "^2.10.1",
     "@supabase/supabase-js": "^2.80.0",
     "@turf/turf": "^7.3.0",
+    "axios": "^1.13.2",
     "bootstrap": "^5.3.8",
     "dayjs": "^1.11.18",
     "leaflet": "^1.9.4",

@@ -2,7 +2,7 @@ import { useState, useActionState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useDispatch } from "react-redux";
 import { clearLocation } from "../../../store/locationSlice";
-import API from "../../../API/API.mjs";
+import API from "../../../API/API.js";
 import styles from "./loginPage.module.css";
 
 export function LoginPage(props) {
@@ -50,19 +50,18 @@ export function LoginPage(props) {
   const handleSignUp = async (userData) => {
     try {
       await API.signUp(userData);
-      
+
       // Automatically log in after successful registration
       const credentials = {
         username: userData.email,
         password: userData.password,
       };
-      
+
       const user = await API.logIn(credentials);
       props.setUser(user);
       dispatch(clearLocation());
 
       navigate(`/map`);
-      
     } catch (err) {
       if (err && err.errors) {
         setMessage({

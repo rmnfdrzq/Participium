@@ -14,7 +14,7 @@ import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { clearLocation } from "./store/locationSlice";
-import API from "./API/API.mjs";
+import API from "./API/API.js";
 import "./App.css";
 
 function App() {
@@ -53,15 +53,11 @@ function App() {
             user ? (
               user.role === "Admin" ? (
                 <Navigate replace to={`/admin`} />
-              ) : user.role==="Municipal public relations officer"? (
-
-                <RelationOfficerPage/>
-              ) : user.role =="Technical office staff member" ? (
-
-                <TechnicalOfficerPage/>
-              )
-              
-              :(
+              ) : user.role === "Municipal public relations officer" ? (
+                <RelationOfficerPage />
+              ) : user.role == "Technical office staff member" ? (
+                <TechnicalOfficerPage />
+              ) : (
                 <MapPage />
               )
             ) : (
@@ -78,26 +74,14 @@ function App() {
           path="/signup"
           element={<LoginPage user={user} setUser={setUser} />}
         />
-        <Route path="/admin" element={<AdminPage  />} />
-        <Route
-          path="/admin/createuser"
-          element={<CreateUserPage />}
-        />
+        <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin/createuser" element={<CreateUserPage />} />
 
-        <Route
-          path="/relationOfficer"
-          element={<RelationOfficerPage/>}
-        />
+        <Route path="/relationOfficer" element={<RelationOfficerPage />} />
 
-        <Route
-          path="/inspectReport"
-          element={<InspectReportPage />}
-        />
+        <Route path="/inspectReport" element={<InspectReportPage />} />
 
-        <Route
-          path="/technicalOfficer"
-          element={<TechnicalOfficerPage/>}
-        />
+        <Route path="/technicalOfficer" element={<TechnicalOfficerPage />} />
 
         <Route path="/map" element={user ? <MapPage /> : <Navigate to="/" />} />
 

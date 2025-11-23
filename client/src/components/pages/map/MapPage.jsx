@@ -9,11 +9,14 @@ import {
   Popup,
   LayersControl,
 } from "react-leaflet";
+import MarkerClusterGroup from "react-leaflet-markercluster";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { setLocation, clearLocation } from "../../../store/locationSlice";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import searchIcon from "../../../images/search.svg";
 import styles from "./mapPage.module.css";
 
@@ -424,40 +427,102 @@ const blueIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+/**
+ * Report popup component
+ * @param {Object} props - Component props
+ * @param {Object} props.report - Report object
+ * @param {Function} props.onViewDetails - Callback when details button is clicked
+ */
+function ReportPopup({ report, onViewDetails }) {
+  return (
+    <div className={styles.reportPopup}>
+      <h4 className={styles.reportPopupTitle}>{report.title}</h4>
+      <p className={styles.reportPopupInfo}>
+        <strong>Category:</strong> {report.category.name}
+      </p>
+      <p className={styles.reportPopupInfo}>
+        <strong>Status:</strong> {report.status.name}
+      </p>
+      <button className={styles.reportPopupButton} onClick={onViewDetails}>
+        Details
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Custom icon create function for clusters with formatted count
+ * @param {Object} cluster - Cluster object from markercluster
+ * @returns {L.DivIcon} Cluster icon
+ */
+function createClusterIcon(cluster) {
+  const count = cluster.getChildCount();
+  // Format count: 2-9 show number, 10+ show "9+"
+  const displayCount = count >= 10 ? "9+" : count.toString();
+
+  return L.divIcon({
+    html: `<div style="
+      background-color:rgb(58, 124, 217);
+      color: white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      border: 3px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    ">${displayCount}</div>`,
+    className: "marker-cluster-custom",
+    iconSize: L.point(40, 40),
+  });
+}
+
+/**
+ * Component that creates a marker cluster group for reports
+ * @param {Object} props - Component props
+ * @param {Array} props.reports - Array of report objects
+ * @param {Function} props.onViewDetails - Callback when report is clicked
+ */
 function ApprovedReportsLayer({ reports, onViewDetails }) {
   if (!reports || reports.length === 0) {
     return null;
   }
 
-  return (
-    <>
-      {reports.map((report) => {
-        if (!report.latitude || !report.longitude || !report.id) {
-          console.warn("Report missing required fields:", report);
-          return null;
-        }
+  // Filter valid reports
+  const validReports = reports.filter(
+    (report) => report.latitude && report.longitude && report.id
+  );
 
-        return (
-          <Marker
-            key={report.id}
-            position={[report.latitude, report.longitude]}
-            icon={blueIcon}
-          >
-            <Popup>
-              <div className={styles.reportPopup}>
-                <h4
-                  onClick={() => onViewDetails(report)}
-                  style={{ cursor: "pointer", color: "#000000ff" }}
-                >
-                  {report.title}
-                </h4>
-                <p>{report.category.name}</p>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </>
+  if (validReports.length === 0) {
+    return null;
+  }
+
+  return (
+    <MarkerClusterGroup
+      iconCreateFunction={createClusterIcon}
+      maxClusterRadius={80}
+      spiderfyOnMaxZoom={true}
+      showCoverageOnHover={false}
+      zoomToBoundsOnClick={true}
+    >
+      {validReports.map((report) => (
+        <Marker
+          key={report.id}
+          position={[report.latitude, report.longitude]}
+          icon={blueIcon}
+        >
+          <Popup>
+            <ReportPopup
+              report={report}
+              onViewDetails={() => onViewDetails(report)}
+            />
+          </Popup>
+        </Marker>
+      ))}
+    </MarkerClusterGroup>
   );
 }
 
@@ -513,12 +578,6 @@ function ReportDetailsModal({ report, onClose }) {
               </div>
             </div>
           )}
-        </div>
-
-        <div className={styles.modalFooter}>
-          <button className={styles.closeModalButton} onClick={onClose}>
-            Close
-          </button>
         </div>
       </div>
     </div>

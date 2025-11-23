@@ -147,7 +147,6 @@
   box-shadow: var(--shadow-hover);
 }
 
-
 :global(.leaflet-control-layers),
 :global(.leaflet-control-zoom) {
   background: var(--static-white) !important;
@@ -192,7 +191,6 @@
   margin-right: 6px !important;
 }
 
-
 :global(.leaflet-popup-content) p {
   margin: 4px 0;
   font-size: 13px;
@@ -200,6 +198,44 @@
 
 :global(.leaflet-popup-content) strong {
   font-weight: 600;
+  color: var(--static-black);
+}
+
+/* Report popup styles */
+.reportPopup {
+  min-width: 150px;
+}
+
+.reportPopupTitle {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--static-black);
+}
+
+.reportPopupInfo {
+  margin: 0 0 8px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.reportPopupButton {
+  width: 100%;
+  padding: 8px 16px;
+  margin-top: 10px;
+  background: var(--gradient-primary);
+  color: var(--static-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reportPopupButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
 }
 
 /* Modal styles */
@@ -232,13 +268,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid var(--border-light);
 }
 
 .modalHeader h2 {
   margin: 0;
   font-size: 1.5rem;
-  color: var(--text-primary);
+  color: var(--static-black);
 }
 
 .closeButton {
@@ -254,7 +289,7 @@
 }
 
 .closeButton:hover {
-  color: var(--text-primary);
+  color: var(--static-black);
 }
 
 .modalBody {
@@ -267,7 +302,7 @@
 
 .detailRow strong {
   display: block;
-  color: var(--text-primary);
+  color: var(--static-black);
   margin-bottom: 5px;
 }
 
@@ -276,7 +311,7 @@
   color: var(--text-secondary);
   word-wrap: break-word;
   overflow-wrap: break-word;
-  white-space: pre-wrap; 
+  white-space: pre-wrap;
   line-height: 1.5;
 }
 

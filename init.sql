@@ -6,6 +6,7 @@ CREATE TABLE citizens (
     last_name VARCHAR(100) NOT NULL,
     password_hash TEXT NOT NULL,
     salt TEXT NOT NULL,
+    profile_photo_url TEXT,
     telegram_username VARCHAR(100),
     email_notifications BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW()

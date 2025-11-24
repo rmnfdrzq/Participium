@@ -26,3 +26,14 @@ export const getAllPendingReports = async () => {
   return await axiosInstance.get("/api/reports");
 };
 
+// Get operators by office ID
+export const getOperatorsByOffice = async (officeId) => {
+  return await axiosInstance.get(`/api/operators?officeId=${officeId}`);
+}
+
+// Set operator for a report
+export const setOperatorByReport = async (reportId, operatorId) => {
+  return await axiosInstance.put(`/api/reports/${reportId}/operator`, {
+    operatorId: operatorId
+  });
+}

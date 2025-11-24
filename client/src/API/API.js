@@ -11,6 +11,8 @@ import {
   getAllCategories,
   updateReportStatus,
   getAllPendingReports,
+  getOperatorsByOffice,
+  setOperatorByReport
 } from "./report.js";
 import { getImageUploadUrl, uploadImageToSignedUrl } from "./image.js";
 
@@ -35,6 +37,8 @@ const API = {
   getAllCategories,
   updateReportStatus,
   getAllPendingReports,
+  getOperatorsByOffice,
+  setOperatorByReport,
 
   // Image methods
   getImageUploadUrl,

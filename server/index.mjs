@@ -5,7 +5,7 @@ import registration from './router/registration_route.mjs';
 import getAll from './router/get-all_route.mjs';
 import forms from './router/forms_route.mjs';
 import { check, validationResult } from 'express-validator';
-import { getUser, getAllReports, updateReportStatus, getAllApprovedReports } from "./dao.mjs";
+import { getUser, getAllReports, updateReportStatus, getAllApprovedReports,setOperatorByReport  } from "./dao.mjs";
 import cors from 'cors';
 
 import passport from 'passport';
@@ -101,6 +101,23 @@ app.put('/api/reports/:id/status', async (req, res) => {
     res.status(200).json(updated);
   } catch (err) {
     res.status(503).json({ error: 'Database error during status update' });
+  }
+});
+
+//PUT /api/reports/:id/operator -> set operator for a report (requires operator/admin)
+app.put('/api/reports/:id/operator', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+    if (req.user.role !== 'Admin' && req.user.role !== 'Municipal public relations officer' && req.user.role !== "Technical office staff member"  ) return res.status(403).json({ error: 'Forbidden' });  
+    const reportId = parseInt(req.params.id, 10);
+    if (isNaN(reportId)) return res.status(423).json({ error: 'Invalid report id' });
+    const { operatorId } = req.body;
+    if (typeof operatorId !== 'number') return res.status(422).json({ error: 'operatorId must be a number' });
+    const updated = await setOperatorByReport(reportId, operatorId);
+    if (!updated) return res.status(404).json({ error: 'Report not found' });
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(503).json({ error: 'Database error during operator assignment' });
   }
 });
 

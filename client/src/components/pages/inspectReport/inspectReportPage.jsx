@@ -4,20 +4,52 @@ import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
 
 function InspectReportPage() {
+
   const selectedReport = useSelector((state) => state.report.selected);
   const navigate = useNavigate();
 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
+  const [officers, setOfficers] = useState([]);
+  const [selectedOfficer, setSelectedOfficer] = useState(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (selectedReport) {
+      loadOfficers();
+    }
+  }, [selectedReport]);
+
+  const loadOfficers = async () => {
+    try {
+      const officersData = await API.getOperatorsByOffice(selectedReport.office.id);
+      setOfficers(officersData);
+    } catch (err) {
+      setError('Failed to load officers: ' + err);
+    }
+  };
 
   const handleRejectReport = () => {
     setShowRejectModal(true);
-  };
+  }
 
-  const submitRejectReason = () => {
-    API.updateReportStatus(selectedReport.id, 5, rejectReason);
+  const submitRejectReason = async () => {
+    await API.updateReportStatus(selectedReport.id, 5, rejectReason);
     setShowRejectModal(false);
     setRejectReason("");
+    navigate(-1);
+  }
+
+  const approveReport = async () => {
+    if (!selectedOfficer) {
+      alert("Please select an officer.");
+      return;
+    }
+
+    console.log("Selected Officer ID:", selectedOfficer);
+    
+    await API.setOperatorByReport(selectedReport.id, selectedOfficer);
+    await API.updateReportStatus(selectedReport.id, 2);
     navigate(-1);
   };
 
@@ -88,7 +120,36 @@ function InspectReportPage() {
             </div>
           )}
 
-          {/* Buttons to accept or reject the report */}
+          {/* Officer Dropdown */}
+          <div style={{ marginTop: "1rem" }}>
+            <label><strong>Assign Officer:</strong></label>
+            <br />
+            <select
+              value={selectedOfficer || ""}
+              onChange={(e) => setSelectedOfficer(Number(e.target.value))}
+              style={{
+                padding: "0.5rem",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+                marginTop: "0.5rem",
+                width: "250px"
+              }}
+            >
+              <option value="">-- Select an Officer --</option>
+              {officers.map(officer => (
+                <option
+                  key={officer.id}
+                  value={officer.id}
+                >
+                  {officer.username}
+                </option>
+              ))}
+            </select>
+
+            {error && <p style={{ color: "red" }}>{error}</p>}
+          </div>
+
+          {/* Approve Button */}
           <button
             style={{
               marginTop: "1rem",
@@ -97,17 +158,14 @@ function InspectReportPage() {
               color: "white",
               border: "none",
               borderRadius: "4px",
-              cursor: "pointer",
+              cursor: "pointer"
             }}
-            onClick={() =>
-              API.updateReportStatus(selectedReport.id, 2).then(() =>
-                navigate(-1)
-              )
-            }
+            onClick={approveReport}
           >
             Approve Report
           </button>
 
+          {/* Reject Button */}
           <button
             style={{
               marginTop: "1rem",
@@ -117,7 +175,7 @@ function InspectReportPage() {
               color: "white",
               border: "none",
               borderRadius: "4px",
-              cursor: "pointer",
+              cursor: "pointer"
             }}
             onClick={handleRejectReport}
           >

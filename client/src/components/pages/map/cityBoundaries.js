@@ -1,4 +1,5 @@
 import * as turf from "@turf/turf";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * Create mask polygon (expanded area minus city) for gray overlay outside city
@@ -393,4 +394,15 @@ export const loadCityBoundaries = async () => {
       maskPolygon: null,
     };
   }
+};
+
+/**
+ * React hook for loading city boundaries with TanStack Query caching
+ * @returns {Object} Query result with data, isLoading, error, etc.
+ */
+export const useCityBoundaries = () => {
+  return useQuery({
+    queryKey: ["cityBoundaries"],
+    queryFn: loadCityBoundaries,
+  });
 };

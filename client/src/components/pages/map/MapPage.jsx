@@ -23,7 +23,7 @@ import styles from "./mapPage.module.css";
 import { GeoJSON } from "react-leaflet";
 import * as turf from "@turf/turf";
 import API from "../../../API/API.js";
-import { loadCityBoundaries } from "./cityBoundaries.js";
+import { useCityBoundaries } from "./cityBoundaries.js";
 
 // Fix for default marker icons in Leaflet with React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -183,13 +183,20 @@ export function MapPage(props) {
   const [error, setError] = useState("");
   const [selectedReport, setSelectedReport] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [cityBoundaries, setCityBoundaries] = useState(null);
-  const [cityBounds, setCityBounds] = useState(null);
-  const [maskPolygon, setMaskPolygon] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [reportsLoaded, setReportsLoaded] = useState(false);
-  const [boundariesLoaded, setBoundariesLoaded] = useState(false);
   const hasLoadedRef = useRef(false);
+
+  // Use TanStack Query hook for city boundaries
+  const {
+    data: cityBoundariesData,
+    isLoading: boundariesLoading,
+    error: boundariesError,
+  } = useCityBoundaries();
+
+  const cityBoundaries = cityBoundariesData?.cityBoundaries || null;
+  const cityBounds = cityBoundariesData?.cityBounds || null;
+  const maskPolygon = cityBoundariesData?.maskPolygon || null;
 
   useEffect(() => {
     // Prevent double execution in StrictMode
@@ -197,31 +204,20 @@ export function MapPage(props) {
     hasLoadedRef.current = true;
 
     loadReports();
-    handleLoadCityBoundaries();
   }, []);
 
   // Check if both reports and boundaries are loaded
   useEffect(() => {
-    if (reportsLoaded && boundariesLoaded) {
+    if (reportsLoaded && !boundariesLoading) {
       setIsLoading(false);
     }
-  }, [reportsLoaded, boundariesLoaded]);
+  }, [reportsLoaded, boundariesLoading]);
 
-  /**
-   * Load city boundaries and create mask
-   */
-  const handleLoadCityBoundaries = useCallback(async () => {
-    try {
-      const result = await loadCityBoundaries();
-      setCityBoundaries(result.cityBoundaries);
-      setCityBounds(result.cityBounds);
-      setMaskPolygon(result.maskPolygon);
-    } catch (error) {
-      console.error("Error loading city boundaries:", error);
-    } finally {
-      setBoundariesLoaded(true);
-    }
-  }, []);
+  // Determine if there's an error loading city boundaries
+  // Show error if: query failed OR loading completed but cityBoundaries is null
+  const hasBoundariesError =
+    boundariesError ||
+    (!boundariesLoading && (!cityBoundariesData || !cityBoundaries));
 
   const loadReports = useCallback(async () => {
     try {
@@ -381,7 +377,14 @@ export function MapPage(props) {
             <div className={styles.loaderText}>Loading map...</div>
           </div>
         )}
-        {!isLoading && (
+        {!isLoading && hasBoundariesError && (
+          <div className={styles.errorContainer}>
+            <div className={styles.errorMessage}>
+              Failed to load the map, try to refresh the page
+            </div>
+          </div>
+        )}
+        {!isLoading && !hasBoundariesError && (
           <div className={styles.searchBar}>
             <form onSubmit={handleSearch} className={styles.searchForm}>
               <div className={styles.searchInputWrapper}>

@@ -54,7 +54,7 @@ router.post('/reports', async (req, res) => {
     });
     res.status(201).json(report);
   } catch (err) {
-    res.status(503).json({ error: err.message || 'Database error during report insertion' });
+    res.status(503).json({ error: err.message});
   }
 });
 

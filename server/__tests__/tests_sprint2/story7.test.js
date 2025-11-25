@@ -150,7 +150,11 @@ describe('Story 7 - Approved reports (DAO + API)', () => {
           getAllReports: async () => [],
           updateReportStatus: async () => ({}),
           getAllApprovedReports: async () => ([{ id: 99, title: 'Test approved', latitude: 0, longitude: 0, anonymous: false }]),
-          getApprovedReports: async () => []
+          getApprovedReports: async () => [],
+          setOperatorByReport: async (reportId, operatorId) => null,
+          getReportsAssigned: async (operatorId) => [],
+          updateUserById: async (userId, updates) => null,
+          getUserInfoById: async (id) => null,
         };
       });
 

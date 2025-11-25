@@ -78,7 +78,7 @@ app.get('/api/reports', async (req, res) => {
     const reports = await getAllReports();
     res.status(200).json(reports);
   } catch (err) {
-    console.error('Error fetching reports:', err);
+  
     res.status(503).json({ error: 'Database error during report retrieval' });
   }
 });
@@ -127,7 +127,7 @@ app.get('/api/reports/approved', async (req, res) => {
     const reports = await getAllApprovedReports();
     res.status(200).json(reports);
   } catch (err) {
-    console.error('Error fetching approved reports:', err);
+  
     res.status(503).json({ error: 'Database error during report retrieval' });
   }
 });
@@ -143,7 +143,7 @@ app.get('/api/reports/assigned', async (req, res) => {
     const reports = await getReportsAssigned(operatorId);
     res.status(200).json(reports);
   } catch (err) {
-    console.error('Error fetching assigned reports:', err);
+  
     res.status(503).json({ error: 'Database error during assigned report retrieval' });
   }
 });
@@ -180,7 +180,7 @@ app.put("/api/citizens", async (req, res) => {
 
     res.json(updatedUser);
   } catch (err) {
-    console.error("Error updating user:", err);
+ 
     res.status(500).json({ error: "Internal server error" });
   }
 });

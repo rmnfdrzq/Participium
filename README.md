@@ -6,6 +6,7 @@ test: cd server; npm test ( cd server; npm run test:coverage) (npm test name_fil
 retrospective: cd retrospective; node calculate.mjs
 
 commads to reset and restart postgreSQL db : docker compose down; Remove-Item -Recurse -Force .\db_data; docker compose up -d
+commands to remove a container named participium_db: docker rm -f participium_db
 
 
 # Docker compose using participium image exampl

@@ -38,8 +38,10 @@ jest.mock('pg', () => {
 describe('API (index.mjs) - improved coverage', () => {
     let agent;
     let queryMock;
+    let mockCreateUser;
 
     beforeAll(async () => {
+        jest.resetModules();
         // set env values used by index.mjs
         process.env.SUPABASE_BUCKET = 'participium';
         process.env.SUPABASE_URL = 'https://supabase.test';
@@ -48,33 +50,57 @@ describe('API (index.mjs) - improved coverage', () => {
         const pg = require('pg');
         queryMock = pg.__queryMock;
 
+        mockCreateUser = jest.fn(async (username, email, first_name, last_name, email_notifications, password) => {
+            return { id: 111, username };
+        });
+
         // --- MOCK dao.mjs to bypass crypto.scrypt and provide deterministic users ---
         await jest.unstable_mockModule('../dao.mjs', () => {
             return {
-                getUser: async (username, password) => {
+                getUser: jest.fn(async (username, password) => {
                     if (username === 'admin' && password === 'correct') {
-                      return { username: 'admin', role: 'Admin', id: 900, type: 'operator' };
+                    return { username: 'admin', role: 'Admin', id: 900, type: 'operator' };
                     }
                     if (username === 'found@operator' && password === 'correct') {
-                      return { username: 'operator_user', role: 'Operator', id: 201, type: 'operator' };
+                    return { username: 'operator_user', role: 'Operator', id: 201, type: 'operator' };
                     }
                     if (username === 'plain' && password === 'correct') {
-                      return { username: 'plainuser', role: 'User', id: 555, type: 'user' };
+                    return { username: 'plainuser', role: 'User', id: 555, type: 'user' };
                     }
                     // emulate failed auth
                     return null;
-                },
-                createUser: async (username, email, first_name, last_name, email_notifications, password) => {
-                    return { id: 111, username };
-                },
-                getAllOffices: async () => [{ id: 1, name: 'Office A' }, { id: 2, name: 'Office B' }],
-                createMunicipalityUser: async (email, username, password, office_id, role_id) => ({ id: 222, username }),
-                getAllOperators: async () => [{ operator_id: 301, email: 'op1@example.com', username: 'op1', office_id: 1, role: 'municipality_user' }],
-                getAllRoles: async () => [{ role_id: 1, name: 'municipality_user' }],
-                getAllCategories: async () => [{ category_id: 1, name: 'Noise' }],
-                insertReport: async (obj) => ({ report_id: 555, description: obj.description || 'desc', image_name: (obj.image_urls && obj.image_urls[0]) || 'img.png' })
+                }),
+                createUser: mockCreateUser,
+                getAllOffices: jest.fn(async () => [
+                    { id: 1, name: 'Office A' },
+                    { id: 2, name: 'Office B' }
+                ]),
+                createMunicipalityUser: jest.fn(async (email, username, password, office_id, role_id) => (
+                    { id: 222, username }
+                )),
+                getAllOperators: jest.fn(async () => [
+                    { operator_id: 301, email: 'op1@example.com', username: 'op1', office_id: 1, role: 'municipality_user' }
+                ]),
+                getAllRoles: jest.fn(async () => [
+                    { role_id: 1, name: 'municipality_user' }
+                ]),
+                getAllCategories: jest.fn(async () => [
+                    { category_id: 1, name: 'Noise' }
+                ]),
+                insertReport: jest.fn(async (obj) => (
+                    { report_id: 555, description: obj.description || 'desc', image_name: (obj.image_urls && obj.image_urls[0]) || 'img.png' }
+                )),
+                getTechnicalOfficersByOffice: jest.fn(async (office_id) => []),
+                getUserInfoById: jest.fn(async (id) => null),
+                getAllReports: jest.fn(async () => []),
+                updateReportStatus: jest.fn(async (reportId, status_id, rejection_reason) => null),
+                getAllApprovedReports: jest.fn(async () => []),
+                setOperatorByReport: jest.fn(async (reportId, operatorId) => null),
+                getReportsAssigned: jest.fn(async (operatorId) => []),
+                updateUserById: jest.fn(async (userId, updates) => null),
             };
         });
+
 
         // --- MOCK supabase client used by index.mjs (createSignedUploadUrl) ---
         await jest.unstable_mockModule('@supabase/supabase-js', () => {
@@ -125,30 +151,128 @@ describe('API (index.mjs) - improved coverage', () => {
         }
     });
 
-    test('POST /api/registration with empty body -> 422', async () => {
-        const res = await agent.post('/api/registration').send({});
-        expect(res.status).toBe(422);
-        expect(Array.isArray(res.body.errors)).toBe(true);
-        expect(res.body.errors.length).toBeGreaterThan(0);
+    
+    test('POST /api/upload-url returns signed url', async () => {
+        const res = await agent.post('/api/upload-url').send({ filename: 'my img.png' });
+        expect(res.status).toBe(200);
+        expect(res.body).toHaveProperty('signedUrl');
+        expect(res.body).toHaveProperty('path');
+        expect(res.body).toHaveProperty('publicUrl');
     });
 
-    test('POST /api/registration invalid email & short password -> 422 with messages', async () => {
-        const payload = {
+    describe('GET /api/admin', () => {
+        test('unauthenticated -> 401', async () => {
+            await agent.delete('/api/sessions/current'); // assicuriamoci di essere disconnessi
+            const res = await agent.get('/api/admin');
+            expect(res.status).toBe(401);
+            expect(res.body).toEqual({ error: 'Not authenticated' });
+        });
+
+        test('database error -> 500', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getAllOperators.mockImplementationOnce(async () => {
+            throw new Error('DB failure');
+            });
+
+            // simuliamo login come Admin
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+
+            const res = await agent.get('/api/admin');
+            expect(res.status).toBe(500);
+            expect(res.body).toEqual({ error: 'Failed to fetch users' });
+        });
+
+        test('login as admin, access /api/admin and create user', async () => {
+            const loginRes = await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+            expect(loginRes.status).toBe(201);
+            expect(loginRes.body).toMatchObject({ username: 'admin', type: 'operator' });
+
+            const adminRes = await agent.get('/api/admin');
+            expect(adminRes.status).toBe(200);
+            expect(Array.isArray(adminRes.body)).toBe(true);
+            expect(adminRes.body[0]).toHaveProperty('role', 'municipality_user');
+
+            const createPayload = { username: 'newop', email: 'newop@example.com', password: 'validpass', office_id: 1, role: 2 };
+            const createRes = await agent.post('/api/admin/createuser').send(createPayload);
+            expect(createRes.status).toBe(201);
+            expect(createRes.body).toMatchObject({ id: 222, username: 'newop' });
+        });
+
+        test('plain user cannot access -> 403', async () => {
+            // log in as plain user
+            await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+            const res = await agent.get('/api/admin');
+            expect(res.status).toBe(403);
+            expect(res.body).toMatchObject({ error: 'Forbidden' });
+        });
+    });
+
+    describe('POST /api/registration', () => {
+        test('with empty body -> 422', async () => {
+            const res = await agent.post('/api/registration').send({});
+            expect(res.status).toBe(422);
+            expect(Array.isArray(res.body.errors)).toBe(true);
+            expect(res.body.errors.length).toBeGreaterThan(0);
+        });
+
+        test('invalid email & short password -> 422 with messages', async () => {
+            const payload = {
             username: 't',
             first_name: 'F',
             last_name: 'L',
             email_notifications: true,
             email: 'bad',
             password: '123'
-        };
-        const res = await agent.post('/api/registration').send(payload);
-        expect(res.status).toBe(422);
-        const msgs = res.body.errors.map(e => e.msg.toLowerCase());
-        expect(msgs.some(m => m.includes('invalid email'))).toBe(true);
-        expect(msgs.some(m => m.includes('at least 6'))).toBe(true);
-    });
+            };
+            const res = await agent.post('/api/registration').send(payload);
+            expect(res.status).toBe(422);
+            const msgs = res.body.errors.map(e => e.msg.toLowerCase());
+            expect(msgs.some(m => m.includes('invalid email'))).toBe(true);
+            expect(msgs.some(m => m.includes('at least 6'))).toBe(true);
+        });
 
-    test('POST /api/registration valid -> 201 created user', async () => {
+        test('database error -> 503', async () => {
+            // Forziamo il mock a lanciare un errore generico
+            mockCreateUser.mockImplementationOnce(async () => {
+            const err = new Error('DB failure');
+            err.code = 'ECONNREFUSED'; // qualsiasi codice diverso da 23505
+            throw err;
+            });
+
+            const payload = {
+            username: 'brokenuser',
+            first_name: 'First',
+            last_name: 'Last',
+            email_notifications: true,
+            email: 'broken@user.it',
+            password: 'validpassword'
+            };
+
+            const res = await agent.post('/api/registration').send(payload);
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'Database error during user creation' });
+        });
+
+        test('valid -> 201 created user', async () => {
+            const payload = {
+            username: 'newuser',
+            first_name: 'First',
+            last_name: 'Last',
+            email_notifications: true,
+            email: 'new@user.it',
+            password: 'validpassword'
+            };
+            const res = await agent.post('/api/registration').send(payload);
+            expect(res.status).toBe(201);
+            expect(res.body).toMatchObject({ id: 111, username: 'newuser' });
+        });
+
+        test('duplicate user -> 409', async () => {
+        mockCreateUser.mockImplementationOnce(() => {
+            const err = new Error('duplicate key value violates unique constraint');
+            err.code = '23505';
+            throw err;
+        });
         const payload = {
             username: 'newuser',
             first_name: 'First',
@@ -158,104 +282,177 @@ describe('API (index.mjs) - improved coverage', () => {
             password: 'validpassword'
         };
         const res = await agent.post('/api/registration').send(payload);
-        expect(res.status).toBe(201);
-        expect(res.body).toMatchObject({ id: 111, username: 'newuser' });
+        expect(res.status).toBe(409);
     });
 
-    test('GET /api/offices -> 200 offices', async () => {
-        const res = await agent.get('/api/offices');
-        expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body[0]).toEqual({ id: 1, name: 'Office A' });
     });
 
-    test('GET /api/roles -> 200 roles', async () => {
-        const res = await agent.get('/api/roles');
-        expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body[0]).toEqual({ role_id: 1, name: 'municipality_user' });
-    });
+    describe('GET /api/offices', () => {
+        test('database error -> 503', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getAllOffices.mockImplementationOnce(async () => {
+            throw new Error('DB failure');
+            });
 
-    test('GET /api/categories -> 200 categories', async () => {
-        const res = await agent.get('/api/categories');
-        expect(res.status).toBe(200);
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body[0]).toEqual({ category_id: 1, name: 'Noise' });
-    });
-
-    test('POST /api/upload-url returns signed url', async () => {
-        const res = await agent.post('/api/upload-url').send({ filename: 'my img.png' });
-        expect(res.status).toBe(200);
-        expect(res.body).toHaveProperty('signedUrl');
-        expect(res.body).toHaveProperty('path');
-        expect(res.body).toHaveProperty('publicUrl');
-    });
-
-    test('GET /api/sessions/current unauthenticated -> 401', async () => {
-        const res = await request('http://localhost:3001').get('/api/sessions/current');
-        expect(res.status).toBe(401);
-        expect(res.body).toMatchObject({ error: 'Not authenticated' });
-    });
-
-    test('DELETE /api/sessions/current logs out', async () => {
-        const res = await agent.delete('/api/sessions/current');
-        expect([200, 204]).toContain(res.status);
-    });
-
-    test('login as admin, access /api/admin and create user', async () => {
-        const loginRes = await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
-        expect(loginRes.status).toBe(201);
-        expect(loginRes.body).toMatchObject({ username: 'admin', type: 'operator' });
-
-        const adminRes = await agent.get('/api/admin');
-        expect(adminRes.status).toBe(200);
-        expect(Array.isArray(adminRes.body)).toBe(true);
-        expect(adminRes.body[0]).toHaveProperty('role', 'municipality_user');
-
-        const createPayload = { username: 'newop', email: 'newop@example.com', password: 'validpass', office_id: 1, role: 2 };
-        const createRes = await agent.post('/api/admin/createuser').send(createPayload);
-        expect(createRes.status).toBe(201);
-        expect(createRes.body).toMatchObject({ id: 222, username: 'newop' });
-    });
-
-    test('POST /api/sessions with wrong password -> 401', async () => {
-        const res = await agent.post('/api/sessions').send({ username: 'admin', password: 'wrong' });
-        expect(res.status).toBe(401);
-    });
-
-    test('POST /api/admin/createuser without authentication -> 401', async () => {
-        const res = await request('http://localhost:3001').post('/api/admin/createuser').send({
-            username: 'x'
+            const res = await agent.get('/api/offices');
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'Database error during office retrieval' });
         });
-        expect(res.status).toBe(401);
+
+        test('-> 200 offices', async () => {
+            const res = await agent.get('/api/offices');
+            expect(res.status).toBe(200);
+            expect(Array.isArray(res.body)).toBe(true);
+            expect(res.body[0]).toEqual({ id: 1, name: 'Office A' });
+        });
     });
 
-    test('POST /api/admin/createuser with invalid payload while authenticated -> 422', async () => {
-        // ensure logged in as admin
-        await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
-        const res = await agent.post('/api/admin/createuser').send({
+    describe('GET /api/roles', () => {
+        test('database error -> 503', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getAllRoles.mockImplementationOnce(async () => {
+            throw new Error('DB failure');
+            });
+
+            const res = await agent.get('/api/roles');
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'Database error during role retrieval' });
+        });
+
+        test('-> 200 roles', async () => {
+            const res = await agent.get('/api/roles');
+            expect(res.status).toBe(200);
+            expect(Array.isArray(res.body)).toBe(true);
+            expect(res.body[0]).toEqual({ role_id: 1, name: 'municipality_user' });
+        });
+    });
+
+    describe('GET /api/categories', () => {
+        test('database error -> 503', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getAllCategories.mockImplementationOnce(async () => {
+            throw new Error('DB failure');
+            });
+
+            const res = await agent.get('/api/categories');
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'Database error during category retrieval' });
+        });
+
+        test('-> 200 categories', async () => {
+            const res = await agent.get('/api/categories');
+            expect(res.status).toBe(200);
+            expect(Array.isArray(res.body)).toBe(true);
+            expect(res.body[0]).toEqual({ category_id: 1, name: 'Noise' });
+        });
+    });
+
+    describe('API sessions', () => {
+        test('GET /api/sessions/current after login returns authenticated user', async () => {
+            let res = await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+            res = await agent.get('/api/sessions/current');
+            expect(res.status).toBe(200);
+            expect(res.body).toMatchObject({ username: 'admin', type: 'operator' });
+        });
+
+        test('GET /api/sessions/current unauthenticated -> 401', async () => {
+            const res = await request('http://localhost:3001').get('/api/sessions/current');
+            expect(res.status).toBe(401);
+            expect(res.body).toMatchObject({ error: 'Not authenticated' });
+        });
+
+        test('DELETE /api/sessions/current logs out', async () => {
+            const res = await agent.delete('/api/sessions/current');
+            expect([200, 204]).toContain(res.status);
+        });
+
+        test('DELETE /api/sessions/current logs out', async () => {
+            const res = await agent.delete('/api/sessions/current');
+            expect([200, 204]).toContain(res.status);
+        });
+
+        test('POST /api/sessions with wrong password -> 401', async () => {
+            const res = await agent.post('/api/sessions').send({ username: 'admin', password: 'wrong' });
+            expect(res.status).toBe(401);
+        });
+    });
+
+    describe('POST /api/admin/createuser', () => {
+        test('without authentication -> 401', async () => {
+            const res = await request('http://localhost:3001')
+            .post('/api/admin/createuser')
+            .send({ username: 'x' });
+            expect(res.status).toBe(401);
+        });
+
+        test('with invalid payload while authenticated -> 422', async () => {
+            // login come Admin
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+
+            const res = await agent.post('/api/admin/createuser').send({
             username: '',
             email: 'bad-email',
             password: '123',
             office_id: 'not-an-int'
+            });
+
+            expect(res.status).toBe(422);
+            expect(Array.isArray(res.body.errors)).toBe(true);
+            expect(res.body.errors.length).toBeGreaterThan(0);
         });
-        expect(res.status).toBe(422);
-        expect(Array.isArray(res.body.errors)).toBe(true);
-        expect(res.body.errors.length).toBeGreaterThan(0);
+
+        test('duplicate -> 409', async () => {
+            const dao = await import('../dao.mjs');
+            dao.createMunicipalityUser.mockImplementationOnce(async () => {
+            const err = new Error('duplicate');
+            err.code = '23505';
+            throw err;
+            });
+
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+
+            const payload = {
+            username: 'dupuser',
+            email: 'dup@example.com',
+            password: 'validpassword',
+            office_id: 1,
+            role: 1
+            };
+
+            const res = await agent.post('/api/admin/createuser').send(payload);
+            expect(res.status).toBe(409);
+            expect(res.body).toEqual({ error: 'Username or email already exists' });
+        });
+
+        test('database error -> 503', async () => {
+            const dao = await import('../dao.mjs');
+            dao.createMunicipalityUser.mockImplementationOnce(async () => {
+            const err = new Error('DB failure');
+            err.code = 'ECONNREFUSED'; // qualsiasi codice diverso da 23505
+            throw err;
+            });
+
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+
+            const payload = {
+            username: 'brokenuser',
+            email: 'broken@example.com',
+            password: 'validpassword',
+            office_id: 1,
+            role: 1
+            };
+
+            const res = await agent.post('/api/admin/createuser').send(payload);
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'Database error during user creation' });
+        });
+
     });
 
-    test('plain user cannot access /api/admin -> 403', async () => {
-        // log in as plain user
-        await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
-        const res = await agent.get('/api/admin');
-        expect(res.status).toBe(403);
-        expect(res.body).toMatchObject({ error: 'Forbidden' });
-    });
-
-    test('POST /api/reports with authenticated user -> 201 created report', async () => {
-        // login as admin (dao.insertReport mocked) to obtain session
-        await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
-        const payload = {
+    describe('POST /api/reports', () => {
+        test('authenticated user -> 201 created report', async () => {
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+            const payload = {
             title: 'T',
             description: 'desc',
             image_urls: ['img.png'],
@@ -263,21 +460,175 @@ describe('API (index.mjs) - improved coverage', () => {
             longitude: 56.78,
             category_id: 1,
             anonymous: false
-        };
-        const res = await agent.post('/api/reports').send(payload);
-        expect(res.status).toBe(201);
-        expect(res.body).toMatchObject({ report_id: 555, description: 'desc', image_name: 'img.png' });
+            };
+            const res = await agent.post('/api/reports').send(payload);
+            expect(res.status).toBe(201);
+            expect(res.body).toMatchObject({ report_id: 555, description: 'desc', image_name: 'img.png' });
+        });
+
+        test('unauthenticated -> 401', async () => {
+            await agent.delete('/api/sessions/current');
+            const payload = {
+            title: 'Noise complaint',
+            description: 'Too loud',
+            image_urls: ['img.png'],
+            latitude: 45.07,
+            longitude: 7.68,
+            category_id: 1,
+            anonymous: false
+            };
+            const res = await agent.post('/api/reports').send(payload);
+            expect(res.status).toBe(401);
+            expect(res.body).toEqual({ error: 'Not authenticated' });
+        });
+
+        test('database error -> 503', async () => {
+            const dao = await import('../dao.mjs');
+            dao.insertReport.mockImplementationOnce(async () => {
+            throw new Error('DB failure');
+            });
+            await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+            const payload = {
+            title: 'Noise complaint',
+            description: 'Too loud',
+            image_urls: ['img.png'],
+            latitude: 45.07,
+            longitude: 7.68,
+            category_id: 1,
+            anonymous: false
+            };
+            const res = await agent.post('/api/reports').send(payload);
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'DB failure' });
+        });
     });
 
-    test('GET /api/sessions/current after login returns authenticated user', async () => {
-        let res = await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
-        res = await agent.get('/api/sessions/current');
-        expect(res.status).toBe(200);
-        expect(res.body).toMatchObject({ username: 'admin', type: 'operator' });
+    describe('GET /api/reports', () => {
+        test('unauthenticated -> 401', async () => {
+            await agent.delete('/api/sessions/current');
+            const res = await agent.get('/api/reports');
+            expect(res.status).toBe(401);
+            expect(res.body).toEqual({ error: 'Not authenticated' });
+        });
+
+        test('authenticated but not Admin or Municipal officer -> 403', async () => {
+            await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+            const res = await agent.get('/api/reports');
+            expect(res.status).toBe(403);
+            expect(res.body).toEqual({ error: 'Forbidden' });
+        });
+
+        test('authenticated as Admin -> 200 reports', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getAllReports.mockImplementationOnce(async () => [
+            { report_id: 1, description: 'Noise complaint' },
+            { report_id: 2, description: 'Garbage issue' }
+            ]);
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+            const res = await agent.get('/api/reports');
+            expect(res.status).toBe(200);
+            expect(Array.isArray(res.body)).toBe(true);
+            expect(res.body[0]).toEqual({ report_id: 1, description: 'Noise complaint' });
+        });
+
+        test('authenticated as Admin but DB error -> 503', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getAllReports.mockImplementationOnce(async () => {
+            throw new Error('DB failure');
+            });
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+            const res = await agent.get('/api/reports');
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'Database error during report retrieval' });
+        });
     });
 
-    test('DELETE /api/sessions/current logs out', async () => {
-        const res = await agent.delete('/api/sessions/current');
-        expect([200, 204]).toContain(res.status);
+    describe ('GET /api/operators',()=>{
+        test('authenticated -> 200', async () => {
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+            const res = await agent.get('/api/operators?officeId=1');
+            expect(res.status).toBe(200);
+        });
+
+        test('unauthenticated -> 401', async () => {
+            await agent.delete('/api/sessions/current');
+            const res = await agent.get('/api/operators?officeId=1');
+            expect(res.status).toBe(401);
+            expect(res.body).toEqual({ error: 'Not authenticated' });
+        });
+
+        test('invalid params -> 422', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getTechnicalOfficersByOffice.mockImplementationOnce(async () => {
+            throw new Error('officer_id or office_id must be provided');
+            });
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+            const res = await agent.get('/api/operators');
+            expect(res.status).toBe(422);
+            expect(res.body).toEqual({ error: 'officer_id or office_id must be provided' });
+        });
+
+        test('database error -> 503', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getTechnicalOfficersByOffice.mockImplementationOnce(async () => {
+            throw new Error('DB failure');
+            });
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+            const res = await agent.get('/api/operators?officeId=1');
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'Database error during operators retrieval' });
+        });
+
     });
+
+    describe('GET /api/reports', () => {
+        test('unauthenticated -> 401', async () => {
+            // logout per sicurezza
+            await agent.delete('/api/sessions/current');
+
+            const res = await agent.get('/api/reports');
+            expect(res.status).toBe(401);
+            expect(res.body).toEqual({ error: 'Not authenticated' });
+        });
+
+        test('authenticated but not Admin or Municipal officer -> 403', async () => {
+            // login come utente normale
+            await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+
+            const res = await agent.get('/api/reports');
+            expect(res.status).toBe(403);
+            expect(res.body).toEqual({ error: 'Forbidden' });
+        });
+
+        test('authenticated as Admin -> 200 reports', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getAllReports.mockImplementationOnce(async () => [
+            { report_id: 1, description: 'Noise complaint' },
+            { report_id: 2, description: 'Garbage issue' }
+            ]);
+
+            // login come Admin
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+
+            const res = await agent.get('/api/reports');
+            expect(res.status).toBe(200);
+            expect(Array.isArray(res.body)).toBe(true);
+            expect(res.body[0]).toEqual({ report_id: 1, description: 'Noise complaint' });
+        });
+
+        test('authenticated as Admin but DB error -> 503', async () => {
+            const dao = await import('../dao.mjs');
+            dao.getAllReports.mockImplementationOnce(async () => {
+            throw new Error('DB failure');
+            });
+
+            // login come Admin
+            await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+
+            const res = await agent.get('/api/reports');
+            expect(res.status).toBe(503);
+            expect(res.body).toEqual({ error: 'Database error during report retrieval' });
+        });
+    });
+
 });

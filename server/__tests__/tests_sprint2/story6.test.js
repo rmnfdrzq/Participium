@@ -158,5 +158,104 @@ describe('Story 6 - get all reports, getTechnicalOfficersByOffice', () => {
             await expect(dao.getTechnicalOfficersByOffice(undefined, undefined))
                 .rejects.toThrow('officer_id or office_id must be provided');
         });
+
+        test('setOperatorByReport: returns updated row on success', async () => {
+            const updatedRow = {
+                report_id: 200,
+                assigned_to_operator_id: 300,
+                title: 'Road issue',
+                status_id: 2,
+                updated_at: new Date().toISOString()
+            };
+            queryMock.mockResolvedValueOnce({ rows: [updatedRow] });
+
+            const res = await dao.setOperatorByReport(200, 300);
+            expect(res).toEqual(updatedRow);
+        });
+
+        test('setOperatorByReport: returns null when no report updated', async () => {
+            queryMock.mockResolvedValueOnce({ rows: [] });
+
+            const res = await dao.setOperatorByReport(9999, 1);
+            expect(res).toBeNull();
+        });
+
+        test('setOperatorByReport: propagates DB error', async () => {
+            const testErr = new Error('db update failed');
+            queryMock.mockRejectedValueOnce(testErr);
+
+            await expect(dao.setOperatorByReport(1, 2)).rejects.toBe(testErr);
+        });
+
+        test('updateReportStatus: returns updated report with photos on success', async () => {
+            const selectRow = {
+                report_id: 42,
+                title: 'Broken Lamp',
+                description: 'Lamp broken near park',
+                latitude: 45.1,
+                longitude: 9.1,
+                anonymous: false,
+                rejection_reason: null,
+                created_at: '2024-01-01T00:00:00Z',
+                updated_at: '2024-01-03T00:00:00Z',
+                citizen_id: 7,
+                citizen_username: 'alice',
+                citizen_first_name: 'Alice',
+                citizen_last_name: 'Smith',
+                category_id: 2,
+                category_name: 'Lighting',
+                office_id: 4,
+                office_name: 'Maintenance',
+                status_id: 3,
+                status_name: 'In Progress',
+                photos: [{ photo_id: 11, image_url: 'lamp.png' }]
+            };
+
+            const clientQuery = jest.fn()
+                // updateResult -> indicates one row updated
+                .mockResolvedValueOnce({ rows: [{ report_id: selectRow.report_id }] })
+                // selectResult -> returns the full row
+                .mockResolvedValueOnce({ rows: [selectRow] });
+
+            const client = { query: clientQuery, release: jest.fn() };
+            const connectSpy = jest.spyOn(Pool.prototype, 'connect').mockResolvedValue(client);
+
+            const res = await dao.updateReportStatus(selectRow.report_id, selectRow.status_id, null);
+
+            expect(res).toMatchObject({
+                id: selectRow.report_id,
+                title: selectRow.title,
+                rejection_reason: selectRow.rejection_reason,
+                status: { id: selectRow.status_id, name: selectRow.status_name },
+                photos: selectRow.photos
+            });
+
+            expect(client.release).toHaveBeenCalled();
+            connectSpy.mockRestore();
+        });
+
+        test('updateReportStatus: returns null when no report updated', async () => {
+            const clientQuery = jest.fn().mockResolvedValueOnce({ rows: [] }); // update -> no rows
+            const client = { query: clientQuery, release: jest.fn() };
+            const connectSpy = jest.spyOn(Pool.prototype, 'connect').mockResolvedValue(client);
+
+            const res = await dao.updateReportStatus(9999, 2, null);
+            expect(res).toBeNull();
+            expect(client.release).toHaveBeenCalled();
+
+            connectSpy.mockRestore();
+        });
+
+        test('updateReportStatus: propagates DB error', async () => {
+            const testErr = new Error('db update failed');
+            const clientQuery = jest.fn().mockRejectedValueOnce(testErr);
+            const client = { query: clientQuery, release: jest.fn() };
+            const connectSpy = jest.spyOn(Pool.prototype, 'connect').mockResolvedValue(client);
+
+            await expect(dao.updateReportStatus(1, 2, null)).rejects.toBe(testErr);
+            expect(client.release).toHaveBeenCalled();
+
+            connectSpy.mockRestore();
+        });
     });
 });

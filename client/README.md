@@ -114,13 +114,15 @@ const user = await API.getUserInfo(); // Returns the entire data directly, not {
 
 They are devided by the purpose we use them for:
 
-| Module     | File        | Methods                                                                                                                         |
-| ---------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **Auth**   | `auth.js`   | `logIn`, `getUserInfo`, `logOut`, `signUp`                                                                                      |
-| **Admin**  | `admin.js`  | `getAllRoles`, `createMunicipalityUser`, `getAllOperators`, `getAllOffices`                                                     |
-| **Map**    | `map.js`    | `getAllApprovedReports`                                                                                                         |
-| **Report** | `report.js` | `insertReport`, `getAllCategories`, `updateReportStatus`, `getAllPendingReports`, `getOperatorsByOffice`, `setOperatorByReport` |
-| **Image**  | `image.js`  | `getImageUploadUrl`, `uploadImageToSignedUrl`                                                                                   |
+| Module           | File             | Methods                                                                                                                         |
+| ---------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Auth**         | `auth.js`        | `logIn`, `getUserInfo`, `logOut`, `signUp`                                                                                      |
+| **Admin**        | `admin.js`       | `getAllRoles`, `createMunicipalityUser`, `getAllOperators`, `getAllOffices`                                                     |
+| **Map**          | `map.js`         | `getAllApprovedReports`                                                                                                         |
+| **Report**       | `report.js`      | `insertReport`, `getAllCategories`, `updateReportStatus`, `getAllPendingReports`, `getOperatorsByOffice`, `setOperatorByReport` |
+| **Image**        | `image.js`       | `getImageUploadUrl`, `uploadImageToSignedUrl`                                                                                   |
+| **Tech Officer** | `techofficer.js` | `getAllReportsForTechOfficer`                                                                                                   |
+| **Citizen**      | `citizen.js`     | `getCitizenProfile`, `updateCitizenProfile`                                                                                     |
 
 ### Unified API Object (`API.js`)
 
@@ -270,33 +272,68 @@ import { queryClient } from "./queryClient";
 </QueryClientProvider>;
 ```
 
-#### Usage Example: City Boundaries (`cityBoundaries.js`)
+#### Using Cached Data in Components
 
-The `useCityBoundaries` hook fetches Turin's city boundaries from the Overpass API and caches them so that we don't need to load it again every time we navigate to the map page:
+Once data is cached by TanStack Query, any component can access it instantly without re-fetching. Example from `MapPage.jsx`:
 
 ```javascript
-import { useQuery } from "@tanstack/react-query";
+// Fetch cached data via hook
+const { data: cityBoundariesData, isLoading, error } = useCityBoundaries();
+```
 
+About creating a hook, read below.
+
+**Key benefit**: On first visit, data loads from Overpass API (~2-5s). On subsequent visits within 24 hours, data loads instantly from cache.
+
+---
+
+## City Boundaries Module (`cityBoundaries.js`)
+
+This module fetches and processes Turin's administrative boundaries for the map. It's used to:
+
+- Restrict report creation to within city limits
+- Display a gray overlay outside the city
+- Set map bounds
+
+**How it works:**
+
+1. **Data Fetching** (`loadCityBoundaries`):
+
+   - Queries [Overpass API](https://overpass-api.de/) for Turin municipality boundary (`admin_level=8`)
+   - Tries 3 different Overpass servers for reliability (with 20s timeout each)
+   - Parses OSM relation data and extracts outer way segments
+   - Connects way segments into a closed polygon (handles reversed segments)
+
+2. **Polygon Processing** (using Turf.js):
+
+   - Cleans coordinates (removes duplicates)
+   - Normalizes winding order (counter-clockwise for outer ring)
+   - Calculates bounding box for map `maxBounds`
+
+3. **Mask Creation** (`createMaskPolygon`):
+   - Creates a world-covering polygon with the city as a "hole"
+   - This renders as a gray overlay outside Turin on the map
+
+**Returns:**
+
+```javascript
+{
+  cityBoundaries: GeoJSON,  // City polygon for point-in-polygon checks
+  cityBounds: [[lat, lng], [lat, lng]],  // SW and NE corners for map bounds
+  maskPolygon: GeoJSON      // Inverted polygon for gray overlay
+}
+```
+
+**React Hook** (`useCityBoundaries`):
+
+```javascript
 export const useCityBoundaries = () => {
   return useQuery({
     queryKey: ["cityBoundaries"],
-    queryFn: loadCityBoundaries, // Fetches from Overpass API
+    queryFn: loadCityBoundaries,
   });
 };
-
-// In MapPage.jsx
-const {
-  data: cityBoundariesData,
-  isLoading: boundariesLoading,
-  error: boundariesError,
-} = useCityBoundaries();
 ```
-
-**Benefits:**
-
-- City boundary data is fetched once and cached for 24 hours
-- Subsequent page visits use cached data (instant load)
-- Automatic retry on network failures
 
 ---
 

@@ -5,7 +5,7 @@ import registration from './router/registration_route.mjs';
 import getAll from './router/get-all_route.mjs';
 import forms from './router/forms_route.mjs';
 import { check, validationResult } from 'express-validator';
-import { getUser, getAllReports, updateReportStatus, getAllApprovedReports, setOperatorByReport, getReportsAssigned, updateUserById, getUserInfoById } from "./dao.mjs";
+import { getUser, getAllReports, updateReportStatus, getAllApprovedReports, setOperatorByReport, getReportsAssigned, updateUserById } from "./dao.mjs";
 import cors from 'cors';
 
 import passport from 'passport';
@@ -165,7 +165,6 @@ app.get('/api/citizens', async (req, res) => {
 // PUT /api/citizens -> update profile of currently logged-in user (requires authentication)
 app.put("/api/citizens", async (req, res) => {
   try {
-    if (!req.isAuthenticated()) return res.status(401).json({ error: "Not authenticated" });
     const userId = req.user.id;
     const updates = req.body;
 

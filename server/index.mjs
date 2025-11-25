@@ -5,7 +5,7 @@ import registration from './router/registration_route.mjs';
 import getAll from './router/get-all_route.mjs';
 import forms from './router/forms_route.mjs';
 import { check, validationResult } from 'express-validator';
-import { getUser, getAllReports, updateReportStatus, getAllApprovedReports, setOperatorByReport, getReportsAssigned } from "./dao.mjs";
+import { getUser, getAllReports, updateReportStatus, getAllApprovedReports, setOperatorByReport, getReportsAssigned, updateUserById } from "./dao.mjs";
 import cors from 'cors';
 
 import passport from 'passport';
@@ -147,6 +147,44 @@ app.get('/api/reports/assigned', async (req, res) => {
     res.status(503).json({ error: 'Database error during assigned report retrieval' });
   }
 });
+
+// Get /api/users/:id -> get user by ID (requires authentication)
+app.get('/api/citizens/:id', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+    const userId = parseInt(req.params.id, 10);
+    if (isNaN(userId)) return res.status(423).json({ error: 'Invalid user id' });
+    const user = await getUserInfoById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(503).json({ error: 'Database error during user retrieval' });
+  }
+});
+
+// PUT /api/citizens/:id -> update user by ID (requires authentication)
+app.put("/api/citizens/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const updates = req.body;
+
+    if (!updates || Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "No update fields provided" });
+    }
+
+    const updatedUser = await updateUserById(userId, updates);
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found or no changes applied" });
+    }
+
+    res.json(updatedUser);
+  } catch (err) {
+    console.error("Error updating user:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 
 

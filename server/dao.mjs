@@ -575,9 +575,6 @@ export const getAllApprovedReports = async () => {
 };
 
 export const setOperatorByReport = async (report_id, operator_id) => {
-
-  
-
   try {
     const sql = `UPDATE reports
       SET assigned_to_operator_id = $2,
@@ -600,3 +597,43 @@ export const setOperatorByReport = async (report_id, operator_id) => {
     throw err;
   }
 };  
+
+export const getUserInfoById = async (userId) => {
+  try {
+    const sql = 'SELECT email, username, first_name, last_name, profile_photo_url, telegram_username, email_notifications from citizens WHERE citizen_id = $1';
+    const result = await pool.query(sql, [userId]);
+    if (result.rows.length === 0) {
+      return null;
+    } 
+    return result.rows[0];
+  } catch (err) {
+    throw err;
+  } 
+};
+
+export const updateUserById = async (userId, updates) => {
+  try {
+    const keys = Object.keys(updates);
+    if (keys.length === 0) return null;
+
+    const setClause = keys
+      .map((key, i) => `${key} = $${i + 1}`)
+      .join(", ");
+
+    const values = keys.map(key => updates[key]);
+
+    const sql = `
+      UPDATE citizens
+      SET ${setClause}
+      WHERE citizen_id = $${keys.length + 1}
+      RETURNING *;
+    `;
+
+    values.push(userId);
+
+    const result = await pool.query(sql, values);
+    return result.rows[0];
+  } catch (err) {
+    throw err;
+  }
+};

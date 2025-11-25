@@ -66,7 +66,7 @@ test('getOperators: returns operator object when password matches', async () => 
   });
 
   const res = await dao.getOperators(fakeRow.email, 'irrelevant');
-  expect(res).toEqual({ id: fakeRow.operator_id, username: fakeRow.username, role: fakeRow.role_name, type: 'operator' });
+  expect(res).toEqual({ id: fakeRow.operator_id, username: fakeRow.username, role: fakeRow.role_name});
 });
 
 test('getOperators: returns false when password does not match', async () => {
@@ -131,7 +131,7 @@ test('getUser: returns operator when operator found and password matches', async
   });
 
   const res = await dao.getUser(opRow.email, 'pw');
-  expect(res).toEqual({ id: opRow.operator_id, username: opRow.username, type: 'operator', role: opRow.role_name });
+  expect(res).toEqual({ id: opRow.operator_id, username: opRow.username, role: opRow.role_name });
 });
 
 test('getUser: falls back to citizens when no operator and citizen matches', async () => {
@@ -153,7 +153,7 @@ test('getUser: falls back to citizens when no operator and citizen matches', asy
   });
 
   const res = await dao.getUser(citizenRow.email, 'pw');
-  expect(res).toEqual({ id: citizenRow.citizen_id, username: citizenRow.username, type: 'user' });
+  expect(res).toEqual({ id: citizenRow.citizen_id, username: citizenRow.username, role: 'user' });
 });
 
 test('createUser: inserts and returns new citizen id', async () => {

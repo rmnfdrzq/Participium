@@ -2,7 +2,7 @@
 terminal BE : cd server;npm i;nodemon index.mjs
 terminal FE : cd client;npm i;npm run dev 
 connection to db: (docker-desktop open and running) docker compose up -d
-test: cd server; npm test ( cd server; npm run test:coverage)
+test: cd server; npm test ( cd server; npm run test:coverage) (npm test name_file)
 retrospective: cd retrospective; node calculate.mjs
 
 commads to reset and restart postgreSQL db : docker compose down; Remove-Item -Recurse -Force .\db_data; docker compose up -d

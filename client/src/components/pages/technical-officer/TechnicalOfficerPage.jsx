@@ -14,7 +14,7 @@ function TechnicalOfficerPage() {
 
   const loadReports = async () => {
     try {
-      const data = await API.getAllPendingReports();
+      const data = await API.getAllReportsForTechOfficer();
       setReports(data);
     } catch (err) {
       setError("Failed to load reports: " + err);

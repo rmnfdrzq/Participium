@@ -21,13 +21,13 @@ export const getTechnicalOfficersByOffice = async (officerId, officeId) => {
     if (officerId && !officeId) {
       const sqlGetOfficer = 'SELECT * FROM operators WHERE operator_id = $1';
       const result = await pool.query(sqlGetOfficer, [officerId]);
-      if(result.rows.length === 0) {
+      if (result.rows.length === 0) {
         throw new Error('Either valid officer_id or office_id must be provided');
       }
       console.log(result.rows[0]);
       const operatorRoleSql = 'SELECT role_id FROM roles WHERE name = \'Municipal public relations officer\'  AND role_id = $1';
       const operatorRoleResult = await pool.query(operatorRoleSql, [result.rows[0].role_id]);
-      if(operatorRoleResult.rows.length === 0) {
+      if (operatorRoleResult.rows.length === 0) {
         throw new Error('Operatot not allowed, he is not a Municipal public relations officer');
       }
       const sqlGetTechnicalOfficers = 'SELECT * FROM operators WHERE office_id = $1 AND role_id = (SELECT role_id FROM roles WHERE name = \'Technical office staff member\')';
@@ -48,9 +48,8 @@ export const getTechnicalOfficersByOffice = async (officerId, officeId) => {
       email: e.email,
       username: e.username,
       office_id: e.office_id
-      }));
+    }));
 }
-
 
 //given username (email) and password does the login -> searches in citizen and then operators tables
 export const getUser = async (username, password) => {
@@ -279,7 +278,6 @@ export const createMunicipalityUser = async (email, username, password, office_i
   });
 };
 
-
 // returns all categories
 export const getAllCategories = async () => {
   try {
@@ -358,10 +356,10 @@ export const getAllReports = async () => {
   }
 };
 
-    // returns all reports assigned to a specific operator (technical staff)
-    export const getReportsAssigned = async (operator_id) => {
-      try {
-        const sql = `
+// returns all reports assigned to a specific operator (technical staff)
+export const getReportsAssigned = async (operator_id) => {
+  try {
+    const sql = `
           SELECT
             r.report_id,
             r.title,
@@ -394,32 +392,32 @@ export const getAllReports = async () => {
           ORDER BY r.updated_at DESC
         `;
 
-        const result = await pool.query(sql, [operator_id]);
-        return result.rows.map((row) => ({
-          id: row.report_id,
-          title: row.title,
-          description: row.description,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          anonymous: row.anonymous,
-          rejection_reason: row.rejection_reason,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
-          citizen: row.citizen_id ? {
-            id: row.citizen_id,
-            username: row.citizen_username,
-            first_name: row.citizen_first_name,
-            last_name: row.citizen_last_name
-          } : null,
-          category: { id: row.category_id, name: row.category_name },
-          office: { id: row.office_id, name: row.office_name },
-          status: { id: row.status_id, name: row.status_name },
-          photos: row.photos || []
-        }));
-      } catch (err) {
-        throw err;
-      }
-    };
+    const result = await pool.query(sql, [operator_id]);
+    return result.rows.map((row) => ({
+      id: row.report_id,
+      title: row.title,
+      description: row.description,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      anonymous: row.anonymous,
+      rejection_reason: row.rejection_reason,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      citizen: row.citizen_id ? {
+        id: row.citizen_id,
+        username: row.citizen_username,
+        first_name: row.citizen_first_name,
+        last_name: row.citizen_last_name
+      } : null,
+      category: { id: row.category_id, name: row.category_name },
+      office: { id: row.office_id, name: row.office_name },
+      status: { id: row.status_id, name: row.status_name },
+      photos: row.photos || []
+    }));
+  } catch (err) {
+    throw err;
+  }
+};
 
 // update the status of a report (optionally include rejection_reason)
 export const updateReportStatus = async (report_id, status_id, rejection_reason = null) => {
@@ -587,7 +585,7 @@ export const setOperatorByReport = async (report_id, operator_id) => {
         status_id,
         updated_at
     `;
-    const result = await pool.query(sql, [report_id, operator_id]); 
+    const result = await pool.query(sql, [report_id, operator_id]);
     if (result.rows.length === 0) {
       return null;
     }
@@ -596,7 +594,7 @@ export const setOperatorByReport = async (report_id, operator_id) => {
   } catch (err) {
     throw err;
   }
-};  
+};
 
 export const getUserInfoById = async (userId) => {
   try {
@@ -604,11 +602,11 @@ export const getUserInfoById = async (userId) => {
     const result = await pool.query(sql, [userId]);
     if (result.rows.length === 0) {
       return null;
-    } 
+    }
     return result.rows[0];
   } catch (err) {
     throw err;
-  } 
+  }
 };
 
 export const updateUserById = async (userId, updates) => {

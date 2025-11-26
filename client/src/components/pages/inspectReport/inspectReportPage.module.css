@@ -1,87 +1,159 @@
-.pageContainer {
-  width: 100%;
-  max-width: 800px;
-  min-height: calc(100vh - 64px);
-  margin: 40px auto;
-  padding: 40px 20px;
-  background: var(--static-white); /* rimane come nel tuo originale */
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+.container {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 120px);
+  padding: 40px 20px;
+  background-color: var(--background-default);
 }
 
-.reportSection {
-  width: 100%;
+.card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  background: var(--static-white); /* anche qui mantenuto */
-  padding: 20px;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  background-color: var(--static-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 40px;
+  width: 100%;
+  max-width: 700px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--static-black);
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.noReport {
+  text-align: center;
+  color: var(--foreground-default);
+  font-size: 16px;
   margin-bottom: 24px;
 }
 
-
-.pageTitle {
-  text-align: center;
-  margin-bottom: 32px;
-  font-size: 28px;
-  color: var(--static-black);
+/* Sections */
+.section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-light);
 }
 
+.section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
 
+.sectionNoBorder {
+  border-bottom: none;
+  padding-bottom: 0;
+}
 
-.labelRow strong {
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--static-black);
+  margin-bottom: 16px;
+}
+
+/* Rows */
+.row {
+  display: flex;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.label {
+  flex: 0 0 140px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--static-black);
 }
 
-/* Photos */
-.photosContainer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 10px;
+.value {
+  flex: 1;
+  font-size: 14px;
+  color: var(--static-black);
+  word-break: break-word;
 }
 
-.photoItem {
-  width: 250px;
-  height: 180px;
+.statusBadge {
+  display: inline-block;
+  padding: 6px 14px;
+  color: var(--static-white);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rejection {
+  color: #c33;
+  font-style: italic;
+}
+
+/* Photos */
+.photosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.photo {
+  width: 100%;
+  height: 150px;
   object-fit: cover;
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.2s ease;
 }
 
-/* Dropdown */
+.photo:hover {
+  transform: scale(1.02);
+}
+
+/* Select */
 .select {
+  width: 100%;
   padding: 12px 16px;
-  border-radius: var(--radius-md);
   border: 1px solid var(--border-light);
-  width: 260px;
-  background: var(--static-white);
-  box-shadow: var(--shadow-sm);
-  transition: all .3s ease;
+  border-radius: var(--radius-md);
+  font-size: 16px;
+  background-color: var(--static-white);
+  transition: all 0.2s ease;
+  cursor: pointer;
 }
 
 .select:focus {
+  outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  outline: none;
+}
+
+/* Error */
+.error {
+  margin-top: 12px;
+  color: #c33;
+  font-size: 14px;
 }
 
 /* Buttons */
-.buttonRow {
-  margin-top: 24px;
+.actionButtons {
   display: flex;
   gap: 16px;
-  color:white;
+  margin-bottom: 24px;
 }
 
 .primaryButton {
-  padding: 12px 18px;
+  flex: 1;
+  padding: 14px 24px;
   background: var(--gradient-primary);
   border: none;
   color: var(--static-white);
@@ -90,109 +162,173 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-sm);
 }
 
-.primaryButton:hover {
+.primaryButton:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: var(--shadow-hover);
 }
 
 .primaryButton:disabled {
-  background-color: #cccccc;   
-  color: #666666;          
-  cursor: not-allowed;         
-  opacity: 0.7;              
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .dangerButton {
-  padding: 12px 18px;
-  background: #d9534f;
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #dc3545;
   border: none;
-  color: white;
+  color: var(--static-white);
   font-size: 16px;
   font-weight: 600;
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-sm);
 }
 
-.dangerButton:hover {
-  background: #c9302c;
+.dangerButton:hover:not(:disabled) {
+  background-color: #c82333;
   transform: translateY(-2px);
   box-shadow: var(--shadow-hover);
 }
 
-/* Error text */
-.errorMessage {
-  margin-top: 8px;
-  color: #c33;
-  font-size: 14px;
+.dangerButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
-/* Modal Background */
+.secondaryButton {
+  flex: 1;
+  padding: 14px 24px;
+  background-color: var(--background-default);
+  border: 1px solid var(--border-light);
+  color: var(--static-black);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.secondaryButton:hover {
+  background-color: var(--border-light);
+}
+
+.backButton {
+  padding: 12px 32px;
+  background-color: var(--background-default);
+  border: 1px solid var(--border-light);
+  color: var(--static-black);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 24px;
+  align-self: center;
+}
+
+.backButton:hover {
+  background-color: var(--border-light);
+}
+
+/* Modal */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1000;
+  padding: 20px;
 }
 
-/* Modal Box */
-.modalBox {
+.modal {
   background: var(--static-white);
-  padding: 24px;
-  width: 420px;
-  border-radius: var(--radius-md);
+  padding: 32px;
+  width: 100%;
+  max-width: 450px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
 }
 
 .modalTitle {
-  margin-bottom: 16px;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--static-black);
+  margin-bottom: 8px;
 }
 
-.modalTextarea {
+.modalDescription {
+  font-size: 14px;
+  color: var(--foreground-default);
+  margin-bottom: 20px;
+}
+
+.textarea {
   width: 100%;
   height: 120px;
-  padding: 12px;
-  border-radius: var(--radius-md);
+  padding: 12px 16px;
   border: 1px solid var(--border-light);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-family: inherit;
   resize: none;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 .modalActions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
 }
 
-.backButton {
-  margin-bottom: 20px;
-  padding: 10px 16px;
-  border-radius: var(--radius-md);
-  background: var(--static-white);
-  border: 1px solid var(--border-light);
-  color: var(--static-black);
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.3s ease;
-}
+/* Mobile */
+@media (max-width: 576px) {
+  .container {
+    padding: 20px 16px;
+    background-color: var(--static-white);
+  }
 
-.backButton:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
-  color: var(--accent-primary);
-}
+  .card {
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+  }
 
+  .row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .label {
+    flex: none;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .modalActions {
+    flex-direction: column-reverse;
+  }
+
+  .backButton {
+    top: 0;
+    right: 0;
+  }
+}

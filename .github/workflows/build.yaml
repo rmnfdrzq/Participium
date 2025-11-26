@@ -34,7 +34,7 @@ jobs:
           # pass scanner properties so Sonar reads coverage from server/coverage/lcov.info
           args: |
             -Dsonar.sources=server
-            -Dsonar.tests=server
+            -Dsonar.tests=server/__tests__
             -Dsonar.javascript.lcov.reportPaths=server/coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

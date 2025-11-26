@@ -59,7 +59,7 @@ function RelationOfficerPage() {
         )}
 
         <div className="content-header">
-          <h1 className="page-title">Pending Reports</h1>
+          <h1 className="page-title">Reports Overview</h1>
         </div>
 
         <div className="users-table-container">

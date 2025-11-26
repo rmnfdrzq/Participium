@@ -35,6 +35,7 @@ client/
 │   │   ├── common/          # Reusable components
 │   │   │   ├── footer/      # Footer component
 │   │   │   ├── header/      # Header with navigation
+│   │   │   ├── imagePreviewModal/ # Fullscreen image slider modal
 │   │   │   ├── layout/      # Page layout wrapper
 │   │   │   └── logoutModal/ # Logout confirmation modal
 │   │   └── pages/           # Page components
@@ -43,9 +44,12 @@ client/
 │   │       ├── inspectReport/# Report inspection view
 │   │       ├── login/       # Login/Signup page
 │   │       ├── map/         # Interactive map page
+│   │       ├── profile/     # User profile page (citizens only)
 │   │       ├── relation-officer/  # PR officer dashboard
 │   │       ├── report/      # Report submission form
 │   │       └── technical-officer/ # Technical staff dashboard
+│   ├── constants/           # Shared constants
+│   │   └── statusMap.js     # Report status colors & labels
 │   ├── data/
 │   │   ├── supabaseClient.js # Supabase client configuration
 │   │   └── Turin_GEOJSON.json # City boundary data (fallback)
@@ -341,12 +345,13 @@ export const useCityBoundaries = () => {
 
 ### Common Components
 
-| Component     | Location                         | Description                     |
-| ------------- | -------------------------------- | ------------------------------- |
-| `Layout`      | `components/common/layout/`      | Page wrapper with header/footer |
-| `Header`      | `components/common/header/`      | Navigation bar with user info   |
-| `Footer`      | `components/common/footer/`      | Page footer                     |
-| `LogoutModal` | `components/common/logoutModal/` | Logout confirmation dialog      |
+| Component           | Location                               | Description                                      |
+| ------------------- | -------------------------------------- | ------------------------------------------------ |
+| `Layout`            | `components/common/layout/`            | Page wrapper with header/footer                  |
+| `Header`            | `components/common/header/`            | Navigation bar with user info & settings menu    |
+| `Footer`            | `components/common/footer/`            | Page footer                                      |
+| `LogoutModal`       | `components/common/logoutModal/`       | Logout confirmation dialog                       |
+| `ImagePreviewModal` | `components/common/imagePreviewModal/` | Fullscreen image slider with navigation controls |
 
 ### Pages
 
@@ -356,6 +361,7 @@ export const useCityBoundaries = () => {
 | `LoginPage`            | `/login`, `/signup` | Authentication forms                                |
 | `MapPage`              | `/map`              | Interactive map to view reports and select location |
 | `InsertReportPage`     | `/create_report`    | Report submission form                              |
+| `ProfilePage`          | `/profile`          | User profile editing (citizens only)                |
 | `AdminPage`            | `/admin`            | Admin dashboard                                     |
 | `CreateUserPage`       | `/admin/createuser` | Create municipal staff accounts                     |
 | `RelationOfficerPage`  | `/relationOfficer`  | PR officer dashboard                                |
@@ -375,6 +381,7 @@ Routing is handled by React Router v7 in `App.jsx`:
     <Route path="/login" element={<LoginPage />} />
     <Route path="/map" element={user ? <MapPage /> : <Navigate to="/" />} />
     <Route path="/create_report" element={<InsertReportPage />} />
+    <Route path="/profile" element={<ProfilePage />} /> {/* Citizens only */}
     <Route path="/admin" element={<AdminPage />} />
     {/* ... more routes */}
   </Route>
@@ -386,7 +393,7 @@ Routing is handled by React Router v7 in `App.jsx`:
 - **Admin** → Redirects to `/admin`
 - **Municipal public relations officer** → `RelationOfficerPage`
 - **Technical office staff member** → `TechnicalOfficerPage`
-- **Regular citizen** → `MapPage`
+- **Regular citizen** → `MapPage` (also has access to `/profile`)
 - **Unauthenticated** → `HomePage`
 
 ---

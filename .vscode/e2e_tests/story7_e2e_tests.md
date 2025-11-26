@@ -72,7 +72,7 @@
 
 **Actual Result:** The report pin is visible on the map
 
-**Status:** [PASS/FAIL]
+**Status:** [PASS]
 
 ---
 
@@ -91,7 +91,7 @@
 
 **Actual Result:** The report pin is visible on the map
 
-**Status:** [PASS/FAIL]
+**Status:** [PASS]
 
 
 ---

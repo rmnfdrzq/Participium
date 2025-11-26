@@ -28,7 +28,7 @@ function RelationOfficerPage() {
 
   const loadReports = async () => {
     try {
-      const data = await API.getAllPendingReports();
+      const data = await API.getAllPendingReports(); //to load reports
       setReports(data);
     } catch (err) {
       setError("Failed to load reports: " + err);

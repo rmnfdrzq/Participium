@@ -3,10 +3,23 @@ import API from "../../../API/API.js";
 import { useNavigate } from "react-router";
 import "./TechnicalOfficerPage.css";
 
+import { useDispatch } from "react-redux";
+import { setSelectedReport } from "../../../store/reportSlice";
+
 function TechnicalOfficerPage() {
+  const dispatch = useDispatch();
   const [reports, setReports] = useState([]);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const STATUS_MAP = {
+    1: { label: "Pending Approval", color: "#ffcc00" },
+    2: { label: "Assigned", color: "#4caf50" },
+    3: { label: "In Progress", color: "#673ab7" },
+    4: { label: "Suspended", color: "#2196f3" },
+    5: { label: "Rejected", color: "#ff4d4d" },
+    6: { label: "Resolved", color: "#9e9e9e" },
+  };
 
   useEffect(() => {
     loadReports();
@@ -35,6 +48,7 @@ function TechnicalOfficerPage() {
   return (
     <div className="admin-page">
       <div className="admin-content">
+
         {error && (
           <div className="alert alert-error">
             {error}
@@ -45,7 +59,7 @@ function TechnicalOfficerPage() {
         )}
 
         <div className="content-header">
-          <h1 className="page-title">Pending Reports</h1>
+          <h1 className="page-title">Reports Overview</h1>
         </div>
 
         <div className="users-table-container">
@@ -55,6 +69,7 @@ function TechnicalOfficerPage() {
                 <th>ID</th>
                 <th>Title</th>
                 <th>Created At</th>
+                <th>Status</th>
               </tr>
             </thead>
 
@@ -63,18 +78,31 @@ function TechnicalOfficerPage() {
                 <tr
                   key={report.id}
                   className="clickable-row"
-                  onClick={() => navigate("/")}
+                  onClick={() => {
+                    dispatch(setSelectedReport(report));
+                    navigate("/inspectReport");
+                  }}
                 >
                   <td className="report-id">{report.id}</td>
                   <td className="report-title">{report.title}</td>
-                  <td className="report-date">
-                    {formatDate(report.created_at)}
+                  <td className="report-date">{formatDate(report.created_at)}</td>
+                  <td>
+                    <span
+                      className="status-pill"
+                      style={{
+                        backgroundColor:
+                          STATUS_MAP[report.status?.id]?.color || "gray",
+                      }}
+                    >
+                      {STATUS_MAP[report.status?.id]?.label || "Unknown"}
+                    </span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
       </div>
     </div>
   );

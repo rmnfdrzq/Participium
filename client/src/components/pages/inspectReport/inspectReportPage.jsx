@@ -63,6 +63,9 @@ function InspectReportPage() {
         <>
           <div className={styles.reportSection}>
             <p className={styles.labelRow}><strong>ID:</strong> {selectedReport.id}</p>
+            <p className={styles.labelRow}><strong>Status:</strong> {selectedReport.status.name}</p>
+            {selectedReport.status.id === 5 && (
+            <p className={styles.labelRow}><strong>Rejection Reason:</strong> {selectedReport.rejection_reason || "No reason provided"}</p>)}
             <p className={styles.labelRow}><strong>Title:</strong> {selectedReport.title}</p>
             <p className={styles.labelRow}><strong>Description:</strong> {selectedReport.description}</p>
             <p className={styles.labelRow}><strong>Created At:</strong> {selectedReport.created_at}</p>
@@ -88,7 +91,7 @@ function InspectReportPage() {
           </div>
 
           {/* Officer Dropdown */}
-          <div className={styles.reportSection}>
+          {selectedReport.status.id == 1 &&<div className={styles.reportSection}>
             <strong>Assign Officer:</strong>
             <select
               value={selectedOfficer || ""}
@@ -104,9 +107,9 @@ function InspectReportPage() {
             </select>
 
             {error && <p className={styles.errorMessage}>{error}</p>}
-          </div>
+          </div>}
 
-          <div className={styles.buttonRow}>
+          {selectedReport.status.id == 1 && <div className={styles.buttonRow}>
             <button className={styles.primaryButton} onClick={approveReport}>
               Approve Report
             </button>
@@ -117,7 +120,7 @@ function InspectReportPage() {
             >
               Reject Report
             </button>
-          </div>
+          </div>}
         </>
       )}
 

@@ -16,7 +16,7 @@ function InspectReportPage() {
   const [selectedOfficer, setSelectedOfficer] = useState(null);
   const [error, setError] = useState("");
   const [address, setAddress] = useState("Loading address...");
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
   useEffect(() => {
     if (selectedReport) {
@@ -178,13 +178,13 @@ function InspectReportPage() {
           <div className={`${styles.section} ${styles.sectionNoBorder}`}>
             <h3 className={styles.sectionTitle}>Photos</h3>
             <div className={styles.photosGrid}>
-              {selectedReport.photos.map((photo) => (
+              {selectedReport.photos.map((photo, index) => (
                 <img
                   key={photo.photo_id}
                   src={photo.image_url}
                   alt="Report"
                   className={styles.photo}
-                  onClick={() => setSelectedImage(photo.image_url)}
+                  onClick={() => setSelectedImageIndex(index)}
                 />
               ))}
             </div>
@@ -268,10 +268,13 @@ function InspectReportPage() {
       )}
 
       {/* Image Preview Modal */}
-      <ImagePreviewModal
-        imageUrl={selectedImage}
-        onClose={() => setSelectedImage(null)}
-      />
+      {selectedImageIndex !== null && (
+        <ImagePreviewModal
+          images={selectedReport.photos?.map((p) => p.image_url) || []}
+          initialIndex={selectedImageIndex}
+          onClose={() => setSelectedImageIndex(null)}
+        />
+      )}
     </div>
   );
 }

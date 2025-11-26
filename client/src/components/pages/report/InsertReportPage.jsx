@@ -6,6 +6,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import API from "../../../API/API.js";
+import { ImagePreviewModal } from "../../common/imagePreviewModal/ImagePreviewModal";
 import styles from "./insertReportPage.module.css";
 
 // Fix for default marker icons in Leaflet with React
@@ -159,6 +160,7 @@ function InsertReportForm({
   const navigate = useNavigate();
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
   const [state, formAction, isPending] = useActionState(insertReportFunction, {
     title: "",
     description: "",
@@ -194,15 +196,29 @@ function InsertReportForm({
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length > 3) {
+    const totalFiles = selectedFiles.length + files.length;
+    if (totalFiles > 3) {
       alert("You can upload a maximum of 3 images");
       e.target.value = "";
       return;
     }
-    setSelectedFiles(files);
 
-    const urls = files.map((file) => URL.createObjectURL(file));
-    setPreviewUrls(urls);
+    const newFiles = [...selectedFiles, ...files];
+    setSelectedFiles(newFiles);
+
+    const newUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls([...previewUrls, ...newUrls]);
+
+    // Reset input to allow selecting the same file again
+    e.target.value = "";
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    // Revoke object URL to avoid memory leaks
+    URL.revokeObjectURL(previewUrls[indexToRemove]);
+
+    setSelectedFiles(selectedFiles.filter((_, index) => index !== indexToRemove));
+    setPreviewUrls(previewUrls.filter((_, index) => index !== indexToRemove));
   };
 
   const mapCenter = location.position || [45.0703, 7.6868];
@@ -321,8 +337,8 @@ function InsertReportForm({
                 className={styles.fileInput}
                 accept="image/*"
                 multiple
-                required
                 onChange={handleFileChange}
+                disabled={selectedFiles.length >= 3}
               />
               <p className={styles.helpText}>
                 You can upload up to 3 images.{" "}
@@ -332,12 +348,22 @@ function InsertReportForm({
               {previewUrls.length > 0 && (
                 <div className={styles.previewContainer}>
                   {previewUrls.map((url, index) => (
-                    <img
-                      key={index}
-                      src={url}
-                      alt={`Preview ${index + 1}`}
-                      className={styles.previewImage}
-                    />
+                    <div key={index} className={styles.previewItem}>
+                      <img
+                        src={url}
+                        alt={`Preview ${index + 1}`}
+                        className={styles.previewImage}
+                        onClick={() => setSelectedImageIndex(index)}
+                      />
+                      <button
+                        type="button"
+                        className={styles.removeImageButton}
+                        onClick={() => handleRemoveImage(index)}
+                        aria-label="Remove image"
+                      >
+                        ×
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -377,6 +403,14 @@ function InsertReportForm({
           </form>
         </div>
       </div>
+
+      {selectedImageIndex !== null && (
+        <ImagePreviewModal
+          images={previewUrls}
+          initialIndex={selectedImageIndex}
+          onClose={() => setSelectedImageIndex(null)}
+        />
+      )}
     </div>
   );
 }

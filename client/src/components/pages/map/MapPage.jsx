@@ -24,6 +24,7 @@ import { GeoJSON } from "react-leaflet";
 import * as turf from "@turf/turf";
 import API from "../../../API/API.js";
 import { useCityBoundaries } from "./cityBoundaries.js";
+import { ImagePreviewModal } from "../../common/imagePreviewModal/ImagePreviewModal";
 
 // Fix for default marker icons in Leaflet with React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -267,12 +268,12 @@ export function MapPage(props) {
     const lng = latlng.lng;
     const coordinates = [lat, lng];
 
-      // Check if the clicked point is inside Turin city limits
-    const point = turf.point([latlng.lng, latlng.lat]);
+    // Check if the clicked point is inside Turin city limits
+      const point = turf.point([latlng.lng, latlng.lat]);
     const isInside = turf.booleanPointInPolygon(point, cityBoundaries);
-    if (!isInside) {
-      dispatch(clearLocation());
-      return;
+      if (!isInside) {
+        dispatch(clearLocation());
+        return;
     }
 
     // Get address using reverse geocoding
@@ -629,59 +630,77 @@ function ApprovedReportsLayer({ reports, onViewDetails }) {
 }
 
 function ReportDetailsModal({ report, onClose }) {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+
+  const imageUrls = report.photos?.map((p) => p.image_url) || [];
+
   return (
-    <div className={styles.modalOverlay} onClick={onClose}>
-      <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.modalHeader}>
-          <h2>{report.title}</h2>
-          <button className={styles.closeButton} onClick={onClose}>
-            ×
-          </button>
-        </div>
-
-        <div className={styles.modalBody}>
-          <div className={styles.detailRow}>
-            <strong>Description:</strong>
-            <p>{report.description}</p>
+    <>
+      <div className={styles.modalOverlay} onClick={onClose}>
+        <div
+          className={styles.modalContent}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className={styles.modalHeader}>
+            <h2>{report.title}</h2>
+            <button className={styles.closeButton} onClick={onClose}>
+              ×
+            </button>
           </div>
 
-          <div className={styles.detailRow}>
-            <strong>Category:</strong>
-            <p>{report.category.name}</p>
-          </div>
-
-          <div className={styles.detailRow}>
-            <strong>Status:</strong>
-            <p>{report.status.name}</p>
-          </div>
-
-          <div className={styles.detailRow}>
-            <strong>Reported by:</strong>
-            <p>{report.citizen.username || "Anonymous"}</p>
-          </div>
-
-          <div className={styles.detailRow}>
-            <strong>Created:</strong>
-            <p>{new Date(report.created_at).toLocaleString()}</p>
-          </div>
-
-          {report.photos && report.photos.length > 0 && (
+          <div className={styles.modalBody}>
             <div className={styles.detailRow}>
-              <strong>Images:</strong>
-              <div className={styles.photoGrid}>
-                {report.photos.map((photo, index) => (
-                  <img
-                    key={photo.photo_id || index}
-                    src={photo.image_url}
-                    alt={`Report Image ${index + 1}`}
-                    className={styles.reportPhoto}
-                  />
-                ))}
-              </div>
+              <strong>Description:</strong>
+              <p>{report.description}</p>
             </div>
-          )}
+
+            <div className={styles.detailRow}>
+              <strong>Category:</strong>
+              <p>{report.category.name}</p>
+            </div>
+
+            <div className={styles.detailRow}>
+              <strong>Status:</strong>
+              <p>{report.status.name}</p>
+            </div>
+
+            <div className={styles.detailRow}>
+              <strong>Reported by:</strong>
+              <p>{report.citizen.username || "Anonymous"}</p>
+            </div>
+
+            <div className={styles.detailRow}>
+              <strong>Created:</strong>
+              <p>{new Date(report.created_at).toLocaleString()}</p>
+            </div>
+
+            {report.photos && report.photos.length > 0 && (
+              <div className={styles.detailRow}>
+                <strong>Images:</strong>
+                <div className={styles.photoGrid}>
+                  {report.photos.map((photo, index) => (
+                    <img
+                      key={photo.photo_id || index}
+                      src={photo.image_url}
+                      alt={`Report Image ${index + 1}`}
+                      className={styles.reportPhoto}
+                      onClick={() => setSelectedImageIndex(index)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+
+      {selectedImageIndex !== null && (
+        <ImagePreviewModal
+          images={imageUrls}
+          initialIndex={selectedImageIndex}
+          onClose={() => setSelectedImageIndex(null)}
+        />
+      )}
+    </>
   );
 }

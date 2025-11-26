@@ -265,6 +265,11 @@
   margin-top: 12px;
 }
 
+.previewItem {
+  position: relative;
+  display: inline-block;
+}
+
 .previewImage {
   width: 120px;
   height: 120px;
@@ -272,4 +277,37 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--border-light);
   box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.previewImage:hover {
+  opacity: 0.9;
+}
+
+.removeImageButton {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--danger);
+  color: var(--static-white);
+  border: 2px solid var(--static-white);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.removeImageButton:hover {
+  transform: scale(1.1);
+  background-color: #c53030;
 }

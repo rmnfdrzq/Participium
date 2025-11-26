@@ -30,6 +30,7 @@ function InspectReportPage() {
   };
 
   const submitRejectReason = async () => {
+
     await API.updateReportStatus(selectedReport.id, 5, rejectReason);
     setShowRejectModal(false);
     setRejectReason("");
@@ -134,7 +135,11 @@ function InspectReportPage() {
             />
 
             <div className={styles.modalActions}>
-              <button className={styles.primaryButton} onClick={submitRejectReason}>
+              <button
+                className={styles.primaryButton}
+                onClick={submitRejectReason}
+                disabled={rejectReason.trim().length < 5}
+              >
                 Submit
               </button>
               <button

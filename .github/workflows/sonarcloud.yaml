@@ -12,29 +12,20 @@ jobs:
   build:
     name: Test Backend & SonarCloud
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
       - name: Use Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-
-      # ===== BACKEND =====
       - name: Install backend dependencies
         working-directory: server
         run: npm install
-
       - name: Run backend tests with coverage
         working-directory: server
         run: npm run test:coverage
-
-      # ===== SONAR =====
       - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2@b4a7e8f97c2b5d5a6f1b8b9a2e3a1e7f0c6a1234
+        uses: SonarSource/sonarcloud-github-action@v2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

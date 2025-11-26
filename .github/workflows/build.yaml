@@ -13,7 +13,28 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm i
+
+      - name: Run server tests with coverage
+        working-directory: server
+        # `test:coverage` produces coverage in `server/coverage/lcov.info`
+        run: npm run test:coverage
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          # pass scanner properties so Sonar reads coverage from server/coverage/lcov.info
+          args: |
+            -Dsonar.sources=server
+            -Dsonar.tests=server
+            -Dsonar.javascript.lcov.reportPaths=server/coverage/lcov.info
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

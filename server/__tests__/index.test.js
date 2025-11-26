@@ -57,15 +57,15 @@ describe('API (index.mjs) - improved coverage', () => {
         // --- MOCK dao.mjs to bypass crypto.scrypt and provide deterministic users ---
         await jest.unstable_mockModule('../dao.mjs', () => {
             return {
-               getUser: jest.fn(async (username, password) => {
+                getUser: jest.fn(async (username, password) => {
                     if (username === 'admin' && password === 'correct') {
-                    return { username: 'admin', role: 'Admin', id: 900 };
+                        return { username: 'admin', role: 'Admin', id: 900 };
                     }
                     if (username === 'found@operator' && password === 'correct') {
-                    return { username: 'operator_user', role: 'Operator', id: 201 };
+                        return { username: 'operator_user', role: 'Operator', id: 201 };
                     }
                     if (username === 'plain' && password === 'correct') {
-                    return { username: 'plainuser', role: 'User', id: 555 };
+                        return { username: 'plainuser', role: 'User', id: 555 };
                     }
                     // emulate failed auth
                     return null;
@@ -151,7 +151,7 @@ describe('API (index.mjs) - improved coverage', () => {
         }
     });
 
-    
+
     test('POST /api/upload-url returns signed url', async () => {
         const res = await agent.post('/api/upload-url').send({ filename: 'my img.png' });
         expect(res.status).toBe(200);
@@ -171,7 +171,7 @@ describe('API (index.mjs) - improved coverage', () => {
         test('database error -> 500', async () => {
             const dao = await import('../dao.mjs');
             dao.getAllOperators.mockImplementationOnce(async () => {
-            throw new Error('DB failure');
+                throw new Error('DB failure');
             });
 
             // simuliamo login come Admin
@@ -217,12 +217,12 @@ describe('API (index.mjs) - improved coverage', () => {
 
         test('invalid email & short password -> 422 with messages', async () => {
             const payload = {
-            username: 't',
-            first_name: 'F',
-            last_name: 'L',
-            email_notifications: true,
-            email: 'bad',
-            password: '123'
+                username: 't',
+                first_name: 'F',
+                last_name: 'L',
+                email_notifications: true,
+                email: 'bad',
+                password: '123'
             };
             const res = await agent.post('/api/registration').send(payload);
             expect(res.status).toBe(422);
@@ -234,18 +234,18 @@ describe('API (index.mjs) - improved coverage', () => {
         test('database error -> 503', async () => {
             // Forziamo il mock a lanciare un errore generico
             mockCreateUser.mockImplementationOnce(async () => {
-            const err = new Error('DB failure');
-            err.code = 'ECONNREFUSED'; // qualsiasi codice diverso da 23505
-            throw err;
+                const err = new Error('DB failure');
+                err.code = 'ECONNREFUSED'; // qualsiasi codice diverso da 23505
+                throw err;
             });
 
             const payload = {
-            username: 'brokenuser',
-            first_name: 'First',
-            last_name: 'Last',
-            email_notifications: true,
-            email: 'broken@user.it',
-            password: 'validpassword'
+                username: 'brokenuser',
+                first_name: 'First',
+                last_name: 'Last',
+                email_notifications: true,
+                email: 'broken@user.it',
+                password: 'validpassword'
             };
 
             const res = await agent.post('/api/registration').send(payload);
@@ -255,12 +255,12 @@ describe('API (index.mjs) - improved coverage', () => {
 
         test('valid -> 201 created user', async () => {
             const payload = {
-            username: 'newuser',
-            first_name: 'First',
-            last_name: 'Last',
-            email_notifications: true,
-            email: 'new@user.it',
-            password: 'validpassword'
+                username: 'newuser',
+                first_name: 'First',
+                last_name: 'Last',
+                email_notifications: true,
+                email: 'new@user.it',
+                password: 'validpassword'
             };
             const res = await agent.post('/api/registration').send(payload);
             expect(res.status).toBe(201);
@@ -268,22 +268,22 @@ describe('API (index.mjs) - improved coverage', () => {
         });
 
         test('duplicate user -> 409', async () => {
-        mockCreateUser.mockImplementationOnce(() => {
-            const err = new Error('duplicate key value violates unique constraint');
-            err.code = '23505';
-            throw err;
+            mockCreateUser.mockImplementationOnce(() => {
+                const err = new Error('duplicate key value violates unique constraint');
+                err.code = '23505';
+                throw err;
+            });
+            const payload = {
+                username: 'newuser',
+                first_name: 'First',
+                last_name: 'Last',
+                email_notifications: true,
+                email: 'new@user.it',
+                password: 'validpassword'
+            };
+            const res = await agent.post('/api/registration').send(payload);
+            expect(res.status).toBe(409);
         });
-        const payload = {
-            username: 'newuser',
-            first_name: 'First',
-            last_name: 'Last',
-            email_notifications: true,
-            email: 'new@user.it',
-            password: 'validpassword'
-        };
-        const res = await agent.post('/api/registration').send(payload);
-        expect(res.status).toBe(409);
-    });
 
     });
 
@@ -291,7 +291,7 @@ describe('API (index.mjs) - improved coverage', () => {
         test('database error -> 503', async () => {
             const dao = await import('../dao.mjs');
             dao.getAllOffices.mockImplementationOnce(async () => {
-            throw new Error('DB failure');
+                throw new Error('DB failure');
             });
 
             const res = await agent.get('/api/offices');
@@ -311,7 +311,7 @@ describe('API (index.mjs) - improved coverage', () => {
         test('database error -> 503', async () => {
             const dao = await import('../dao.mjs');
             dao.getAllRoles.mockImplementationOnce(async () => {
-            throw new Error('DB failure');
+                throw new Error('DB failure');
             });
 
             const res = await agent.get('/api/roles');
@@ -331,7 +331,7 @@ describe('API (index.mjs) - improved coverage', () => {
         test('database error -> 503', async () => {
             const dao = await import('../dao.mjs');
             dao.getAllCategories.mockImplementationOnce(async () => {
-            throw new Error('DB failure');
+                throw new Error('DB failure');
             });
 
             const res = await agent.get('/api/categories');
@@ -352,7 +352,7 @@ describe('API (index.mjs) - improved coverage', () => {
             let res = await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
             res = await agent.get('/api/sessions/current');
             expect(res.status).toBe(200);
-            expect(res.body).toMatchObject({ username: 'admin'});
+            expect(res.body).toMatchObject({ username: 'admin' });
         });
 
         test('GET /api/sessions/current unauthenticated -> 401', async () => {
@@ -380,8 +380,8 @@ describe('API (index.mjs) - improved coverage', () => {
     describe('POST /api/admin/createuser', () => {
         test('without authentication -> 401', async () => {
             const res = await request('http://localhost:3001')
-            .post('/api/admin/createuser')
-            .send({ username: 'x' });
+                .post('/api/admin/createuser')
+                .send({ username: 'x' });
             expect(res.status).toBe(401);
         });
 
@@ -390,10 +390,10 @@ describe('API (index.mjs) - improved coverage', () => {
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
 
             const res = await agent.post('/api/admin/createuser').send({
-            username: '',
-            email: 'bad-email',
-            password: '123',
-            office_id: 'not-an-int'
+                username: '',
+                email: 'bad-email',
+                password: '123',
+                office_id: 'not-an-int'
             });
 
             expect(res.status).toBe(422);
@@ -404,19 +404,19 @@ describe('API (index.mjs) - improved coverage', () => {
         test('duplicate -> 409', async () => {
             const dao = await import('../dao.mjs');
             dao.createMunicipalityUser.mockImplementationOnce(async () => {
-            const err = new Error('duplicate');
-            err.code = '23505';
-            throw err;
+                const err = new Error('duplicate');
+                err.code = '23505';
+                throw err;
             });
 
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
 
             const payload = {
-            username: 'dupuser',
-            email: 'dup@example.com',
-            password: 'validpassword',
-            office_id: 1,
-            role: 1
+                username: 'dupuser',
+                email: 'dup@example.com',
+                password: 'validpassword',
+                office_id: 1,
+                role: 1
             };
 
             const res = await agent.post('/api/admin/createuser').send(payload);
@@ -427,19 +427,19 @@ describe('API (index.mjs) - improved coverage', () => {
         test('database error -> 503', async () => {
             const dao = await import('../dao.mjs');
             dao.createMunicipalityUser.mockImplementationOnce(async () => {
-            const err = new Error('DB failure');
-            err.code = 'ECONNREFUSED'; // qualsiasi codice diverso da 23505
-            throw err;
+                const err = new Error('DB failure');
+                err.code = 'ECONNREFUSED'; // qualsiasi codice diverso da 23505
+                throw err;
             });
 
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
 
             const payload = {
-            username: 'brokenuser',
-            email: 'broken@example.com',
-            password: 'validpassword',
-            office_id: 1,
-            role: 1
+                username: 'brokenuser',
+                email: 'broken@example.com',
+                password: 'validpassword',
+                office_id: 1,
+                role: 1
             };
 
             const res = await agent.post('/api/admin/createuser').send(payload);
@@ -453,13 +453,13 @@ describe('API (index.mjs) - improved coverage', () => {
         test('authenticated user -> 201 created report', async () => {
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
             const payload = {
-            title: 'T',
-            description: 'desc',
-            image_urls: ['img.png'],
-            latitude: 12.34,
-            longitude: 56.78,
-            category_id: 1,
-            anonymous: false
+                title: 'T',
+                description: 'desc',
+                image_urls: ['img.png'],
+                latitude: 12.34,
+                longitude: 56.78,
+                category_id: 1,
+                anonymous: false
             };
             const res = await agent.post('/api/reports').send(payload);
             expect(res.status).toBe(201);
@@ -469,13 +469,13 @@ describe('API (index.mjs) - improved coverage', () => {
         test('unauthenticated -> 401', async () => {
             await agent.delete('/api/sessions/current');
             const payload = {
-            title: 'Noise complaint',
-            description: 'Too loud',
-            image_urls: ['img.png'],
-            latitude: 45.07,
-            longitude: 7.68,
-            category_id: 1,
-            anonymous: false
+                title: 'Noise complaint',
+                description: 'Too loud',
+                image_urls: ['img.png'],
+                latitude: 45.07,
+                longitude: 7.68,
+                category_id: 1,
+                anonymous: false
             };
             const res = await agent.post('/api/reports').send(payload);
             expect(res.status).toBe(401);
@@ -485,17 +485,17 @@ describe('API (index.mjs) - improved coverage', () => {
         test('database error -> 503', async () => {
             const dao = await import('../dao.mjs');
             dao.insertReport.mockImplementationOnce(async () => {
-            throw new Error('DB failure');
+                throw new Error('DB failure');
             });
             await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
             const payload = {
-            title: 'Noise complaint',
-            description: 'Too loud',
-            image_urls: ['img.png'],
-            latitude: 45.07,
-            longitude: 7.68,
-            category_id: 1,
-            anonymous: false
+                title: 'Noise complaint',
+                description: 'Too loud',
+                image_urls: ['img.png'],
+                latitude: 45.07,
+                longitude: 7.68,
+                category_id: 1,
+                anonymous: false
             };
             const res = await agent.post('/api/reports').send(payload);
             expect(res.status).toBe(503);
@@ -521,8 +521,8 @@ describe('API (index.mjs) - improved coverage', () => {
         test('authenticated as Admin -> 200 reports', async () => {
             const dao = await import('../dao.mjs');
             dao.getAllReports.mockImplementationOnce(async () => [
-            { report_id: 1, description: 'Noise complaint' },
-            { report_id: 2, description: 'Garbage issue' }
+                { report_id: 1, description: 'Noise complaint' },
+                { report_id: 2, description: 'Garbage issue' }
             ]);
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
             const res = await agent.get('/api/reports');
@@ -534,7 +534,7 @@ describe('API (index.mjs) - improved coverage', () => {
         test('authenticated as Admin but DB error -> 503', async () => {
             const dao = await import('../dao.mjs');
             dao.getAllReports.mockImplementationOnce(async () => {
-            throw new Error('DB failure');
+                throw new Error('DB failure');
             });
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
             const res = await agent.get('/api/reports');
@@ -543,7 +543,7 @@ describe('API (index.mjs) - improved coverage', () => {
         });
     });
 
-    describe ('GET /api/operators',()=>{
+    describe('GET /api/operators', () => {
         test('authenticated -> 200', async () => {
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
             const res = await agent.get('/api/operators?officeId=1');
@@ -560,7 +560,7 @@ describe('API (index.mjs) - improved coverage', () => {
         test('invalid params -> 422', async () => {
             const dao = await import('../dao.mjs');
             dao.getTechnicalOfficersByOffice.mockImplementationOnce(async () => {
-            throw new Error('officer_id or office_id must be provided');
+                throw new Error('officer_id or office_id must be provided');
             });
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
             const res = await agent.get('/api/operators');
@@ -571,7 +571,7 @@ describe('API (index.mjs) - improved coverage', () => {
         test('database error -> 503', async () => {
             const dao = await import('../dao.mjs');
             dao.getTechnicalOfficersByOffice.mockImplementationOnce(async () => {
-            throw new Error('DB failure');
+                throw new Error('DB failure');
             });
             await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
             const res = await agent.get('/api/operators?officeId=1');
@@ -603,8 +603,8 @@ describe('API (index.mjs) - improved coverage', () => {
         test('authenticated as Admin -> 200 reports', async () => {
             const dao = await import('../dao.mjs');
             dao.getAllReports.mockImplementationOnce(async () => [
-            { report_id: 1, description: 'Noise complaint' },
-            { report_id: 2, description: 'Garbage issue' }
+                { report_id: 1, description: 'Noise complaint' },
+                { report_id: 2, description: 'Garbage issue' }
             ]);
 
             // login come Admin
@@ -619,7 +619,7 @@ describe('API (index.mjs) - improved coverage', () => {
         test('authenticated as Admin but DB error -> 503', async () => {
             const dao = await import('../dao.mjs');
             dao.getAllReports.mockImplementationOnce(async () => {
-            throw new Error('DB failure');
+                throw new Error('DB failure');
             });
 
             // login come Admin
@@ -630,5 +630,200 @@ describe('API (index.mjs) - improved coverage', () => {
             expect(res.body).toEqual({ error: 'Database error during report retrieval' });
         });
     });
+
+    describe('Additional endpoints coverage (status/operator/approved/assigned/citizens)', () => {
+
+        describe('PUT /api/reports/:id/status', () => {
+            test('unauthenticated -> 401', async () => {
+                await agent.delete('/api/sessions/current');
+                const res = await agent.put('/api/reports/1/status').send({ status_id: 2 });
+                expect(res.status).toBe(401);
+                expect(res.body).toEqual({ error: 'Not authenticated' });
+            });
+
+            test('invalid report id -> 423', async () => {
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.put('/api/reports/abc/status').send({ status_id: 2 });
+                expect(res.status).toBe(423);
+                expect(res.body).toEqual({ error: 'Invalid report id' });
+            });
+
+            test('status_id not number -> 422', async () => {
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.put('/api/reports/1/status').send({ status_id: 'x' });
+                expect(res.status).toBe(422);
+                expect(res.body).toEqual({ error: 'status_id must be a number' });
+            });
+
+            test('report not found -> 404', async () => {
+                const dao = await import('../dao.mjs');
+                dao.updateReportStatus.mockImplementationOnce(async () => null);
+
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.put('/api/reports/999/status').send({ status_id: 2 });
+                expect(res.status).toBe(404);
+                expect(res.body).toEqual({ error: 'Report not found' });
+            });
+
+            test('success -> 200 and updated report returned', async () => {
+                const dao = await import('../dao.mjs');
+                const updated = { id: 5, title: 'X', description: 'Y', status: { id: 2, name: 'Assigned' }, photos: [] };
+                dao.updateReportStatus.mockImplementationOnce(async () => updated);
+
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.put('/api/reports/5/status').send({ status_id: 2 });
+                expect(res.status).toBe(200);
+                expect(res.body).toMatchObject(updated);
+            });
+        });
+
+        describe('PUT /api/reports/:id/operator', () => {
+            test('unauthenticated -> 401', async () => {
+                await agent.delete('/api/sessions/current');
+                const res = await agent.put('/api/reports/1/operator').send({ operatorId: 2 });
+                expect(res.status).toBe(401);
+                expect(res.body).toEqual({ error: 'Not authenticated' });
+            });
+
+            test('invalid report id -> 423', async () => {
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.put('/api/reports/abc/operator').send({ operatorId: 2 });
+                expect(res.status).toBe(423);
+                expect(res.body).toEqual({ error: 'Invalid report id' });
+            });
+
+            test('operatorId not number -> 422', async () => {
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.put('/api/reports/1/operator').send({ operatorId: 'nope' });
+                expect(res.status).toBe(422);
+                expect(res.body).toEqual({ error: 'operatorId must be a number' });
+            });
+
+            test('report not found -> 404', async () => {
+                const dao = await import('../dao.mjs');
+                dao.setOperatorByReport.mockImplementationOnce(async () => null);
+
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.put('/api/reports/999/operator').send({ operatorId: 2 });
+                expect(res.status).toBe(404);
+                expect(res.body).toEqual({ error: 'Report not found' });
+            });
+
+            test('success -> 200', async () => {
+                const dao = await import('../dao.mjs');
+                dao.setOperatorByReport.mockImplementationOnce(async () => ({ report_id: 10, assigned_to_operator_id: 2 }));
+
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.put('/api/reports/10/operator').send({ operatorId: 2 });
+                expect(res.status).toBe(200);
+                expect(res.body).toEqual({});
+            });
+        });
+
+        describe('GET /api/reports/approved', () => {
+            test('returns approved reports -> 200', async () => {
+                const dao = await import('../dao.mjs');
+                dao.getAllApprovedReports.mockImplementationOnce(async () => [{ report_id: 1 }]);
+
+                const res = await agent.get('/api/reports/approved');
+                expect(res.status).toBe(200);
+                expect(res.body).toEqual([{ report_id: 1 }]);
+            });
+
+            test('DB error -> 503', async () => {
+                const dao = await import('../dao.mjs');
+                dao.getAllApprovedReports.mockImplementationOnce(async () => { throw new Error('DB'); });
+
+                const res = await agent.get('/api/reports/approved');
+                expect(res.status).toBe(503);
+                expect(res.body).toEqual({ error: 'Database error during report retrieval' });
+            });
+        });
+
+        describe('GET /api/reports/assigned', () => {
+            test('unauthenticated -> 401', async () => {
+                await agent.delete('/api/sessions/current');
+                const res = await agent.get('/api/reports/assigned');
+                expect(res.status).toBe(401);
+                expect(res.body).toEqual({ error: 'Not authenticated' });
+            });
+
+            test('forbidden when not Technical staff -> 403', async () => {
+                await agent.post('/api/sessions').send({ username: 'admin', password: 'correct' });
+                const res = await agent.get('/api/reports/assigned');
+                expect(res.status).toBe(403);
+                expect(res.body).toEqual({ error: 'Forbidden' });
+            });
+
+            test('success -> 200 returns assigned reports', async () => {
+                const dao = await import('../dao.mjs');
+                // make next login return a Technical office staff member
+                dao.getUser.mockImplementationOnce(async () => ({ username: 'tech', id: 123, role: 'Technical office staff member' }));
+                dao.getReportsAssigned.mockImplementationOnce(async () => [{ report_id: 77 }]);
+
+                await agent.post('/api/sessions').send({ username: 'tech', password: 'correct' });
+                const res = await agent.get('/api/reports/assigned');
+                expect(res.status).toBe(200);
+                expect(res.body).toEqual([{ report_id: 77 }]);
+            });
+        });
+
+        describe('GET/PUT /api/citizens', () => {
+            test('GET unauthenticated -> 401', async () => {
+                await agent.delete('/api/sessions/current');
+                const res = await agent.get('/api/citizens');
+                expect(res.status).toBe(401);
+                expect(res.body).toEqual({ error: 'Not authenticated' });
+            });
+
+            test('GET user not found -> 404', async () => {
+                await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+                const res = await agent.get('/api/citizens');
+                expect(res.status).toBe(404);
+                expect(res.body).toEqual({ error: 'User not found' });
+            });
+
+            test('GET success -> 200 user returned', async () => {
+                const dao = await import('../dao.mjs');
+                const user = { id: 555, username: 'plainuser' };
+                dao.getUserInfoById.mockImplementationOnce(async () => user);
+
+                await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+                const res = await agent.get('/api/citizens');
+                expect(res.status).toBe(200);
+                expect(res.body).toEqual(user);
+            });
+
+            test('PUT no updates -> 400', async () => {
+                await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+                const res = await agent.put('/api/citizens').send({});
+                expect(res.status).toBe(400);
+                expect(res.body).toEqual({ error: 'No update fields provided' });
+            });
+
+            test('PUT not found -> 404', async () => {
+                const dao = await import('../dao.mjs');
+                dao.updateUserById.mockImplementationOnce(async () => null);
+
+                await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+                const res = await agent.put('/api/citizens').send({ first_name: 'New' });
+                expect(res.status).toBe(404);
+                expect(res.body).toEqual({ error: 'User not found or no changes applied' });
+            });
+
+            test('PUT success -> returns updated user', async () => {
+                const dao = await import('../dao.mjs');
+                const updated = { id: 555, first_name: 'New' };
+                dao.updateUserById.mockImplementationOnce(async () => updated);
+
+                await agent.post('/api/sessions').send({ username: 'plain', password: 'correct' });
+                const res = await agent.put('/api/citizens').send({ first_name: 'New' });
+                expect(res.status).toBe(200);
+                expect(res.body).toEqual(updated);
+            });
+        });
+
+    });
+
 
 });

@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import API from "../../../API/API.js";
 import { useNavigate } from "react-router";
 import { useSelector } from "react-redux";
+import styles from "./inspectReportPage.module.css";
 
 function InspectReportPage() {
-
   const selectedReport = useSelector((state) => state.report.selected);
   const navigate = useNavigate();
 
@@ -15,30 +15,27 @@ function InspectReportPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (selectedReport) {
-      loadOfficers();
-    }
+    if (selectedReport) loadOfficers();
   }, [selectedReport]);
 
   const loadOfficers = async () => {
     try {
-      const officersData = await API.getOperatorsByOffice(selectedReport.office.id);
+      const officersData = await API.getOperatorsByOffice(
+        selectedReport.office.id
+      );
       setOfficers(officersData);
     } catch (err) {
-      setError('Failed to load officers: ' + err);
+      setError("Failed to load officers: " + err);
     }
   };
 
-  const handleRejectReport = () => {
-    setShowRejectModal(true);
-  }
-
   const submitRejectReason = async () => {
+
     await API.updateReportStatus(selectedReport.id, 5, rejectReason);
     setShowRejectModal(false);
     setRejectReason("");
     navigate(-1);
-  }
+  };
 
   const approveReport = async () => {
     if (!selectedOfficer) {
@@ -46,159 +43,116 @@ function InspectReportPage() {
       return;
     }
 
-    console.log("Selected Officer ID:", selectedOfficer);
-    
     await API.setOperatorByReport(selectedReport.id, selectedOfficer);
     await API.updateReportStatus(selectedReport.id, 2);
     navigate(-1);
   };
 
   return (
-    <div>
-      <h1>Inspect Report</h1>
+    <div className={styles.pageContainer}>
+
+      <button className={styles.backButton} onClick={() => navigate(-1)}>
+        ← Back
+      </button>
+
+      <h1 className={styles.pageTitle}>Inspect Report</h1>
 
       {!selectedReport ? (
         <p>No report selected.</p>
       ) : (
-        <div>
-          <p>
-            <strong>ID:</strong> {selectedReport.id}
-          </p>
-          <p>
-            <strong>Title:</strong> {selectedReport.title}
-          </p>
-          <p>
-            <strong>Description</strong>
-            {selectedReport.description}
-          </p>
-          <p>
-            <strong>Created At:</strong> {selectedReport.created_at}
-          </p>
-          <p>
-            <strong>Coordinates: </strong>
-            {selectedReport.latitude}, {selectedReport.longitude}
-          </p>
-          <p>
-            <strong>Citizen: </strong>
-            {selectedReport.citizen.username}
-          </p>
-          <p>
-            <strong>Category: </strong>
-            {selectedReport.category.name}
-          </p>
+        <>
+          <div className={styles.reportSection}>
+            <p className={styles.labelRow}><strong>ID:</strong> {selectedReport.id}</p>
+            <p className={styles.labelRow}><strong>Status:</strong> {selectedReport.status.name}</p>
+            {selectedReport.status.id === 5 && (
+            <p className={styles.labelRow}><strong>Rejection Reason:</strong> {selectedReport.rejection_reason || "No reason provided"}</p>)}
+            <p className={styles.labelRow}><strong>Title:</strong> {selectedReport.title}</p>
+            <p className={styles.labelRow}><strong>Description:</strong> {selectedReport.description}</p>
+            <p className={styles.labelRow}><strong>Created At:</strong> {selectedReport.created_at}</p>
+            <p className={styles.labelRow}><strong>Coordinates:</strong> {selectedReport.latitude}, {selectedReport.longitude}</p>
+            <p className={styles.labelRow}><strong>Citizen:</strong> {selectedReport.citizen.username}</p>
+            <p className={styles.labelRow}><strong>Category:</strong> {selectedReport.category.name}</p>
 
-          {/* Images part  */}
-          {selectedReport.photos?.length > 0 && (
-            <div style={{ marginTop: "1rem" }}>
-              <p>
+            {selectedReport.photos?.length > 0 && (
+              <>
                 <strong>Photos:</strong>
-              </p>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  flexWrap: "wrap",
-                  marginTop: "0.5rem",
-                }}
-              >
-                {selectedReport.photos.map((photo) => (
-                  <img
-                    key={photo.photo_id}
-                    src={photo.image_url}
-                    alt={`Report photo ${photo.photo_id}`}
-                    style={{
-                      width: "250px",
-                      height: "180px",
-                      objectFit: "cover",
-                      borderRadius: "8px",
-                      boxShadow: "0 2px 6px rgba(0, 0, 0, 0.15)",
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
+                <div className={styles.photosContainer}>
+                  {selectedReport.photos.map((photo) => (
+                    <img
+                      key={photo.photo_id}
+                      src={photo.image_url}
+                      alt="Report"
+                      className={styles.photoItem}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Officer Dropdown */}
-          <div style={{ marginTop: "1rem" }}>
-            <label><strong>Assign Officer:</strong></label>
-            <br />
+          {selectedReport.status.id == 1 &&<div className={styles.reportSection}>
+            <strong>Assign Officer:</strong>
             <select
               value={selectedOfficer || ""}
               onChange={(e) => setSelectedOfficer(Number(e.target.value))}
-              style={{
-                padding: "0.5rem",
-                borderRadius: "6px",
-                border: "1px solid #ccc",
-                marginTop: "0.5rem",
-                width: "250px"
-              }}
+              className={styles.select}
             >
               <option value="">-- Select an Officer --</option>
-              {officers.map(officer => (
-                <option
-                  key={officer.id}
-                  value={officer.id}
-                >
+              {officers.map((officer) => (
+                <option key={officer.id} value={officer.id}>
                   {officer.username}
                 </option>
               ))}
             </select>
 
-            {error && <p style={{ color: "red" }}>{error}</p>}
-          </div>
+            {error && <p className={styles.errorMessage}>{error}</p>}
+          </div>}
 
-          {/* Approve Button */}
-          <button
-            style={{
-              marginTop: "1rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "green",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer"
-            }}
-            onClick={approveReport}
-          >
-            Approve Report
-          </button>
+          {selectedReport.status.id == 1 && <div className={styles.buttonRow}>
+            <button className={styles.primaryButton} onClick={approveReport}>
+              Approve Report
+            </button>
 
-          {/* Reject Button */}
-          <button
-            style={{
-              marginTop: "1rem",
-              marginLeft: "1rem",
-              padding: "0.5rem 1rem",
-              backgroundColor: "red",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer"
-            }}
-            onClick={handleRejectReport}
-          >
-            Reject Report
-          </button>
+            <button
+              className={styles.dangerButton}
+              onClick={() => setShowRejectModal(true)}
+            >
+              Reject Report
+            </button>
+          </div>}
+        </>
+      )}
 
-          {/* Reject Modal */}
+      {/* Reject Modal */}
+      {showRejectModal && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
+            <h3 className={styles.modalTitle}>Reject Report</h3>
 
-          {showRejectModal && (
-            <div>
-              <h3>Reject Report</h3>
-              <textarea
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-              />
-              <div>
-                <button onClick={submitRejectReason}>Submit</button>
-                <button onClick={() => setShowRejectModal(false)}>
-                  Cancel
-                </button>
-              </div>
+            <textarea
+              className={styles.modalTextarea}
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Enter the reason for rejection..."
+            />
+
+            <div className={styles.modalActions}>
+              <button
+                className={styles.primaryButton}
+                onClick={submitRejectReason}
+                disabled={rejectReason.trim().length < 5}
+              >
+                Submit
+              </button>
+              <button
+                className={styles.dangerButton}
+                onClick={() => setShowRejectModal(false)}
+              >
+                Cancel
+              </button>
             </div>
-          )}
+          </div>
         </div>
       )}
     </div>

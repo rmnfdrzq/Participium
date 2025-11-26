@@ -60,6 +60,9 @@ networks:
 # mail - password
 admin@participium.local -  participium
 
+-- Citizen
+melo@participium.local - password
+
 -- Organization Office
 off.org@participium.local - participium
 

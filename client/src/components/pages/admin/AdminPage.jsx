@@ -118,7 +118,7 @@ function AdminPage() {
         )}
 
         <div className="content-header">
-          <h1 className="page-title">Users</h1>
+          <h1 className="page-title">Operators</h1>
           <button className="btn-create" onClick={handleCreateUserClick}>
             Create municipal user
           </button>

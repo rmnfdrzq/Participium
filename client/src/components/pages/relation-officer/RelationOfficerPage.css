@@ -107,6 +107,17 @@
   background-color: #f5f7fa; /* leggero highlight come le tabelle moderne */
 }
 
+.status-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;   
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: white;          
+  text-align: center;
+  min-width: 120px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .admin-content {

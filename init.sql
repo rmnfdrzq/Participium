@@ -277,3 +277,223 @@ INSERT INTO operators (email, username, password_hash, salt, office_id, role_id)
 ('tec.general@participium.local', 'tec_general', 'f746cd28ba22bc7f3bbd4f62f152180f17236d0463d70888c4881d154c7526af', '4c999d4a2a78113f997cc7fd2cd05043', 
   (SELECT office_id FROM offices WHERE name = 'General Services'), 
   (SELECT role_id FROM roles WHERE name = 'Technical office staff member'));
+
+-- 6. Citizen test
+INSERT INTO citizens (email, username, first_name, last_name, password_hash, salt, profile_photo_url, telegram_username, email_notifications) VALUES
+('melo@participium.local', 'melo', 'Carmelo', 'Locali', '858461e61ed6a0863bb44c4541e7bdcb33f9dd8d4401095ea6016bb4645b1239', '50ca648a1d5bbd29454d4a19efd9775b', NULL, NULL, TRUE);
+
+-- 7. Test report
+-- 1️⃣ Close reports cluster (around central area)
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Architectural Barriers'),
+        (SELECT office_id FROM offices WHERE name='Accessibility Office'),
+        (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+        NULL,
+        'Broken mobile stairs and inaccessible stairs',
+        'The escalators are not functioning and the elevator is out of service, making access impossible.',
+        45.063231, 7.659270,
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, url
+FROM new_report nr,
+LATERAL (VALUES
+    ('https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/scale_mobili_2.jpg'),
+    ('https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/scale_mobili1.jpg')
+) AS t(url);
+
+
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Sewer System'),
+        (SELECT office_id FROM offices WHERE name='Sewage Department'),
+        (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+        NULL,
+        'Working on sewage overflow',
+        'Replacing damaged pipes causing sewage overflow in the street.',
+        45.063215, 7.659258,  -- Close to first report
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, url
+FROM new_report nr,
+LATERAL (VALUES
+    ('https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/swage_report.jpg'),
+    ('https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/sewage2.jpg'),
+    ('https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/sewage3.jpg')
+) AS t(url);
+
+
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Public Lighting'),
+        (SELECT office_id FROM offices WHERE name='Lighting Department'),
+        (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+        NULL,
+        'Streetlight completely broken',
+        'The streetlight has been off for several days, the area is very dark at night.',
+        45.063248, 7.659290,  -- Close to the first two
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, 'https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/lampione_rotto.jpg'
+FROM new_report nr;
+
+-- 2️⃣ Spread out reports across the city
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Waste'),
+        (SELECT office_id FROM offices WHERE name='Waste Management'),
+        (SELECT status_id FROM statuses WHERE name='In Progress'),
+        (SELECT operator_id FROM operators WHERE username='tec_waste'),
+        'Overflowing trash container',
+        'Trash is not being collected and bags are piling up around the container.',
+        45.070500, 7.661200,
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, 'https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/waste_report.jpg'
+FROM new_report nr;
+
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Road Signs and Traffic Lights'),
+        (SELECT office_id FROM offices WHERE name='Traffic Department'),
+        (SELECT status_id FROM statuses WHERE name='In Progress'),
+        (SELECT operator_id FROM operators WHERE username='tec_traffic'),
+        'Broken traffic light',
+        'Traffic light is broken and causing confusion at the intersection.',
+        45.063611, 7.677467,
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, url
+FROM new_report nr,
+LATERAL (VALUES
+    ('https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/semafooro_rotto.jpg'),
+    ('https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/semaforo2.jpg')
+) AS t(url);
+
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Roads and Urban Furnishings'),
+        (SELECT office_id FROM offices WHERE name='Public Works'),
+        (SELECT status_id FROM statuses WHERE name='Resolved'),
+        (SELECT operator_id FROM operators WHERE username='tec_publicworks'),
+        'Pothole in the road',
+        'The road is broken and needs to be repaired to ensure safety.',
+        45.064250, 7.680255,
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, 'https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/roadworks_report.jpg'
+FROM new_report nr;
+
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Public Green Areas and Playgrounds'),
+        (SELECT office_id FROM offices WHERE name='Parks Department'),
+        (SELECT status_id FROM statuses WHERE name='Assigned'),
+        (SELECT operator_id FROM operators WHERE username='tec_parks'),
+        'Fallen tree blocking path',
+        'A large tree has fallen and is blocking the pedestrian walkway.',
+        45.073415, 7.663635,
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, 'https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/fallen_tree.png'
+FROM new_report nr;
+
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Other'),
+        (SELECT office_id FROM offices WHERE name='General Services'),
+        (SELECT status_id FROM statuses WHERE name='Suspended'),
+        (SELECT operator_id FROM operators WHERE username='tec_general'),
+        'Broken information screen',
+        'The municipal electronic info-panel is not working and shows only static.',
+        45.079649, 7.660552,
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, 'https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/schermo_rotto_1.jpg'
+FROM new_report nr;
+
+WITH new_report AS (
+    INSERT INTO reports (
+        citizen_id, category_id, office_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+    ) VALUES (
+        (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+        (SELECT category_id FROM categories WHERE name='Water Supply – Drinking Water'),
+        (SELECT office_id FROM offices WHERE name='Water Department'),
+        (SELECT status_id FROM statuses WHERE name='Assigned'),
+        (SELECT operator_id FROM operators WHERE username='tec_water'),
+        'Broken public fountain',
+        'The public drinking fountain is not working. Water flow has completely stopped.',
+        45.081651, 7.663635,
+        FALSE
+    )
+    RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT nr.report_id, 'https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/fontana_rotta.jpg'
+FROM new_report nr;

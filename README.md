@@ -126,8 +126,5 @@ messages(message_id, report_id, sender_type, sender_id, content, sent_at)
 
 notifications (notification_id, citizen_id, report_id, message,sent_at, seen)
 
--- (opzionale/commentata)
-telegram_users(
-    telegram_user_id, citizen_id, chat_id, linked_at
-)
+telegram_users(telegram_user_id, citizen_id, chat_id, linked_at)
 

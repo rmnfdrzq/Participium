@@ -516,6 +516,9 @@ function ReportPopup({ report, onViewDetails }) {
       <p className={styles.reportPopupInfo}>
         <strong>Status:</strong> {report.status.name}
       </p>
+      <p className={styles.reportPopupInfo}>
+        <strong>Reported by:</strong> {report.citizen.username}
+      </p>
       <button className={styles.reportPopupButton} onClick={onViewDetails}>
         Details
       </button>

@@ -78,5 +78,32 @@ sections:
     > 
   
 ## ASSESSMENT
+- What did go wrong in the sprint?
 
-copy from the template
+  > We finished the front end the night before the demo.
+
+- What caused your errors in estimation (if any)?
+
+  > The estimation error is due to the fact that estimates are discussed and decided by majority vote before being assigned, and the skill level of the person who will actually work on the task is not taken into account.
+
+- What lessons did you learn in this sprint?
+
+  > We need to establish stricter internal deadlines before the final delivery, especially for the backend and frontend development work.
+
+- Which improvement goals set in the previous retrospective were you able to achieve? 
+
+  > **achieved**:We reorganized the code to make it clearer, splitting overly large files into smaller ones so that we can more easily locate and update our code when needed.
+
+  > **achived**: We avoided collective tasks (related to documentation or shared knowledge) by turning them into tasks where one person would research the topic and then briefly explain to the group how that part worked in the project.
+  
+- Which ones you were not able to achieve? Why?
+  > Improve allocation of hours: We definitely improved compared to the first sprint, but we still didn’t take into account the skills of the people assigned to each task.
+
+- Improvement goals for the next sprint and how to achieve them 
+
+  > Improve task estimation by reviewing task duration during sprint planning after the assignment, so that the person assigned can adjust the estimated time based on their skill set.
+  
+  >Set intermediate deadlines for both the front end and back end, and complete them a few days before the end of the sprint so that the person in charge of testing has more time available.
+
+- One thing you are proud of as a Team!!
+  > Despite the difficulties encountered during this sprint, we managed to complete what was planned and ended up with only one issue.

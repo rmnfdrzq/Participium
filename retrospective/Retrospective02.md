@@ -17,7 +17,7 @@ sections:
 - Total points committed vs. done 
   > 19 vs 19 (story points)
 - Nr of hours planned vs. spent (as a team)
-  > 95h 30m vs 95h 5m
+  > 95h 30m vs 96h 5m
 
 **Remember**
  a story is done ONLY if it fits the Definition of Done:
@@ -31,7 +31,7 @@ sections:
 
 | Story  | # Tasks | Points | Hours est. | Hours actual |
 |--------|---------|--------|------------|--------------|
-| _Uncategorized_   |    15    |   -    | 52 h 45 m        |    51 h 15 m         |
+| _Uncategorized_   |    15    |   -    | 52 h 45 m        |    52 h 15 m         |
 | 6    |   10     |   5     | 11 h 30 m      |    12 h       | 
 | 7    |    7    |    8   |  9 h 15 m    |   9 h 50 m       |  
 | 8   |  9      |   3    |  10 h     |    10 h       | 
@@ -42,14 +42,14 @@ sections:
 
 |            | Mean | StDev |
 |------------|------|-------|
-| Estimation |  1.89   |  2.79    | 
-| Actual     |  1.90 |  2.73   |
+| Estimation |  1.88  |  2.77    | 
+| Actual     |  1.88 |  2.70   |
 
-- Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1 = **0.62%**
+- Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1 = **0.61%**
 
     $$\frac{\sum_i spent_{task_i}}{\sum_i estimation_{task_i}} - 1$$
     
-- Absolute relative task estimation error: sum( abs( spent-task-i / estimation-task-i - 1))/n = **11.22%**
+- Absolute relative task estimation error: sum( abs( spent-task-i / estimation-task-i - 1))/n = **11%**
 
     $$\frac{1}{n}\sum_i^n \left| \frac{spent_{task_i}}{estimation_task_i}-1 \right| $$
   
@@ -61,7 +61,7 @@ sections:
   - Total hours spent
     > 9 h
   - Nr of automated unit test cases 
-    > 153 tests
+    > 153 tests (sum of those of this sprint and the previous one)
   - Coverage
     > 96 % lines coverage
 - E2E testing:
@@ -70,7 +70,7 @@ sections:
   - Total hours spent
     > 3 h 50 m
   - Nr of test cases
-    >  
+    > 33 test cases (only counted those of the current sprint)
 - Code review 
   - Total hours estimated 
     > 18 h
@@ -80,15 +80,15 @@ sections:
 ## ASSESSMENT
 - What did go wrong in the sprint?
 
-  > We finished the front end the night before the demo.
+  > We finished the front end the night before the demo
 
 - What caused your errors in estimation (if any)?
 
-  > The estimation error is due to the fact that estimates are discussed and decided by majority vote before being assigned, and the skill level of the person who will actually work on the task is not taken into account.
+  > The estimation error is due to the fact that estimates are discussed and decided by majority vote before being assigned, and the skill level of the person who will actually work on the task is not taken into account
 
 - What lessons did you learn in this sprint?
 
-  > We need to establish stricter internal deadlines before the final delivery, especially for the backend and frontend development work.
+  > We need to establish stricter internal deadlines before the final delivery, especially for the backend and frontend development work
 
 - Which improvement goals set in the previous retrospective were you able to achieve? 
 
@@ -97,13 +97,15 @@ sections:
   > **achived**: We avoided collective tasks (related to documentation or shared knowledge) by turning them into tasks where one person would research the topic and then briefly explain to the group how that part worked in the project.
   
 - Which ones you were not able to achieve? Why?
+
   > Improve allocation of hours: We definitely improved compared to the first sprint, but we still didn’t take into account the skills of the people assigned to each task.
 
 - Improvement goals for the next sprint and how to achieve them 
 
-  > Improve task estimation by reviewing task duration during sprint planning after the assignment, so that the person assigned can adjust the estimated time based on their skill set.
+  > Improve task estimation by reviewing task duration during sprint planning after the assignment, so that the person assigned can adjust the estimated time based on their skill set
   
-  >Set intermediate deadlines for both the front end and back end, and complete them a few days before the end of the sprint so that the person in charge of testing has more time available.
+  > Set intermediate deadlines for both the front end and back end, and complete them a few days before the end of the sprint so that the person in charge of testing has more time available
 
 - One thing you are proud of as a Team!!
-  > Despite the difficulties encountered during this sprint, we managed to complete what was planned and ended up with only one issue.
+
+  > Despite the difficulties encountered during this sprint, we managed to complete what was planned

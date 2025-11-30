@@ -35,8 +35,7 @@ jobs:
           args: |
             -Dsonar.sources=server
             -Dsonar.tests=server/__tests__
-            -Dsonar.exclusions=server/__tests__/**
+            -Dsonar.exclusions=server/__tests__/**,server/coverage/**
             -Dsonar.javascript.lcov.reportPaths=server/coverage/lcov.info
-            -Dsonar.exclusions=server/coverage/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

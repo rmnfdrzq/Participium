@@ -72,39 +72,30 @@ melo@participium.local - password
 off.org@participium.local - participium
 
 -- Water Department
-off.water@participium.local - participium
 tec.water@participium.local - participium
 
 -- Accessibility Office
-off.accessibility@participium.local - participium
 tec.accessibility@participium.local - participium
 
 -- Sewage Department
-off.sewage@participium.local - participium
 tec.sewage@participium.local - participium
 
 -- Lighting Department
-off.lighting@participium.local - participium
 tec.lighting@participium.local - participium
 
 -- Waste Management
-off.waste@participium.local - participium
 tec.waste@participium.local - participium
 
 -- Traffic Department
-off.traffic@participium.local - participium
 tec.traffic@participium.local - participium
 
 -- Public Works
-off.publicworks@participium.local - participium
 tec.publicworks@participium.local - participium
 
 -- Parks Department
-off.parks@participium.local - participium
 tec.parks@participium.local - participium
 
 -- General Services
-off.general@participium.local - participium
 tec.general@participium.local - participium
 
 # DB

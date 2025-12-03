@@ -22,11 +22,10 @@ CREATE TABLE categories (
     name VARCHAR(255) UNIQUE NOT NULL,
     office_id INT REFERENCES offices(office_id)
 );
-CREATE TABLE companies (
+CREATE TABLE company (
     company_id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
     description TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
 );
 
 CREATE TABLE statuses (
@@ -79,7 +78,7 @@ CREATE TABLE photos (
 );
 
 
-CREATE TABLE internal_comments (
+CREATE TABLE internal_comment (
     internal_comment_id SERIAL PRIMARY KEY,
     report_id INT REFERENCES reports(report_id) ON DELETE CASCADE,
     sender_operator_id INT REFERENCES operators(operator_id) NOT NULL,

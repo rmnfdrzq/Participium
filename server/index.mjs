@@ -83,11 +83,11 @@ app.get('/api/reports', async (req, res) => {
   }
 });
 
-// PUT /api/reports/:id/status -> update status of a report (requires operator/admin)
+// PUT /api/reports/:id/status -> update status of a report (requires operator/admin/technical staff/external maintainer)
 app.put('/api/reports/:id/status', async (req, res) => {
   try {
     if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
-    if (req.user.role !== 'Admin' && req.user.role !== 'Municipal public relations officer' && req.user.role !== "Technical office staff member"  ) return res.status(403).json({ error: 'Forbidden' });
+    if (req.user.role !== 'Admin' && req.user.role !== 'Municipal public relations officer' && req.user.role !== "Technical office staff member" && req.user.role !== "External maintainer"  ) return res.status(403).json({ error: 'Forbidden' });
 
     const reportId = parseInt(req.params.id, 10);
     if (isNaN(reportId)) return res.status(423).json({ error: 'Invalid report id' });
@@ -133,11 +133,11 @@ app.get('/api/reports/approved', async (req, res) => {
 });
 
 
-// GET /api/reports/assigned -> reports assigned to the logged-in technical staff (requires Technical office staff member)
+// GET /api/reports/assigned -> reports assigned to the logged-in technical staff (requires Technical office staff member/External maintainer)
 app.get('/api/reports/assigned', async (req, res) => {
   try {
     if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
-    if (req.user.role !== 'Technical office staff member') return res.status(403).json({ error: 'Forbidden' });
+    if (req.user.role !== 'Technical office staff member'&& req.user.role !== "External maintainer") return res.status(403).json({ error: 'Forbidden' });
 
     const operatorId = req.user.id;
     const reports = await getReportsAssigned(operatorId);

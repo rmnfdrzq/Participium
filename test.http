@@ -1,6 +1,5 @@
-### 1. GET all roles : id+name
-GET http://localhost:3001/api/offices
-Content-Type: application/json
+### 1. GET all operators with office=2
+GET http://localhost:3001/api/assign_list?office_id=2
 
 ###
 
@@ -11,7 +10,7 @@ POST http://localhost:3001/api/sessions
 content-type: application/json
 
 {
-  "username": "aaaaaaaa@aaaaaaaaaaa.com",
+  "username": "alessioVivaldii",
   "password": "password"
 }
 
@@ -57,10 +56,11 @@ POST http://localhost:3001/api/admin/createuser
 content-type: application/json
 
 {
-  "username": "alessioVivaldi",
-  "email" : "aaaaaaaa@aaaaaaaaaa.com",
+  "username": "alessioVivaldii",
+  "email" : "aaaaaaaa@aaaaaaaaa.com",
   "password": "password",
-  "office_id": 2
+  "office_id": 2,
+  "role": 2
 }
 
 ###

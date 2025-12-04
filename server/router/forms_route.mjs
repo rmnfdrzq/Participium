@@ -46,10 +46,27 @@ router.post('/admin/createuser', [
 });
 
 //POST /api/reports
-router.post('/reports', async (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ error: 'Not authenticated' });
+router.post('/reports',[
+  check('title').exists({ checkFalsy: true }).withMessage('Title is required')
+    .isLength({ min: 3 }).withMessage('Title must be at least 3 characters long'),
+  check('description').exists({ checkFalsy: true }).withMessage('Description is required')
+    .isLength({ min: 10 }).withMessage('Description must be at least 10 characters long'),
+  check('image_urls').isArray({ min: 1, max: 3 }).withMessage('You must provide between 1 and 3 images'),
+  check('latitude').exists().withMessage('Latitude is required')
+    .isFloat().withMessage('Latitude must be a number'),
+  check('longitude').exists().withMessage('Longitude is required')
+    .isFloat().withMessage('Longitude must be a number'),
+  check('category_id').exists().withMessage('Category ID is required')
+    .isInt().withMessage('Category ID must be an integer'),
+  check('anonymous').exists().withMessage('Anonymous is required')
+    .isBoolean().withMessage('Anonymous must be boolean'),
+], async (req, res) => {
+
+  if (!req.isAuthenticated() || req.user.role !== 'user' ) {
+    return res.status(401).json({ error: 'Not authenticated or forbidden' });
   }
+
+
   try {
     const { title, description, image_urls, latitude, longitude, category_id, anonymous } = req.body;
     const report = await insertReport({ 

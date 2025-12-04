@@ -22,10 +22,10 @@ CREATE TABLE categories (
     name VARCHAR(255) UNIQUE NOT NULL,
     office_id INT REFERENCES offices(office_id)
 );
-CREATE TABLE company (
+CREATE TABLE companies (
     company_id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
-    description TEXT,
+    description TEXT
 );
 
 CREATE TABLE statuses (

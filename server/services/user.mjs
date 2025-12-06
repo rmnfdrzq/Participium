@@ -127,3 +127,57 @@ export const updateUserById = async (userId, updates) => {
     throw err;
   }
 };
+
+const sendEmail = async (to, subject, text) => {
+  // Placeholder function - integrate with actual email service
+  console.log(`Sending email to ${to} with subject "${subject}" and text: ${text}`);
+}
+
+
+export const generateEmailVerificationCode = async (userId) => {
+  try {
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+    const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+
+    // Check if there's an existing code for the user and delete it
+    const deleteSql = 'DELETE FROM email_verification_codes WHERE citizen_id = $1';
+    await pool.query(deleteSql, [userId]);
+
+    // Insert new citizen-code pair
+    const sql = `
+      INSERT INTO email_verification_codes (citizen_id, code, created_at, expires_at)
+      VALUES ($1, $2, NOW(), $3)';
+    `;
+    await pool.query(sql, [userId, code, expires_at]);
+
+    // Send the code via email
+    const userInfo = await getUserInfoById(userId);
+    if (userInfo) {
+      await sendEmail(userInfo.email, 'Your Email Verification Code', `Your verification code is: ${code}`);
+    }
+
+    return expires_at;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const verifyEmailCode = async (userId, code) => {
+  try {
+    const sql = `
+      SELECT * FROM email_verification_codes
+      WHERE citizen_id = $1 AND code = $2 AND expires_at > NOW()
+    `;
+    const result = await pool.query(sql, [userId, code]);
+    if (result.rows.length === 0) {
+      return false;
+    }
+    // Delete the code after successful verification
+    const deleteSql = 'DELETE FROM email_verification_codes WHERE citizen_id = $1';
+    await pool.query(deleteSql, [userId]);
+    return true;
+  } catch (err) {
+    throw err;
+  } 
+};
+      

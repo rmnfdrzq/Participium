@@ -20,13 +20,6 @@ const supabaseUrl = process.env.SUPABASE_URL
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 const supabase = createClient(supabaseUrl, supabaseKey)
 
-/*const { data, error } = await supabase
-  .storage
-  .createBucket('participium', {
-    public: true,
-    allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif'],
-  });*/
-
 // init
 const app = express();
 const port = 3001;
@@ -204,6 +197,21 @@ app.put("/api/citizens", async (req, res) => {
   }
 });
 
+/* Verification routes */
+
+// POST /api/citizens/verification-code
+app.post('/api/citizens/verification-code', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+    const userId = req.user.id;
+    if (isNaN(userId)) return res.status(423).json({ error: 'Invalid user id' });
+
+    const expires_at = await generateEmailVerificationCode(userId);
+    res.status(200).json({ expires_at });
+  } catch (err) {
+    res.status(503).json({ error: 'Database error during verification code generation' });
+  }
+});
 
 
 

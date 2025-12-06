@@ -9,8 +9,19 @@ CREATE TABLE citizens (
     profile_photo_url TEXT,
     telegram_username VARCHAR(100),
     email_notifications BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    verified BOOLEAN DEFAULT FALSE
 );
+
+CREATE TABLE verification_codes (
+    code_id SERIAL PRIMARY KEY,
+    citizen_id INT REFERENCES citizens(citizen_id),
+    code VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    expires_at TIMESTAMP NOT NULL
+);
+
+
 CREATE TABLE offices (
     office_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,

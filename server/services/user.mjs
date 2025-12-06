@@ -197,6 +197,15 @@ export const verifyEmailCode = async (userId, code) => {
     if (result.rows.length === 0) {
       return false;
     }
+    const updateSql = `
+      UPDATE citizens
+      SET verified = TRUE
+      WHERE citizen_id = $1
+    `;
+    await pool.query(updateSql, [userId]);
+    if (result.rows.length === 0) {
+      return false;
+    }
     // Delete the code after successful verification
     const deleteSql = 'DELETE FROM verification_codes WHERE citizen_id = $1';
     await pool.query(deleteSql, [userId]);

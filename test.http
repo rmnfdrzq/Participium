@@ -64,3 +64,39 @@ content-type: application/json
 }
 
 ###
+
+
+
+###
+
+# Login
+POST http://localhost:3001/api/sessions
+content-type: application/json
+
+{
+  "username": "melo@participium.local",
+  "password": "password"
+}
+
+###
+
+# Try to send verification email
+POST http://localhost:3001/api/citizens/verification-code
+content-type: application/json
+
+{
+  "userId": "1"
+}
+
+###
+
+# Verify email
+POST http://localhost:3001/api/citizens/verify-email
+content-type: application/json
+
+{
+  "userId": "1",
+  "code": "481813"
+}
+
+###

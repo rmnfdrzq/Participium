@@ -1,8 +1,19 @@
 import { Pool } from 'pg';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import e from 'express';
+import nodemailer from "nodemailer";
 
 dotenv.config();
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+        user: 'alan.okeefe54@ethereal.email',
+        pass: 'dnyNWufZpf4PZ9EvtB'
+    }
+});
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -129,9 +140,21 @@ export const updateUserById = async (userId, updates) => {
 };
 
 const sendEmail = async (to, subject, text) => {
-  // Placeholder function - integrate with actual email service
-  console.log(`Sending email to ${to} with subject "${subject}" and text: ${text}`);
-}
+  try {
+    const info = await transporter.sendMail({
+      from: `"Participium" <alan.okeefe54@ethereal.email>`,
+      to,
+      subject,
+      text,
+    });
+
+    console.log("Email sent:", info.messageId);
+    return info;
+  } catch (err) {
+    console.error("Error sending email:", err);
+    throw err;
+  }
+};
 
 
 export const generateEmailVerificationCode = async (userId) => {
@@ -140,24 +163,26 @@ export const generateEmailVerificationCode = async (userId) => {
     const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
 
     // Check if there's an existing code for the user and delete it
-    const deleteSql = 'DELETE FROM email_verification_codes WHERE citizen_id = $1';
+    const deleteSql = 'DELETE FROM verification_codes WHERE citizen_id = $1';
     await pool.query(deleteSql, [userId]);
 
     // Insert new citizen-code pair
     const sql = `
-      INSERT INTO email_verification_codes (citizen_id, code, created_at, expires_at)
-      VALUES ($1, $2, NOW(), $3)';
+      INSERT INTO verification_codes (citizen_id, code, created_at, expires_at)
+      VALUES ($1, $2, NOW(), $3);
     `;
     await pool.query(sql, [userId, code, expires_at]);
 
     // Send the code via email
     const userInfo = await getUserInfoById(userId);
     if (userInfo) {
-      await sendEmail(userInfo.email, 'Your Email Verification Code', `Your verification code is: ${code}`);
+      await sendEmail(userInfo.email, "Your Email Verification Code", `Your verification code is: ${code}`
+);
     }
 
     return expires_at;
   } catch (err) {
+    console.error("generateEmailVerificationCode ERROR:", err);
     throw err;
   }
 };
@@ -165,7 +190,7 @@ export const generateEmailVerificationCode = async (userId) => {
 export const verifyEmailCode = async (userId, code) => {
   try {
     const sql = `
-      SELECT * FROM email_verification_codes
+      SELECT * FROM verification_codes
       WHERE citizen_id = $1 AND code = $2 AND expires_at > NOW()
     `;
     const result = await pool.query(sql, [userId, code]);
@@ -173,7 +198,7 @@ export const verifyEmailCode = async (userId, code) => {
       return false;
     }
     // Delete the code after successful verification
-    const deleteSql = 'DELETE FROM email_verification_codes WHERE citizen_id = $1';
+    const deleteSql = 'DELETE FROM verification_codes WHERE citizen_id = $1';
     await pool.query(deleteSql, [userId]);
     return true;
   } catch (err) {

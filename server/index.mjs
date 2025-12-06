@@ -5,7 +5,7 @@ import registration from './router/registration_route.mjs';
 import getAll from './router/get-all_route.mjs';
 import forms from './router/forms_route.mjs';
 import { check, validationResult } from 'express-validator';
-import { getUser, getAllReports, updateReportStatus, getAllApprovedReports, setOperatorByReport, getReportsAssigned, updateUserById, getUserInfoById, setMainteinerByReport } from "./dao.mjs";
+import { getUser, getAllReports, updateReportStatus, getAllApprovedReports, setOperatorByReport, getReportsAssigned, updateUserById, getUserInfoById, setMainteinerByReport, generateEmailVerificationCode, verifyEmailCode } from "./dao.mjs";
 import cors from 'cors';
 
 import passport from 'passport';
@@ -201,20 +201,37 @@ app.put("/api/citizens", async (req, res) => {
 
 // POST /api/citizens/verification-code
 app.post('/api/citizens/verification-code', async (req, res) => {
+  console.log("Imported generateEmailVerificationCode =", generateEmailVerificationCode);
+
   try {
     if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
     const userId = req.user.id;
+    console.log("Received request to generate verification code for user:", req.user);
     if (isNaN(userId)) return res.status(423).json({ error: 'Invalid user id' });
 
     const expires_at = await generateEmailVerificationCode(userId);
+
     res.status(200).json({ expires_at });
   } catch (err) {
+    console.error("ROUTE ERROR:", err);
     res.status(503).json({ error: 'Database error during verification code generation' });
-  }
+  } 
 });
 
-
-
+app.post('/api/citizens/verify-email', async (req, res) => {
+  try {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: 'Not authenticated' });
+    const userId = req.user.id;
+    const { code } = req.body;
+    if (isNaN(userId)) return res.status(423).json({ error: 'Invalid user id' });
+    if (typeof code !== 'string') return res.status(422).json({ error: 'Code must be a string' });
+    const isValid = await verifyEmailCode(userId, code);
+    if (!isValid) return res.status(400).json({ error: 'Invalid or expired code' });
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(503).json({ error: 'Database error during email verification' });
+  }
+});
 
 
 /* ROUTES OF THE FIRST SPRINT */

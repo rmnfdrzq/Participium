@@ -1,19 +1,10 @@
 import { Pool } from 'pg';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import e from 'express';
-import nodemailer from "nodemailer";
+import { sendEmail } from './utils.js';
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-    host: 'smtp.ethereal.email',
-    port: 587,
-    auth: {
-        user: 'alan.okeefe54@ethereal.email',
-        pass: 'dnyNWufZpf4PZ9EvtB'
-    }
-});
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -23,60 +14,7 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-//given username (email) and password does the login -> searches in citizen and then operators tables
-export const getUser = async (username, password) => {
-  try {
-    // First try to find in operators table
-    const operatorSql = 'SELECT o.*, r.name as role_name FROM operators o JOIN roles r ON o.role_id = r.role_id WHERE o.email = $1 OR o.username = $1';
-    const operatorResult = await pool.query(operatorSql, [username]);
 
-    if (operatorResult.rows.length > 0) {
-      const row = operatorResult.rows[0];
-      const user = {
-        id: row.operator_id,
-        username: row.username,
-        role: row.role_name
-      };
-
-      return new Promise((resolve, reject) => {
-        crypto.scrypt(password, row.salt, 32, (err, hashedPassword) => {
-          if (err) return reject(err);
-
-          const match = crypto.timingSafeEqual(
-            Buffer.from(row.password_hash, 'hex'),
-            hashedPassword
-          );
-
-          resolve(match ? user : false);
-        });
-      });
-    }
-
-    // If not found in operators, try citizens
-    const citizenSql = 'SELECT * FROM citizens WHERE email = $1 OR username = $1';
-    const citizenResult = await pool.query(citizenSql, [username]);
-
-    const row = citizenResult.rows[0];
-    if (!row) return false;
-
-    const user = { id: row.citizen_id, username: row.username, role: "user" };
-
-    return new Promise((resolve, reject) => {
-      crypto.scrypt(password, row.salt, 32, (err, hashedPassword) => {
-        if (err) return reject(err);
-
-        const match = crypto.timingSafeEqual(
-          Buffer.from(row.password_hash, 'hex'),
-          hashedPassword
-        );
-
-        resolve(match ? user : false);
-      });
-    });
-  } catch (err) {
-    throw err;
-  }
-};
 
 //ginen user data creates a citizen
 export const createUser = async (username, email, first_name, last_name, email_notifications, password) => {
@@ -99,6 +37,7 @@ export const createUser = async (username, email, first_name, last_name, email_n
   });
 };
 
+
 export const getUserInfoById = async (userId) => {
   try {
     const sql = 'SELECT email, username, first_name, last_name, profile_photo_url, telegram_username, email_notifications from citizens WHERE citizen_id = $1';
@@ -111,6 +50,7 @@ export const getUserInfoById = async (userId) => {
     throw err;
   } 
 };
+
 
 export const updateUserById = async (userId, updates) => {
   try {
@@ -135,23 +75,6 @@ export const updateUserById = async (userId, updates) => {
     const result = await pool.query(sql, values);
     return result.rows[0];
   } catch (err) {
-    throw err;
-  }
-};
-
-const sendEmail = async (to, subject, text) => {
-  try {
-    const info = await transporter.sendMail({
-      from: `"Participium" <alan.okeefe54@ethereal.email>`,
-      to,
-      subject,
-      text,
-    });
-
-    console.log("Email sent:", info.messageId);
-    return info;
-  } catch (err) {
-    console.error("Error sending email:", err);
     throw err;
   }
 };
@@ -187,6 +110,8 @@ export const generateEmailVerificationCode = async (userId) => {
   }
 };
 
+
+
 export const verifyEmailCode = async (userId, code) => {
   try {
     const sql = `
@@ -214,4 +139,4 @@ export const verifyEmailCode = async (userId, code) => {
     throw err;
   } 
 };
-      
+   

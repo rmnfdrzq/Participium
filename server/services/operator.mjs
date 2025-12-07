@@ -12,6 +12,81 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
+//given username (email) and password does the login -> searches in citizen and then operators tables
+export const getUser = async (username, password) => {
+  try {
+    // First try to find in operators table
+    const operatorSql = 'SELECT o.*, r.name as role_name FROM operators o JOIN roles r ON o.role_id = r.role_id WHERE o.email = $1 OR o.username = $1';
+    const operatorResult = await pool.query(operatorSql, [username]);
+
+    if (operatorResult.rows.length > 0) {
+      const row = operatorResult.rows[0];
+      const user = {
+        id: row.operator_id,
+        username: row.username,
+        role: row.role_name
+      };
+
+      return new Promise((resolve, reject) => {
+        crypto.scrypt(password, row.salt, 32, (err, hashedPassword) => {
+          if (err) return reject(err);
+
+          const match = crypto.timingSafeEqual(
+            Buffer.from(row.password_hash, 'hex'),
+            hashedPassword
+          );
+
+          resolve(match ? user : false);
+        });
+      });
+    }
+
+    // If not found in operators, try citizens
+    const citizenSql = 'SELECT * FROM citizens WHERE email = $1 OR username = $1';
+    const citizenResult = await pool.query(citizenSql, [username]);
+
+    const row = citizenResult.rows[0];
+    if (!row) return false;
+
+    const user = { id: row.citizen_id, username: row.username, role: "user" };
+
+    return new Promise((resolve, reject) => {
+      crypto.scrypt(password, row.salt, 32, (err, hashedPassword) => {
+        if (err) return reject(err);
+
+        const match = crypto.timingSafeEqual(
+          Buffer.from(row.password_hash, 'hex'),
+          hashedPassword
+        );
+
+        resolve(match ? user : false);
+      });
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+//get all mainteiners by office_id
+export const getMainteinerByOffice = async (officeId) => {
+  const sql = `SELECT o.operator_id, o.username, c.name AS company_name
+    FROM operators o LEFT JOIN companies c ON o.company_id = c.company_id
+    WHERE o.office_id = $1 AND o.role_id = (SELECT role_id FROM roles WHERE name = 'External maintainer')`;
+
+  const result = await pool.query(sql, [officeId]);
+
+  return result.rows.map(e => ({ id: e.operator_id, username: e.username, company: e.company_name }));
+};
+
+//get all technical officers by relation officer's office_id
+export const getTechnicalOfficersByOffice = async (officeId) => {
+  const sqlGetTechnicalOfficers = 'SELECT * FROM operators WHERE office_id = $1 AND role_id = (SELECT role_id FROM roles WHERE name = \'Technical office staff member\')';
+  const resultOfficers = await pool.query(sqlGetTechnicalOfficers, [officeId]);
+
+  return resultOfficers.rows
+    .map((e) => ({ id: e.operator_id, email: e.email, username: e.username,office_id: e.office_id }));
+}
+
 //given username (email) and password does the login -> searches only in the onperators tables
 export const getOperators = async (username, password) => {
   try {

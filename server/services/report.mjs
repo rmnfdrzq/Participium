@@ -126,9 +126,9 @@ export const getAllReports = async () => {
 };
 
 // returns all reports assigned to a specific operator (internal technical staff or external maintainer)
-    export const getReportsAssigned = async (operator_id) => {
-      try {
-        const sql = `
+export const getReportsAssigned = async (operator_id) => {
+  try {
+    const sql = `
           SELECT
             r.report_id,
             r.title,
@@ -169,52 +169,52 @@ export const getAllReports = async () => {
           ORDER BY r.updated_at DESC
         `;
 
-        const result = await pool.query(sql, [operator_id]);
-        return result.rows.map((row) => ({
-          id: row.report_id,
-          title: row.title,
-          description: row.description,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          anonymous: row.anonymous,
-          rejection_reason: row.rejection_reason,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
-          citizen: row.citizen_id ? {
-            id: row.citizen_id,
-            username: row.citizen_username,
-            first_name: row.citizen_first_name,
-            last_name: row.citizen_last_name
-          } : null,
-          category: { id: row.category_id, name: row.category_name },
-          office: { id: row.office_id, name: row.office_name },
-          status: { id: row.status_id, name: row.status_name },
-          assigned_to_operator: row.assigned_to_operator_id ? {
-            id: row.assigned_to_operator_id,
-            username: row.operator_username,
-            email: row.operator_email,
-            company: row.company_name
-          } : null,
-          assigned_to_external: row.assigned_to_external_id ? row.assigned_to_external_id : null,
-          photos: row.photos || []
-        }));
-      } catch (err) {
-        throw err;
-      }
-    };
+    const result = await pool.query(sql, [operator_id]);
+    return result.rows.map((row) => ({
+      id: row.report_id,
+      title: row.title,
+      description: row.description,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      anonymous: row.anonymous,
+      rejection_reason: row.rejection_reason,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      citizen: row.citizen_id ? {
+        id: row.citizen_id,
+        username: row.citizen_username,
+        first_name: row.citizen_first_name,
+        last_name: row.citizen_last_name
+      } : null,
+      category: { id: row.category_id, name: row.category_name },
+      office: { id: row.office_id, name: row.office_name },
+      status: { id: row.status_id, name: row.status_name },
+      assigned_to_operator: row.assigned_to_operator_id ? {
+        id: row.assigned_to_operator_id,
+        username: row.operator_username,
+        email: row.operator_email,
+        company: row.company_name
+      } : null,
+      assigned_to_external: row.assigned_to_external_id ? row.assigned_to_external_id : null,
+      photos: row.photos || []
+    }));
+  } catch (err) {
+    throw err;
+  }
+};
 
-    // update the status of a report (optionally include rejection_reason)
-    export const updateReportStatus = async (report_id, status_id, rejection_reason = null) => {
-      const client = await pool.connect();
-      try {
-        //await client.query('BEGIN');
-    
-        let rejection = null;
-        if (status_id === 5) {  // only if status is "Rejected"
-          rejection = rejection_reason || null;
-        }
-    
-        const updateSql = `
+// update the status of a report (optionally include rejection_reason)
+export const updateReportStatus = async (report_id, status_id, rejection_reason = null) => {
+  const client = await pool.connect();
+  try {
+    //await client.query('BEGIN');
+
+    let rejection = null;
+    if (status_id === 5) {  // only if status is "Rejected"
+      rejection = rejection_reason || null;
+    }
+
+    const updateSql = `
           UPDATE reports
           SET status_id = $2,
               rejection_reason = $3,
@@ -222,15 +222,15 @@ export const getAllReports = async () => {
           WHERE report_id = $1
           RETURNING *
         `;
-        const updateResult = await client.query(updateSql, [report_id, status_id, rejection_reason]);
-    
-        if (updateResult.rows.length === 0) {
-          //await client.query('ROLLBACK');
-          return null;
-        }
-    
-        // return the updated report with related info and photos
-        const selectSql = `
+    const updateResult = await client.query(updateSql, [report_id, status_id, rejection_reason]);
+
+    if (updateResult.rows.length === 0) {
+      //await client.query('ROLLBACK');
+      return null;
+    }
+
+    // return the updated report with related info and photos
+    const selectSql = `
           SELECT
             r.report_id,
             r.title,
@@ -271,53 +271,53 @@ export const getAllReports = async () => {
           WHERE r.report_id = $1
           GROUP BY r.report_id, c.citizen_id, c.username, c.first_name, c.last_name, cat.name, off.name, s.name, op.operator_id, op.username, op.email, ext_op.operator_id, ext_op.username, ext_op.email, comp.company_id, comp.name
         `;
-    
-        const selectResult = await client.query(selectSql, [report_id]);
-        //await client.query('COMMIT');
-    
-        const row = selectResult.rows[0];
-        if (!row) return null;
-    
-        return {
-          id: row.report_id,
-          title: row.title,
-          description: row.description,
-          latitude: row.latitude,
-          longitude: row.longitude,
-          anonymous: row.anonymous,
-          rejection_reason: row.rejection_reason,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
-          citizen: row.citizen_id ? {
-            id: row.citizen_id,
-            username: row.citizen_username,
-            first_name: row.citizen_first_name,
-            last_name: row.citizen_last_name
-          } : null,
-          category: { id: row.category_id, name: row.category_name },
-          office: { id: row.office_id, name: row.office_name },
-          status: { id: row.status_id, name: row.status_name },
-          assigned_to_operator: row.assigned_to_operator_id ? {
-            id: row.assigned_to_operator_id,
-            username: row.operator_username,
-            email: row.operator_email
-          } : null,
-          assigned_to_external: row.assigned_to_external_id ? {
-            id: row.assigned_to_external_id,
-            username: row.external_operator_username,
-            email: row.external_operator_email,
-            company: row.external_company_name
-          } : null,
-          photos: row.photos || []
-        };
-      } catch (err) {
-        //await client.query('ROLLBACK');
-        throw err;
-      } finally {
-        client.release();
-      }
+
+    const selectResult = await client.query(selectSql, [report_id]);
+    //await client.query('COMMIT');
+
+    const row = selectResult.rows[0];
+    if (!row) return null;
+
+    return {
+      id: row.report_id,
+      title: row.title,
+      description: row.description,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      anonymous: row.anonymous,
+      rejection_reason: row.rejection_reason,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      citizen: row.citizen_id ? {
+        id: row.citizen_id,
+        username: row.citizen_username,
+        first_name: row.citizen_first_name,
+        last_name: row.citizen_last_name
+      } : null,
+      category: { id: row.category_id, name: row.category_name },
+      office: { id: row.office_id, name: row.office_name },
+      status: { id: row.status_id, name: row.status_name },
+      assigned_to_operator: row.assigned_to_operator_id ? {
+        id: row.assigned_to_operator_id,
+        username: row.operator_username,
+        email: row.operator_email
+      } : null,
+      assigned_to_external: row.assigned_to_external_id ? {
+        id: row.assigned_to_external_id,
+        username: row.external_operator_username,
+        email: row.external_operator_email,
+        company: row.external_company_name
+      } : null,
+      photos: row.photos || []
     };
-    
+  } catch (err) {
+    //await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+};
+
 export const getAllApprovedReports = async () => {
   try {
     const sql = `
@@ -390,7 +390,7 @@ export const setOperatorByReport = async (report_id, operator_id) => {
         status_id,
         updated_at
     `;
-    const result = await pool.query(sql, [report_id, operator_id]); 
+    const result = await pool.query(sql, [report_id, operator_id]);
     if (result.rows.length === 0) {
       return null;
     }
@@ -399,8 +399,7 @@ export const setOperatorByReport = async (report_id, operator_id) => {
   } catch (err) {
     throw err;
   }
-};  
-
+};
 
 // Assegna un mainteiner (operator) a un report
 export const setMainteinerByReport = async (report_id, operator_id) => {

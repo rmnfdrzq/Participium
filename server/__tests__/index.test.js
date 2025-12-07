@@ -98,6 +98,9 @@ describe('API (index.mjs) - improved coverage', () => {
                 setOperatorByReport: jest.fn(async (reportId, operatorId) => null),
                 getReportsAssigned: jest.fn(async (operatorId) => []),
                 updateUserById: jest.fn(async (userId, updates) => null),
+                getAllCompanies: jest.fn(async () => [{id:1, name: "Participium"},{id:2, name: "Enel"}] ),
+                getMainteinerByOffice:jest.fn (async (office_id) => [{id:3,name:"Mario", company:"Enel"}]),
+                setMainteinerByReport: jest.fn( async (report_id, operator_id) => {id:3}),
             };
         });
 
@@ -192,7 +195,7 @@ describe('API (index.mjs) - improved coverage', () => {
             expect(Array.isArray(adminRes.body)).toBe(true);
             expect(adminRes.body[0]).toHaveProperty('role', 'municipality_user');
 
-            const createPayload = { username: 'newop', email: 'newop@example.com', password: 'validpass', office_id: 1, role: 2 };
+            const createPayload = { username: 'newop', email: 'newop@example.com', password: 'validpass', office_id: 1, role: 2, company:1 };
             const createRes = await agent.post('/api/admin/createuser').send(createPayload);
             expect(createRes.status).toBe(201);
             expect(createRes.body).toMatchObject({ id: 222, username: 'newop' });
@@ -416,7 +419,7 @@ describe('API (index.mjs) - improved coverage', () => {
                 email: 'dup@example.com',
                 password: 'validpassword',
                 office_id: 1,
-                role: 1
+                role: 1, company:1
             };
 
             const res = await agent.post('/api/admin/createuser').send(payload);
@@ -439,7 +442,7 @@ describe('API (index.mjs) - improved coverage', () => {
                 email: 'broken@example.com',
                 password: 'validpassword',
                 office_id: 1,
-                role: 1
+                role: 1, company:1
             };
 
             const res = await agent.post('/api/admin/createuser').send(payload);
@@ -479,7 +482,7 @@ describe('API (index.mjs) - improved coverage', () => {
             };
             const res = await agent.post('/api/reports').send(payload);
             expect(res.status).toBe(401);
-            expect(res.body).toEqual({ error: 'Not authenticated' });
+            expect(res.body).toEqual({ error: 'Not authenticated or forbidden' });
         });
 
         test('database error -> 503', async () => {

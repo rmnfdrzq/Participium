@@ -100,6 +100,9 @@ describe('Reports Integration Tests (Mocked)', () => {
                 getTechnicalOfficersByOffice: jest.fn(),
                 getAllApprovedReports: jest.fn(),
                 updateUserById: jest.fn(),
+                getAllCompanies: jest.fn(async () => [{id:1, name: "Participium"},{id:2, name: "Enel"}] ),
+                getMainteinerByOffice:jest.fn (async (office_id) => [{id:3,name:"Mario", company:"Enel"}]),
+                setMainteinerByReport: jest.fn( async (report_id, operator_id) => {id:3}),
             };
         });
 

@@ -97,6 +97,9 @@ describe('API integration', () => {
                 setOperatorByReport: jest.fn(async (reportId, operatorId) => null),
                 getReportsAssigned: jest.fn(async (operatorId) => []),
                 updateUserById: jest.fn(async (userId, updates) => null),
+                getAllCompanies: jest.fn(async () => [{id:1, name: "Participium"},{id:2, name: "Enel"}] ),
+                getMainteinerByOffice:jest.fn (async (office_id) => [{id:3,name:"Mario", company:"Enel"}]),
+                setMainteinerByReport: jest.fn( async (report_id, operator_id) => {id:3}),
             };
         });
 
@@ -184,7 +187,7 @@ describe('API integration', () => {
             email: 'operator1@example.com',
             password: 'validpass123',
             office_id: 1,
-            role: 1
+            role: 1, company:1
         });
         expect(createOp1.status).toBe(201);
         expect(createOp1.body).toMatchObject({ id: 222, username: 'operator1' });

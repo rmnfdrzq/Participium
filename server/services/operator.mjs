@@ -65,7 +65,7 @@ export const getAllOperators = async () => {
 };
 
 //given operator data creates an operator
-export const createMunicipalityUser = async (email, username, password, office_id, role_id) => {
+export const createMunicipalityUser = async (email, username, password, office_id, role_id, company_id) => {
   const salt = crypto.randomBytes(16).toString('hex');
 
   return new Promise((resolve, reject) => {
@@ -73,11 +73,11 @@ export const createMunicipalityUser = async (email, username, password, office_i
       if (err) return reject(err);
 
       const sql = `
-        INSERT INTO operators (email, username, password_hash, salt, office_id, role_id)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO operators (email, username, password_hash, salt, office_id, role_id, company_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING operator_id
       `;
-      const values = [email, username, hashedPassword.toString('hex'), salt, office_id, role_id];
+      const values = [email, username, hashedPassword.toString('hex'), salt, office_id, role_id,company_id];
 
       try {
         const result = await pool.query(sql, values);

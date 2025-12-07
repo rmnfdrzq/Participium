@@ -125,7 +125,7 @@ export const getAllReports = async () => {
   }
 };
 
-// returns all reports assigned to a specific operator (technical staff)
+// returns all reports assigned to a specific operator (internal technical staff or external maintainer)
     export const getReportsAssigned = async (operator_id) => {
       try {
         const sql = `
@@ -149,15 +149,23 @@ export const getAllReports = async () => {
             off.name as office_name,
             r.status_id,
             s.name as status_name,
+            r.assigned_to_operator_id,
+            r.assigned_to_external_id,
+            op.username as operator_username,
+            op.email as operator_email,
+            op.company_id,
+            comp.name as company_name,
             COALESCE(json_agg(DISTINCT jsonb_build_object('photo_id', p.photo_id, 'image_url', p.image_url)) FILTER (WHERE p.photo_id IS NOT NULL), '[]') AS photos
           FROM reports r
           LEFT JOIN citizens c ON r.citizen_id = c.citizen_id
           LEFT JOIN categories cat ON r.category_id = cat.category_id
           LEFT JOIN offices off ON r.office_id = off.office_id
           LEFT JOIN statuses s ON r.status_id = s.status_id
+          LEFT JOIN operators op ON r.assigned_to_operator_id = op.operator_id
+          LEFT JOIN companies comp ON op.company_id = comp.company_id
           LEFT JOIN photos p ON r.report_id = p.report_id
-          WHERE r.assigned_to_operator_id = $1
-          GROUP BY r.report_id, c.citizen_id, c.username, c.first_name, c.last_name, cat.name, off.name, s.name
+          WHERE r.assigned_to_operator_id = $1 OR r.assigned_to_external_id = $1
+          GROUP BY r.report_id, c.citizen_id, c.username, c.first_name, c.last_name, cat.name, off.name, s.name, op.operator_id, op.username, op.email, op.company_id, comp.company_id, comp.name
           ORDER BY r.updated_at DESC
         `;
 
@@ -181,6 +189,13 @@ export const getAllReports = async () => {
           category: { id: row.category_id, name: row.category_name },
           office: { id: row.office_id, name: row.office_name },
           status: { id: row.status_id, name: row.status_name },
+          assigned_to_operator: row.assigned_to_operator_id ? {
+            id: row.assigned_to_operator_id,
+            username: row.operator_username,
+            email: row.operator_email,
+            company: row.company_name
+          } : null,
+          assigned_to_external: row.assigned_to_external_id ? row.assigned_to_external_id : null,
           photos: row.photos || []
         }));
       } catch (err) {
@@ -195,8 +210,8 @@ export const getAllReports = async () => {
         //await client.query('BEGIN');
     
         let rejection = null;
-        if (status_id === 5) {  // solo se lo status è "Rejected"
-          rejection = rejection_reason || null; // prendi il valore passato o null
+        if (status_id === 5) {  // only if status is "Rejected"
+          rejection = rejection_reason || null;
         }
     
         const updateSql = `
@@ -236,15 +251,25 @@ export const getAllReports = async () => {
             off.name as office_name,
             r.status_id,
             s.name as status_name,
+            r.assigned_to_operator_id,
+            op.username as operator_username,
+            op.email as operator_email,
+            r.assigned_to_external_id,
+            ext_op.username as external_operator_username,
+            ext_op.email as external_operator_email,
+            comp.name as external_company_name,
             COALESCE(json_agg(DISTINCT jsonb_build_object('photo_id', p.photo_id, 'image_url', p.image_url)) FILTER (WHERE p.photo_id IS NOT NULL), '[]') AS photos
           FROM reports r
           LEFT JOIN citizens c ON r.citizen_id = c.citizen_id
           LEFT JOIN categories cat ON r.category_id = cat.category_id
           LEFT JOIN offices off ON r.office_id = off.office_id
           LEFT JOIN statuses s ON r.status_id = s.status_id
+          LEFT JOIN operators op ON r.assigned_to_operator_id = op.operator_id
+          LEFT JOIN operators ext_op ON r.assigned_to_external_id = ext_op.operator_id
+          LEFT JOIN companies comp ON ext_op.company_id = comp.company_id
           LEFT JOIN photos p ON r.report_id = p.report_id
           WHERE r.report_id = $1
-          GROUP BY r.report_id, c.citizen_id, c.username, c.first_name, c.last_name, cat.name, off.name, s.name
+          GROUP BY r.report_id, c.citizen_id, c.username, c.first_name, c.last_name, cat.name, off.name, s.name, op.operator_id, op.username, op.email, ext_op.operator_id, ext_op.username, ext_op.email, comp.company_id, comp.name
         `;
     
         const selectResult = await client.query(selectSql, [report_id]);
@@ -272,6 +297,17 @@ export const getAllReports = async () => {
           category: { id: row.category_id, name: row.category_name },
           office: { id: row.office_id, name: row.office_name },
           status: { id: row.status_id, name: row.status_name },
+          assigned_to_operator: row.assigned_to_operator_id ? {
+            id: row.assigned_to_operator_id,
+            username: row.operator_username,
+            email: row.operator_email
+          } : null,
+          assigned_to_external: row.assigned_to_external_id ? {
+            id: row.assigned_to_external_id,
+            username: row.external_operator_username,
+            email: row.external_operator_email,
+            company: row.external_company_name
+          } : null,
           photos: row.photos || []
         };
       } catch (err) {
@@ -364,3 +400,32 @@ export const setOperatorByReport = async (report_id, operator_id) => {
     throw err;
   }
 };  
+
+
+// Assegna un mainteiner (operator) a un report
+export const setMainteinerByReport = async (report_id, operator_id) => {
+  const sql = `
+    UPDATE reports
+    SET assigned_to_external_id = $2,
+        updated_at = NOW()
+    WHERE report_id = $1
+    RETURNING 
+      report_id,
+      assigned_to_external_id,
+      title,
+      status_id,
+      updated_at
+  `;
+
+  try {
+    const result = await pool.query(sql, [report_id, operator_id]);
+
+    if (result.rows.length === 0) {
+      return null; // Nessun report trovato con quell'ID
+    }
+
+    return result.rows[0];
+  } catch (err) {
+    throw err;
+  }
+};

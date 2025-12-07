@@ -3,6 +3,7 @@ import {
   createMunicipalityUser,
   getAllOperators,
   getAllOffices,
+  getAllCompanies,
 } from "./admin.js";
 import { logIn, getUserInfo, logOut, signUp } from "./auth.js";
 import { getAllApprovedReports } from "./map.js";
@@ -24,6 +25,7 @@ const API = {
   createMunicipalityUser,
   getAllOperators,
   getAllOffices,
+  getAllCompanies,
 
   // Auth methods
   logIn,

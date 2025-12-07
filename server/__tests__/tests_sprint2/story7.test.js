@@ -155,6 +155,9 @@ describe('Story 7 - Approved reports (DAO + API)', () => {
           getReportsAssigned: async (operatorId) => [],
           updateUserById: async (userId, updates) => null,
           getUserInfoById: async (id) => null,
+          getAllCompanies: jest.fn(async () => [{id:1, name: "Participium"},{id:2, name: "Enel"}] ),
+          getMainteinerByOffice:jest.fn (async (office_id) => [{id:3,name:"Mario", company:"Enel"}]),
+          setMainteinerByReport: jest.fn( async (report_id, operator_id) => {id:3}),
         };
       });
 

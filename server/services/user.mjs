@@ -1,8 +1,19 @@
 import { Pool } from 'pg';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import e from 'express';
+import nodemailer from "nodemailer";
 
 dotenv.config();
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.ethereal.email',
+    port: 587,
+    auth: {
+        user: 'alan.okeefe54@ethereal.email',
+        pass: 'dnyNWufZpf4PZ9EvtB'
+    }
+});
 
 const pool = new Pool({
   user: process.env.DB_USER,
@@ -16,7 +27,7 @@ const pool = new Pool({
 export const getUser = async (username, password) => {
   try {
     // First try to find in operators table
-    const operatorSql = 'SELECT o.*, r.name as role_name FROM operators o JOIN roles r ON o.role_id = r.role_id WHERE o.email = $1';
+    const operatorSql = 'SELECT o.*, r.name as role_name FROM operators o JOIN roles r ON o.role_id = r.role_id WHERE o.email = $1 OR o.username = $1';
     const operatorResult = await pool.query(operatorSql, [username]);
 
     if (operatorResult.rows.length > 0) {
@@ -42,7 +53,7 @@ export const getUser = async (username, password) => {
     }
 
     // If not found in operators, try citizens
-    const citizenSql = 'SELECT * FROM citizens WHERE email = $1';
+    const citizenSql = 'SELECT * FROM citizens WHERE email = $1 OR username = $1';
     const citizenResult = await pool.query(citizenSql, [username]);
 
     const row = citizenResult.rows[0];
@@ -127,3 +138,80 @@ export const updateUserById = async (userId, updates) => {
     throw err;
   }
 };
+
+const sendEmail = async (to, subject, text) => {
+  try {
+    const info = await transporter.sendMail({
+      from: `"Participium" <alan.okeefe54@ethereal.email>`,
+      to,
+      subject,
+      text,
+    });
+
+    console.log("Email sent:", info.messageId);
+    return info;
+  } catch (err) {
+    console.error("Error sending email:", err);
+    throw err;
+  }
+};
+
+
+export const generateEmailVerificationCode = async (userId) => {
+  try {
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+    const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+
+    // Check if there's an existing code for the user and delete it
+    const deleteSql = 'DELETE FROM verification_codes WHERE citizen_id = $1';
+    await pool.query(deleteSql, [userId]);
+
+    // Insert new citizen-code pair
+    const sql = `
+      INSERT INTO verification_codes (citizen_id, code, created_at, expires_at)
+      VALUES ($1, $2, NOW(), $3);
+    `;
+    await pool.query(sql, [userId, code, expires_at]);
+
+    // Send the code via email
+    const userInfo = await getUserInfoById(userId);
+    if (userInfo) {
+      await sendEmail(userInfo.email, "Your Email Verification Code", `Your verification code is: ${code}`
+);
+    }
+
+    return expires_at;
+  } catch (err) {
+    console.error("generateEmailVerificationCode ERROR:", err);
+    throw err;
+  }
+};
+
+export const verifyEmailCode = async (userId, code) => {
+  try {
+    const sql = `
+      SELECT * FROM verification_codes
+      WHERE citizen_id = $1 AND code = $2 AND expires_at > NOW()
+    `;
+    const result = await pool.query(sql, [userId, code]);
+    if (result.rows.length === 0) {
+      return false;
+    }
+    const updateSql = `
+      UPDATE citizens
+      SET verified = TRUE
+      WHERE citizen_id = $1
+    `;
+    await pool.query(updateSql, [userId]);
+    if (result.rows.length === 0) {
+      return false;
+    }
+    // Delete the code after successful verification
+    const deleteSql = 'DELETE FROM verification_codes WHERE citizen_id = $1';
+    await pool.query(deleteSql, [userId]);
+    return true;
+  } catch (err) {
+    throw err;
+  } 
+};
+      

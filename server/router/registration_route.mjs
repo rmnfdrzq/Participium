@@ -6,7 +6,9 @@ const router = Router();
 
 // POST /api/registration 
 router.post('/registration', [
-  check('username').notEmpty().withMessage('Username is required'),
+  check('username')
+    .not().isEmail().withMessage('Username cannot be an email')
+    .notEmpty().withMessage('Username is required'),
   check('first_name').notEmpty().withMessage('First name is required'),
   check('last_name').notEmpty().withMessage('Last name is required'),
   check('email_notifications').isBoolean().withMessage('Email notification must be true or false'),

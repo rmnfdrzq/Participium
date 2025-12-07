@@ -50,3 +50,4 @@ export const getAllCategories = async () => {
     throw err;
   }
 };
+

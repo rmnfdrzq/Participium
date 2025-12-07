@@ -156,9 +156,9 @@ function LoginForm(props) {
       )}
 
       <input
-        type="email"
+        type="text"
         name="email"
-        placeholder="Email"
+        placeholder="Email or username"
         className={styles.inputField}
         required
         disabled={isPending}

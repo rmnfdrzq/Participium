@@ -11,5 +11,9 @@
             "database": "participium",
             "username": "admin"
         }
-    ]
+    ],
+    "sonarlint.connectedMode.project": {
+        "connectionId": "damianolarosa",
+        "projectKey": "DamianoLaRosa_Participium"
+    }
 }

@@ -72,60 +72,53 @@ melo@participium.local - password
 off.org@participium.local - participium
 
 -- Water Department
-off.water@participium.local - participium
 tec.water@participium.local - participium
 
 -- Accessibility Office
-off.accessibility@participium.local - participium
 tec.accessibility@participium.local - participium
 
 -- Sewage Department
-off.sewage@participium.local - participium
 tec.sewage@participium.local - participium
 
 -- Lighting Department
-off.lighting@participium.local - participium
 tec.lighting@participium.local - participium
 
 -- Waste Management
-off.waste@participium.local - participium
 tec.waste@participium.local - participium
 
 -- Traffic Department
-off.traffic@participium.local - participium
 tec.traffic@participium.local - participium
 
 -- Public Works
-off.publicworks@participium.local - participium
 tec.publicworks@participium.local - participium
 
 -- Parks Department
-off.parks@participium.local - participium
 tec.parks@participium.local - participium
 
 -- General Services
-off.general@participium.local - participium
 tec.general@participium.local - participium
 
 # DB
 
-citizens( citizen_id, email, username, first_name, last_name, password_hash, salt, email_notifications, created_at )
+citizens( citizen_id, email, username, first_name, last_name, password_hash, salt,profile_photo_url, email_notifications,telegram_username,email_notifications, created_at )
 
 offices( office_id, name, description )
 
 categories( category_id, name, office_id )
 
+company(company_id, name, description)
+
 statuses( status_id, name )
 
-reports( report_id, citizen_id, category_id, office_id, status_id, title, description, latitude, longitude, anonymous rejection_reason, created_at, updated_at )
+reports( report_id, citizen_id, category_id, office_id, status_id,assigned_to_operator_id,assigned_to_external_id, title, description, latitude, longitude, anonymous rejection_reason, created_at, updated_at )
 
 photos( photo_id, report_id, image_url, uploaded_at )
 
 roles( role_id, name, description )
 
-operators(operator_id, email, username, password_hash, salt, office_id, role_id)
+operators(operator_id, email, username, password_hash, salt, office_id, role_id,company_id,category_id)
 
-comments( comment_id, report_id, operator_id, content, created_at)
+internal_comment( internal_comment_id, report_id, sender_operator_id, content, created_at)
 
 messages(message_id, report_id, sender_type, sender_id, content, sent_at)
 

@@ -27,8 +27,10 @@ export const getAllPendingReports = async () => {
 };
 
 // Get operators by office ID
-export const getOperatorsByOffice = async (officeId) => {
-  return await axiosInstance.get(`/api/operators?officeId=${officeId}`);
+export const getOperatorsByOffice = async (office_id) => {
+  return await axiosInstance.get('/api/operators', {
+    params: { office_id: office_id } // Axios lo trasforma in ?officeId=9
+  });
 }
 
 // Set operator for a report

@@ -105,58 +105,20 @@ describe('Story 6 - get all reports, getTechnicalOfficersByOffice', () => {
             await expect(dao.getAllReports()).rejects.toThrow('db failure');
         });
 
-
-        test('getTechnicalOfficersByOffice: throws when officerId not found', async () => {
-            queryMock.mockResolvedValueOnce({ rows: [] });
-
-            await expect(dao.getTechnicalOfficersByOffice(999, undefined))
-                .rejects.toThrow('Either valid officer_id or office_id must be provided');
-        });
-
-        test('getTechnicalOfficersByOffice: throws when officer is not municipal relations officer', async () => {
-            const officerRow = { operator_id: 1, email: 'off@x', username: 'off', office_id: 10, role_id: 42 };
-            queryMock
-                .mockResolvedValueOnce({ rows: [officerRow] })
-                .mockResolvedValueOnce({ rows: [] });
-
-            await expect(dao.getTechnicalOfficersByOffice(officerRow.operator_id, undefined))
-                .rejects.toThrow('Operatot not allowed, he is not a Municipal public relations officer');
-        });
-
-        test('getTechnicalOfficersByOffice: returns technical officers when called with officerId', async () => {
-            const officerRow = { operator_id: 1, email: 'off@x', username: 'off', office_id: 10, role_id: 2 };
-            const operatorRoleRow = { role_id: 2 };
+        test('getTechnicalOfficersByOffice: returns technical officers when called with officeId', async () => {
             const techRows = [
                 { operator_id: 2, email: 'tec1@x', username: 'tec1', office_id: 10 },
                 { operator_id: 3, email: 'tec2@x', username: 'tec2', office_id: 10 }
             ];
 
             queryMock
-                .mockResolvedValueOnce({ rows: [officerRow] })
-                .mockResolvedValueOnce({ rows: [operatorRoleRow] })
                 .mockResolvedValueOnce({ rows: techRows });
 
-            const res = await dao.getTechnicalOfficersByOffice(officerRow.operator_id, undefined);
+            const res = await dao.getTechnicalOfficersByOffice(10);
             expect(res).toEqual([
                 { id: 2, email: 'tec1@x', username: 'tec1', office_id: 10 },
                 { id: 3, email: 'tec2@x', username: 'tec2', office_id: 10 }
             ]);
-        });
-
-        test('getTechnicalOfficersByOffice: returns technical officers when called with officeId only', async () => {
-            const techRows = [
-                { operator_id: 4, email: 'tec3@x', username: 'tec3', office_id: 20 }
-            ];
-
-            queryMock.mockResolvedValueOnce({ rows: techRows }); // sqlGetTechnicalOfficers using officeId
-
-            const res = await dao.getTechnicalOfficersByOffice(undefined, 20);
-            expect(res).toEqual([{ id: 4, email: 'tec3@x', username: 'tec3', office_id: 20 }]);
-        });
-
-        test('getTechnicalOfficersByOffice: throws when neither officerId nor officeId provided', async () => {
-            await expect(dao.getTechnicalOfficersByOffice(undefined, undefined))
-                .rejects.toThrow('officer_id or office_id must be provided');
         });
 
         test('setOperatorByReport: returns updated row on success', async () => {

@@ -13,11 +13,21 @@ import {
   updateReportStatus,
   getAllPendingReports,
   getOperatorsByOffice,
-  setOperatorByReport
+  setOperatorByReport,
+  setMaintainerByReport,
 } from "./report.js";
+import {
+  getAssignedReportsForMaintainer,
+  updateReportStatusByMaintainer,
+} from "./maintainer.js";
 import { getImageUploadUrl, uploadImageToSignedUrl } from "./image.js";
-import { getAllReportsForTechOfficer} from "./techofficer.js";
-import { getCitizenProfile, updateCitizenProfile } from "./citizen.js";
+import { getAllReportsForTechOfficer } from "./techofficer.js";
+import {
+  getCitizenProfile,
+  updateCitizenProfile,
+  requestVerificationCode,
+  verifyEmail,
+} from "./citizen.js";
 
 const API = {
   // Admin methods
@@ -43,18 +53,22 @@ const API = {
   getAllPendingReports,
   getOperatorsByOffice,
   setOperatorByReport,
+  setMaintainerByReport,
+  getAssignedReportsForMaintainer,
+  updateReportStatusByMaintainer,
 
   // Image methods
   getImageUploadUrl,
   uploadImageToSignedUrl,
 
-
-  // Tech Officer methods 
+  // Tech Officer methods
   getAllReportsForTechOfficer,
 
   // Citizen methods
   getCitizenProfile,
   updateCitizenProfile,
+  requestVerificationCode,
+  verifyEmail,
 };
 
 export default API;

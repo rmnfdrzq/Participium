@@ -11,10 +11,12 @@ function InspectReportPage() {
   const navigate = useNavigate();
 
   const [showRejectModal, setShowRejectModal] = useState(false);
+  const [showApproveModal, setShowApproveModal] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [officers, setOfficers] = useState([]);
   const [selectedOfficer, setSelectedOfficer] = useState(null);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [address, setAddress] = useState("Loading address...");
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
@@ -64,14 +66,19 @@ function InspectReportPage() {
     navigate(-1);
   };
 
-  const approveReport = async () => {
+  const handleApproveClick = () => {
     if (!selectedOfficer) {
-      alert("Please select an officer.");
+      setWarning("Please select an officer.");
+      setTimeout(() => setWarning(""), 3000);
       return;
     }
+    setShowApproveModal(true);
+  };
 
+  const confirmApproveReport = async () => {
     await API.setOperatorByReport(selectedReport.id, selectedOfficer);
     await API.updateReportStatus(selectedReport.id, 2);
+    setShowApproveModal(false);
     navigate(-1);
   };
 
@@ -102,6 +109,13 @@ function InspectReportPage() {
 
   return (
     <div className={styles.container}>
+      {/* Warning Notification */}
+      {warning && (
+        <div className={`${styles.notification} ${styles.warning}`}>
+          {warning}
+        </div>
+      )}
+
       <div className={styles.card}>
         <h1 className={styles.title}>Inspect Report</h1>
 
@@ -214,7 +228,10 @@ function InspectReportPage() {
         {/* Action Buttons */}
         {selectedReport.status.id === 1 && (
           <div className={styles.actionButtons}>
-            <button className={styles.primaryButton} onClick={approveReport}>
+            <button
+              className={styles.primaryButton}
+              onClick={handleApproveClick}
+            >
               Approve Report
             </button>
             <button
@@ -231,6 +248,36 @@ function InspectReportPage() {
           Back
         </button>
       </div>
+
+      {/* Approve Confirmation Modal */}
+      {showApproveModal && (
+        <div
+          className={styles.confirmModalOverlay}
+          onClick={(e) =>
+            e.target === e.currentTarget && setShowApproveModal(false)
+          }
+        >
+          <div className={styles.confirmModal}>
+            <p className={styles.confirmQuestion}>
+              Are you sure you want to approve this report?
+            </p>
+            <div className={styles.confirmModalButtons}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowApproveModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmButton}
+                onClick={confirmApproveReport}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Reject Modal */}
       {showRejectModal && (

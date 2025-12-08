@@ -6,9 +6,11 @@ import HomePage from "./components/pages/home/HomePage";
 import AdminPage from "./components/pages/admin/AdminPage";
 import RelationOfficerPage from "./components/pages/relation-officer/RelatioOfficerPage";
 import TechnicalOfficerPage from "./components/pages/technical-officer/TechnicalOfficerPage";
+import MaintainerPage from "./components/pages/maintainer/MaintainerPage";
 import CreateUserPage from "./components/pages/admin/CreateUserPage";
 import InspectReportPage from "./components/pages/inspectReport/inspectReportPage.jsx";
 import ProfilePage from "./components/pages/profile/ProfilePage";
+import VerifyEmailPage from "./components/pages/verify-email/VerifyEmailPage";
 import { MapPage } from "./components/pages/map/MapPage";
 import { useNavigate } from "react-router";
 import { useEffect, useState } from "react";
@@ -66,7 +68,13 @@ function App() {
   return (
     <Routes>
       <Route
-        element={<DefaultLayout user={user} handleLogout={handleLogout} citizenProfile={citizenProfile} />}
+        element={
+          <DefaultLayout
+            user={user}
+            handleLogout={handleLogout}
+            citizenProfile={citizenProfile}
+          />
+        }
       >
         <Route
           path="/"
@@ -76,8 +84,10 @@ function App() {
                 <Navigate replace to={`/admin`} />
               ) : user.role === "Municipal public relations officer" ? (
                 <RelationOfficerPage />
-              ) : user.role == "Technical office staff member" ? (
+              ) : user.role === "Technical office staff member" ? (
                 <TechnicalOfficerPage />
+              ) : user.role === "External maintainer" ? (
+                <MaintainerPage />
               ) : (
                 <MapPage />
               )
@@ -95,6 +105,10 @@ function App() {
           path="/signup"
           element={<LoginPage user={user} setUser={setUser} />}
         />
+        <Route
+          path="/verify-email"
+          element={<VerifyEmailPage user={user} setUser={setUser} />}
+        />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/admin/createuser" element={<CreateUserPage />} />
 
@@ -104,12 +118,22 @@ function App() {
 
         <Route path="/technicalOfficer" element={<TechnicalOfficerPage />} />
 
+        <Route path="/maintainer" element={<MaintainerPage />} />
+
         <Route path="/map" element={user ? <MapPage /> : <Navigate to="/" />} />
 
         <Route
           path="/profile"
           element={
-            isAuthLoading ? null : (user?.role === "user" ? <ProfilePage user={user} citizenProfile={citizenProfile} setCitizenProfile={setCitizenProfile} /> : <Navigate to="/" />)
+            isAuthLoading ? null : user?.role === "user" ? (
+              <ProfilePage
+                user={user}
+                citizenProfile={citizenProfile}
+                setCitizenProfile={setCitizenProfile}
+              />
+            ) : (
+              <Navigate to="/" />
+            )
           }
         />
 

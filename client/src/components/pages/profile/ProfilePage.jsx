@@ -24,6 +24,7 @@ export default function ProfilePage({
     telegram_username: "",
     email_notifications: false,
     profile_photo_url: "",
+    verified: false,
   });
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function ProfilePage({
         telegram_username: data.telegram_username || "",
         email_notifications: data.email_notifications || false,
         profile_photo_url: data.profile_photo_url || "",
+        verified: data.verified || false,
       });
       // Also update the shared state
       if (setCitizenProfile) {
@@ -300,6 +302,28 @@ export default function ProfilePage({
               disabled
             />
             <span className={styles.hint}>Email cannot be changed</span>
+          </div>
+
+          {/* Verification Status */}
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Email Verification</label>
+            {formData.verified ? (
+              <div className={styles.verifiedBadge}>
+                <span className={styles.verifiedIcon}>✓</span>
+                <span>Verified</span>
+              </div>
+            ) : (
+              <div className={styles.unverifiedSection}>
+                <span className={styles.unverifiedText}>Not verified</span>
+                <button
+                  type="button"
+                  className={styles.verifyButton}
+                  onClick={() => navigate("/verify-email", { state: { fromProfile: true } })}
+                >
+                  Verify Email
+                </button>
+              </div>
+            )}
           </div>
 
           <div className={styles.formGroup}>

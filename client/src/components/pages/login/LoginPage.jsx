@@ -24,11 +24,25 @@ export function LoginPage(props) {
   const handleLogin = async (credentials) => {
     try {
       const user = await API.logIn(credentials);
-      setMessage({ msg: `Welcome, ${user.name}!`, type: "success" });
+
+      // Check if citizen user is verified
+      if (user.role === "user" && !user.verified) {
+        // Don't set user state - keep them "not logged in" on frontend
+        // But session exists on server for verification API calls
+        try {
+          await API.requestVerificationCode();
+        } catch (verifyErr) {
+          console.error("Failed to send verification code:", verifyErr);
+        }
+        navigate("/verify-email");
+        return;
+      }
+
+      // Only set user if verified (or not a citizen)
       props.setUser(user);
       dispatch(clearLocation());
-
-      navigate(`/`);
+      setMessage({ msg: `Welcome, ${user.username}!`, type: "success" });
+      navigate("/");
     } catch (err) {
       // ensure we store a string message, not an Error object
       const text =
@@ -51,17 +65,24 @@ export function LoginPage(props) {
     try {
       await API.signUp(userData);
 
-      // Automatically log in after successful registration
+      // Automatically log in after successful registration (creates session on server)
       const credentials = {
         username: userData.email,
         password: userData.password,
       };
 
-      const user = await API.logIn(credentials);
-      props.setUser(user);
-      dispatch(clearLocation());
+      await API.logIn(credentials);
+      // Don't set user state - new users need to verify email first
+      // Session exists on server for verification API calls
 
-      navigate(`/map`);
+      // Request verification code and redirect to verification page
+      try {
+        await API.requestVerificationCode();
+      } catch (verifyErr) {
+        console.error("Failed to send verification code:", verifyErr);
+      }
+
+      navigate("/verify-email");
     } catch (err) {
       if (err && err.errors) {
         setMessage({

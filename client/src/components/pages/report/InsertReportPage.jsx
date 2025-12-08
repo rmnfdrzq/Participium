@@ -161,6 +161,7 @@ function InsertReportForm({
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrls, setPreviewUrls] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
+  const [warning, setWarning] = useState("");
   const [state, formAction, isPending] = useActionState(insertReportFunction, {
     title: "",
     description: "",
@@ -198,7 +199,8 @@ function InsertReportForm({
     const files = Array.from(e.target.files);
     const totalFiles = selectedFiles.length + files.length;
     if (totalFiles > 3) {
-      alert("You can upload a maximum of 3 images");
+      setWarning("You can upload a maximum of 3 images");
+      setTimeout(() => setWarning(""), 3000);
       e.target.value = "";
       return;
     }
@@ -217,7 +219,9 @@ function InsertReportForm({
     // Revoke object URL to avoid memory leaks
     URL.revokeObjectURL(previewUrls[indexToRemove]);
 
-    setSelectedFiles(selectedFiles.filter((_, index) => index !== indexToRemove));
+    setSelectedFiles(
+      selectedFiles.filter((_, index) => index !== indexToRemove)
+    );
     setPreviewUrls(previewUrls.filter((_, index) => index !== indexToRemove));
   };
 
@@ -226,6 +230,13 @@ function InsertReportForm({
 
   return (
     <div className={styles.pageWrapper}>
+      {/* Warning Notification */}
+      {warning && (
+        <div className={`${styles.notification} ${styles.warning}`}>
+          {warning}
+        </div>
+      )}
+
       <div className={styles.contentWrapper}>
         {isPending && (
           <div className={styles.alert}>

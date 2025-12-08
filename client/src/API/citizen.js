@@ -9,3 +9,13 @@ export const getCitizenProfile = async () => {
 export const updateCitizenProfile = async (updates) => {
   return await axiosInstance.put("/api/citizens", updates);
 };
+
+// Request email verification code (sends 6-digit code to user's email)
+export const requestVerificationCode = async () => {
+  return await axiosInstance.post("/api/citizens/verification-code");
+};
+
+// Verify email with the code received via email
+export const verifyEmail = async (code) => {
+  return await axiosInstance.post("/api/citizens/verify-email", { code });
+};

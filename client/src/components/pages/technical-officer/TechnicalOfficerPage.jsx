@@ -11,6 +11,7 @@ function TechnicalOfficerPage() {
   const dispatch = useDispatch();
   const [reports, setReports] = useState([]);
   const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,10 +38,17 @@ function TechnicalOfficerPage() {
     });
   };
 
+  // Filter reports based on selected status
+  const filteredReports =
+    statusFilter === "all"
+      ? reports
+      : reports.filter(
+          (report) => report.status?.id === parseInt(statusFilter)
+        );
+
   return (
     <div className="admin-page">
       <div className="admin-content">
-
         {error && (
           <div className="alert alert-error">
             {error}
@@ -52,6 +60,21 @@ function TechnicalOfficerPage() {
 
         <div className="content-header">
           <h1 className="page-title">Reports Overview</h1>
+          <div className="filter-container">
+            <span className="filter-label">Filter:</span>
+            <select
+              className="status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Default (All)</option>
+              <option value="1">Pending Approval</option>
+              <option value="2">Assigned</option>
+              <option value="3">In Progress</option>
+              <option value="4">Suspended</option>
+              <option value="6">Resolved</option>
+            </select>
+          </div>
         </div>
 
         <div className="users-table-container">
@@ -66,7 +89,7 @@ function TechnicalOfficerPage() {
             </thead>
 
             <tbody>
-              {reports.map((report) => (
+              {filteredReports.map((report) => (
                 <tr
                   key={report.id}
                   className="clickable-row"
@@ -77,7 +100,9 @@ function TechnicalOfficerPage() {
                 >
                   <td className="report-id">{report.id}</td>
                   <td className="report-title">{report.title}</td>
-                  <td className="report-date">{formatDate(report.created_at)}</td>
+                  <td className="report-date">
+                    {formatDate(report.created_at)}
+                  </td>
                   <td>
                     <span
                       className="status-pill"
@@ -94,7 +119,6 @@ function TechnicalOfficerPage() {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
   );

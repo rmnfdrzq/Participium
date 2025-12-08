@@ -234,6 +234,54 @@
   margin-top: 12px;
 }
 
+/* Verification Status */
+.verifiedBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.verifiedIcon {
+  font-size: 16px;
+}
+
+.unverifiedSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background-color: #fff3cd;
+  border-radius: var(--radius-md);
+}
+
+.unverifiedText {
+  font-size: 14px;
+  color: #856404;
+}
+
+.verifyButton {
+  padding: 8px 16px;
+  background: var(--gradient-primary);
+  color: var(--static-white);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.verifyButton:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
 .saveButton {
   width: 100%;
   padding: 14px 24px;

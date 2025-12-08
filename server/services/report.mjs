@@ -222,15 +222,16 @@ export const updateReportStatus = async (report_id, status_id, rejection_reason 
           WHERE report_id = $1
           RETURNING *
         `;
-    const updateResult = await client.query(updateSql, [report_id, status_id, rejection_reason]);
 
-    if (updateResult.rows.length === 0) {
-      //await client.query('ROLLBACK');
-      return null;
-    }
-
-    // return the updated report with related info and photos
-    const selectSql = `
+        const updateResult = await client.query(updateSql, [report_id, status_id, rejection]);
+    
+        if (updateResult.rows.length === 0) {
+          //await client.query('ROLLBACK');
+          return null;
+        }
+    
+        // return the updated report with related info and photos
+        const selectSql = `
           SELECT
             r.report_id,
             r.title,

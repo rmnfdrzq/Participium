@@ -1,3 +1,4 @@
+
 import { Pool } from "pg";
 import crypto from "crypto";
 import dotenv from "dotenv";
@@ -21,68 +22,6 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD,
   port: process.env.DB_PORT,
 });
-
-//given username (email) and password does the login -> searches in citizen and then operators tables
-export const getUser = async (username, password) => {
-  try {
-    // First try to find in operators table
-    const operatorSql =
-      "SELECT o.*, r.name as role_name FROM operators o JOIN roles r ON o.role_id = r.role_id WHERE o.email = $1 OR o.username = $1";
-    const operatorResult = await pool.query(operatorSql, [username]);
-
-    if (operatorResult.rows.length > 0) {
-      const row = operatorResult.rows[0];
-      const user = {
-        id: row.operator_id,
-        username: row.username,
-        role: row.role_name,
-      };
-
-      return new Promise((resolve, reject) => {
-        crypto.scrypt(password, row.salt, 32, (err, hashedPassword) => {
-          if (err) return reject(err);
-
-          const match = crypto.timingSafeEqual(
-            Buffer.from(row.password_hash, "hex"),
-            hashedPassword
-          );
-
-          resolve(match ? user : false);
-        });
-      });
-    }
-
-    // If not found in operators, try citizens
-    const citizenSql =
-      "SELECT * FROM citizens WHERE email = $1 OR username = $1";
-    const citizenResult = await pool.query(citizenSql, [username]);
-
-    const row = citizenResult.rows[0];
-    if (!row) return false;
-
-    const user = {
-      id: row.citizen_id,
-      username: row.username,
-      role: "user",
-      verified: row.verified,
-    };
-
-    return new Promise((resolve, reject) => {
-      crypto.scrypt(password, row.salt, 32, (err, hashedPassword) => {
-        if (err) return reject(err);
-
-        const match = crypto.timingSafeEqual(
-          Buffer.from(row.password_hash, "hex"),
-          hashedPassword
-        );
-
-        resolve(match ? user : false);
-      });
-    });
-  } catch (err) {
-    throw err;
-  }
-};
 
 //ginen user data creates a citizen
 export const createUser = async (
@@ -125,6 +64,7 @@ export const createUser = async (
   });
 };
 
+
 export const getUserInfoById = async (userId) => {
   try {
     const sql =
@@ -138,6 +78,7 @@ export const getUserInfoById = async (userId) => {
     throw err;
   }
 };
+
 
 export const updateUserById = async (userId, updates) => {
   try {
@@ -213,6 +154,8 @@ export const generateEmailVerificationCode = async (userId) => {
     throw err;
   }
 };
+
+
 
 export const verifyEmailCode = async (userId, code) => {
   try {

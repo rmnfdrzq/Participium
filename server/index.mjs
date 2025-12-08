@@ -1,13 +1,13 @@
 // import
 import express from "express";
 import morgan from "morgan";
-import category from "./router/category.js";
-import role from "./router/role.js";
-import office from "./router/office.js";
-import operator from "./router/operator.js";
-import citizen from "./router/citizen.js";
-import report from "./router/report.js";
-import company from "./router/company.js";
+import category from "./router/category.mjs";
+import role from "./router/role.mjs";
+import office from "./router/office.mjs";
+import operator from "./router/operator.mjs";
+import citizen from "./router/citizen.mjs";
+import report from "./router/report.mjs";
+import company from "./router/company.mjs";
 import { getUser } from "./dao.mjs";
 import cors from "cors";
 

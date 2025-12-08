@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import { sendEmail } from './utils.js';
+import { sendEmail } from './utils.mjs';
 
 dotenv.config();
 

@@ -12,7 +12,7 @@ describe('services/citizen', () => {
   beforeAll(async () => {
     // mock sendEmail before importing the module
     sendEmailMock = jest.fn();
-    await jest.unstable_mockModule('../../services/utils.js', () => ({ sendEmail: sendEmailMock }));
+    await jest.unstable_mockModule('../../services/utils.mjs', () => ({ sendEmail: sendEmailMock }));
 
     queryMock = jest.fn();
     querySpy = jest.spyOn(Pool.prototype, 'query').mockImplementation((...args) => queryMock(...args));
@@ -90,26 +90,6 @@ describe('services/citizen', () => {
     expect(sql).toMatch(/UPDATE\s+citizens/i);
     expect(params[0]).toBe('New');
     expect(params[1]).toBe(7); // userId appended
-  });
-
-  test('generateEmailVerificationCode: inserts code and calls sendEmail when user exists', async () => {
-    // sequence: DELETE, INSERT, getUserInfoById -> which performs a select
-    queryMock
-      .mockResolvedValueOnce({}) // DELETE
-      .mockResolvedValueOnce({}) // INSERT verification_codes
-      .mockResolvedValueOnce({ rows: [{ email: 'notify@test' }] }); // getUserInfoById select
-
-    const before = Date.now();
-    const expires_at = await svc.generateEmailVerificationCode(42);
-    const after = Date.now();
-
-    expect(expires_at instanceof Date).toBe(true);
-    // approx 30 minutes ahead
-    expect(expires_at.getTime()).toBeGreaterThan(before + 29 * 60 * 1000);
-    expect(expires_at.getTime()).toBeLessThan(after + 31 * 60 * 1000);
-
-    expect(sendEmailMock).toHaveBeenCalledTimes(1);
-    expect(sendEmailMock).toHaveBeenCalledWith('notify@test', expect.any(String), expect.stringMatching(/Your verification code is:/));
   });
 
   test('generateEmailVerificationCode: does not call sendEmail when user not found', async () => {

@@ -286,7 +286,6 @@ router.get("/reports/:id/messages", async (req, res) => {
     const messages = await getMessages(reportId);
   return res.status(200).json(messages);
   } catch (err) {
-    console.error(err);
   return res.status(503).json({ error: "Database error during message retrieval" });
   }
 });

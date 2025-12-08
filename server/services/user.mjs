@@ -7,12 +7,11 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.ethereal.email",
-  port: 587,
+  service: 'gmail',
   auth: {
-    user: "alan.okeefe54@ethereal.email",
-    pass: "dnyNWufZpf4PZ9EvtB",
-  },
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  }
 });
 
 const pool = new Pool({
@@ -168,13 +167,13 @@ export const updateUserById = async (userId, updates) => {
 const sendEmail = async (to, subject, text) => {
   try {
     const info = await transporter.sendMail({
-      from: `"Participium" <alan.okeefe54@ethereal.email>`,
+       from: `"Participium" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       text,
     });
 
-    console.log("Email sent:", info.messageId);
+    console.log("Email sent:", info);
     return info;
   } catch (err) {
     console.error("Error sending email:", err);

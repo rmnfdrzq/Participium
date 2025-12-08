@@ -16,8 +16,12 @@ import {
   setOperatorByReport,
   setMaintainerByReport,
 } from "./report.js";
+import {
+  getAssignedReportsForMaintainer,
+  updateReportStatusByMaintainer,
+} from "./maintainer.js";
 import { getImageUploadUrl, uploadImageToSignedUrl } from "./image.js";
-import { getAllReportsForTechOfficer} from "./techofficer.js";
+import { getAllReportsForTechOfficer } from "./techofficer.js";
 import {
   getCitizenProfile,
   updateCitizenProfile,
@@ -50,13 +54,14 @@ const API = {
   getOperatorsByOffice,
   setOperatorByReport,
   setMaintainerByReport,
+  getAssignedReportsForMaintainer,
+  updateReportStatusByMaintainer,
 
   // Image methods
   getImageUploadUrl,
   uploadImageToSignedUrl,
 
-
-  // Tech Officer methods 
+  // Tech Officer methods
   getAllReportsForTechOfficer,
 
   // Citizen methods

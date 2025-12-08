@@ -14,10 +14,14 @@ export const getAllCategories = async () => {
 // reportId: Report ID
 // newStatus: New status
 // rejection_reason: Rejection reason (optional)
-export const updateReportStatus = async (reportId, newStatus, rejection_reason = null) => {
+export const updateReportStatus = async (
+  reportId,
+  newStatus,
+  rejection_reason = null
+) => {
   return await axiosInstance.put(`/api/reports/${reportId}/status`, {
     status_id: newStatus,
-    rejection_reason: rejection_reason
+    rejection_reason: rejection_reason,
   });
 };
 
@@ -28,21 +32,21 @@ export const getAllPendingReports = async () => {
 
 // Get operators by office ID
 export const getOperatorsByOffice = async (office_id) => {
-  return await axiosInstance.get('/api/operators', {
-    params: { office_id: office_id } // Axios lo trasforma in ?officeId=9
+  return await axiosInstance.get("/api/operators", {
+    params: { office_id: office_id }, // Axios lo trasforma in ?officeId=9
   });
-}
+};
 
 // Set operator for a report
 export const setOperatorByReport = async (reportId, operatorId) => {
   return await axiosInstance.put(`/api/reports/${reportId}/operator`, {
-    operatorId: operatorId
+    operatorId: operatorId,
   });
 };
 
 // Set external maintainer for a report
 export const setMaintainerByReport = async (reportId, operatorId) => {
   return await axiosInstance.put(`/api/reports/${reportId}/mainteiner`, {
-    operatorId: operatorId
+    operatorId: operatorId,
   });
 };

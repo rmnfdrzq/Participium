@@ -14,11 +14,7 @@ const pool = new Pool({
 
 //returns all default offices 
 export const getAllOffices = async () => {
-  try {
     const sql = 'SELECT * FROM offices';
     const result = await pool.query(sql);
     return result.rows.map((e) => { return { id: e.office_id, name: e.name }; });
-  } catch (err) {
-    throw err;
-  }
 };

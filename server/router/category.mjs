@@ -13,7 +13,7 @@ router.get('/categories', async (req, res) => {
     const categories = await getAllCategories();
   return res.status(200).json(categories);
   } catch (err) {
-  return res.status(503).json({ error: 'Database error during category retrieval' });
+    return res.status(503).json({ error: 'Database error during category retrieval' });
   }
 });
 

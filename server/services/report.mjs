@@ -65,7 +65,6 @@ export const insertReport = async ({ title, citizen_id, description, image_urls,
 
 // returns all reports with related info and photos
 export const getAllReports = async () => {
-  try {
     const sql = `
       SELECT
         r.report_id,
@@ -130,14 +129,10 @@ export const getAllReports = async () => {
       } : null,
       photos: row.photos || []
     }));
-  } catch (err) {
-    throw err;
-  }
 };
 
 // returns all reports assigned to a specific operator (internal technical staff or external maintainer)
 export const getReportsAssigned = async (operator_id) => {
-  try {
     const sql = `
           SELECT
             r.report_id,
@@ -208,9 +203,6 @@ export const getReportsAssigned = async (operator_id) => {
       assigned_to_external: row.assigned_to_external_id ? row.assigned_to_external_id : null,
       photos: row.photos || []
     }));
-  } catch (err) {
-    throw err;
-  }
 };
 
 // update the status of a report (optionally include rejection_reason)
@@ -330,7 +322,6 @@ export const updateReportStatus = async (report_id, status_id, rejection_reason 
 };
 
 export const getAllApprovedReports = async () => {
-  try {
     const sql = `
       SELECT
         r.report_id,
@@ -383,13 +374,9 @@ export const getAllApprovedReports = async () => {
       status: { id: row.status_id, name: row.status_name },
       photos: row.photos || []
     }));
-  } catch (err) {
-    throw err;
-  }
 };
 
 export const setOperatorByReport = async (report_id, operator_id) => {
-  try {
     const sql = `UPDATE reports
       SET assigned_to_operator_id = $2,
           updated_at = NOW()
@@ -407,9 +394,6 @@ export const setOperatorByReport = async (report_id, operator_id) => {
     }
 
     return result.rows[0];
-  } catch (err) {
-    throw err;
-  }
 };
 
 // Assegna un mainteiner (operator) a un report
@@ -426,8 +410,6 @@ export const setMainteinerByReport = async (report_id, operator_id) => {
       status_id,
       updated_at
   `;
-
-  try {
     const result = await pool.query(sql, [report_id, operator_id]);
 
     if (result.rows.length === 0) {
@@ -435,7 +417,5 @@ export const setMainteinerByReport = async (report_id, operator_id) => {
     }
 
     return result.rows[0];
-  } catch (err) {
-    throw err;
-  }
+ 
 };

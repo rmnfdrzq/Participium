@@ -88,11 +88,6 @@ router.put("/citizens", async (req, res) => {
 
 // POST /citizens/verification-code
 router.post("/citizens/verification-code", async (req, res) => {
-  console.log(
-    "Imported generateEmailVerificationCode =",
-    generateEmailVerificationCode
-  );
-
   try {
     if (!req.isAuthenticated())
       return res.status(401).json({ error: "Not authenticated" });

@@ -13,12 +13,8 @@ const pool = new Pool({
 
 // returns all companies /api/companies
 export const getAllCompanies = async () => {
-  try {
     const sql = 'SELECT * FROM companies';
     const result = await pool.query(sql);
 
     return result.rows.map((e) => ({ id: e.company_id,name: e.name, description: e.description}));
-  } catch (err) {
-    throw err;
-  }
 };

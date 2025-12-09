@@ -3,7 +3,6 @@ import { getAllRoles } from '../dao.mjs';
 
 const router = Router();
 
-
 //GET /api/roles -> all roles
 router.get('/roles', async (req, res) => {
   try {

@@ -14,7 +14,6 @@ const pool = new Pool({
 
 //given username (email) and password does the login -> searches in citizen and then operators tables
 export const getUser = async (username, password) => {
-  try {
     // First try to find in operators table
     const operatorSql = 'SELECT o.*, r.name as role_name FROM operators o JOIN roles r ON o.role_id = r.role_id WHERE o.email = $1 OR o.username = $1';
     const operatorResult = await pool.query(operatorSql, [username]);
@@ -62,9 +61,6 @@ export const getUser = async (username, password) => {
         resolve(match ? user : false);
       });
     });
-  } catch (err) {
-    throw err;
-  }
 };
 
 //get all mainteiners by office_id
@@ -89,7 +85,6 @@ export const getTechnicalOfficersByOffice = async (officeId) => {
 
 //given username (email) and password does the login -> searches only in the onperators tables
 export const getOperators = async (username, password) => {
-  try {
     const sql = 'SELECT * FROM operators JOIN roles ON operators.role_id = roles.role_id WHERE email = $1';
     const result = await pool.query(sql, [username]);
 
@@ -110,14 +105,10 @@ export const getOperators = async (username, password) => {
         resolve(match ? user : false);
       });
     });
-  } catch (err) {
-    throw err;
-  }
 };
 
 //returns all operators with its data 
 export const getAllOperators = async () => {
-  try {
     const sql = `
       SELECT o.operator_id, o.email, o.username, o.office_id, off.name as office_name, r.name as role_name
       FROM operators o
@@ -134,9 +125,6 @@ export const getAllOperators = async () => {
       office_name: row.office_name,
       role: row.role_name
     }));
-  } catch (err) {
-    throw err;
-  }
 };
 
 //given operator data creates an operator

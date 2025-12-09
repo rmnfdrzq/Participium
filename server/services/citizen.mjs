@@ -2,7 +2,6 @@
 import { Pool } from "pg";
 import crypto from "crypto";
 import dotenv from "dotenv";
-import e from "express";
 import nodemailer from "nodemailer";
 
 dotenv.config();
@@ -64,9 +63,7 @@ export const createUser = async (
   });
 };
 
-
 export const getUserInfoById = async (userId) => {
-  try {
     const sql =
       "SELECT email, username, first_name, last_name, profile_photo_url, telegram_username, email_notifications, verified from citizens WHERE citizen_id = $1";
     const result = await pool.query(sql, [userId]);
@@ -74,14 +71,9 @@ export const getUserInfoById = async (userId) => {
       return null;
     }
     return result.rows[0];
-  } catch (err) {
-    throw err;
-  }
 };
 
-
 export const updateUserById = async (userId, updates) => {
-  try {
     const keys = Object.keys(updates);
     if (keys.length === 0) return null;
 
@@ -100,13 +92,9 @@ export const updateUserById = async (userId, updates) => {
 
     const result = await pool.query(sql, values);
     return result.rows[0];
-  } catch (err) {
-    throw err;
-  }
 };
 
 const sendEmail = async (to, subject, text) => {
-  try {
     const info = await transporter.sendMail({
        from: `"Participium" <${process.env.GMAIL_USER}>`,
       to,
@@ -114,16 +102,10 @@ const sendEmail = async (to, subject, text) => {
       text,
     });
 
-    console.log("Email sent:", info);
     return info;
-  } catch (err) {
-    console.error("Error sending email:", err);
-    throw err;
-  }
 };
 
 export const generateEmailVerificationCode = async (userId) => {
-  try {
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
     const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
 
@@ -149,16 +131,9 @@ export const generateEmailVerificationCode = async (userId) => {
     }
 
     return expires_at;
-  } catch (err) {
-    console.error("generateEmailVerificationCode ERROR:", err);
-    throw err;
-  }
 };
 
-
-
 export const verifyEmailCode = async (userId, code) => {
-  try {
     const sql = `
       SELECT * FROM verification_codes
       WHERE citizen_id = $1 AND code = $2 AND expires_at > NOW()
@@ -180,7 +155,4 @@ export const verifyEmailCode = async (userId, code) => {
     const deleteSql = "DELETE FROM verification_codes WHERE citizen_id = $1";
     await pool.query(deleteSql, [userId]);
     return true;
-  } catch (err) {
-    throw err;
-  }
 };

@@ -83,8 +83,8 @@ router.put("/reports/:id/status", async (req, res) => {
     if (req.user.role === "user" || req.user.role === "Municipal administrator")
       return res.status(403).json({ error: "Forbidden" });
 
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(423).json({ error: "Invalid report id" });
 
     const { status_id, rejection_reason } = req.body;
@@ -114,8 +114,8 @@ router.put("/reports/:id/operator", async (req, res) => {
       req.user.role !== "Admin"
     )
       return res.status(403).json({ error: "Forbidden" });
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(423).json({ error: "Invalid report id" });
     const { operatorId } = req.body;
     if (typeof operatorId !== "number")
@@ -140,8 +140,8 @@ router.put("/reports/:id/mainteiner", async (req, res) => {
       req.user.role !== "Admin"
     )
       return res.status(403).json({ error: "Forbidden" });
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(423).json({ error: "Invalid report id" });
 
     const { operatorId } = req.body;
@@ -200,8 +200,8 @@ router.post("/reports/:id/internal-comments", async (req, res) => {
       return res.status(403).json({ error: "Forbidden - operators only" });
     }
 
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 
     const { content } = req.body;
@@ -216,7 +216,6 @@ router.post("/reports/:id/internal-comments", async (req, res) => {
     );
   return res.status(201).json(comment);
   } catch (err) {
-    console.error(err);
   return res.status(503).json({ error: "Database error during comment creation" });
   }
 });
@@ -231,14 +230,13 @@ router.get("/reports/:id/internal-comments", async (req, res) => {
       return res.status(403).json({ error: "Forbidden - operators only" });
     }
 
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 
     const comments = await getInternalComments(reportId);
   return res.status(200).json(comments);
   } catch (err) {
-    console.error(err);
   return res.status(503).json({ error: "Database error during comment retrieval" });
   }
 });
@@ -249,8 +247,8 @@ router.post("/reports/:id/messages", async (req, res) => {
     if (!req.isAuthenticated())
       return res.status(401).json({ error: "Not authenticated" });
 
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 
     const { content } = req.body;
@@ -268,7 +266,6 @@ router.post("/reports/:id/messages", async (req, res) => {
     );
   return res.status(201).json(message);
   } catch (err) {
-    console.error(err);
   return res.status(503).json({ error: "Database error during message creation" });
   }
 });
@@ -279,8 +276,8 @@ router.get("/reports/:id/messages", async (req, res) => {
     if (!req.isAuthenticated())
       return res.status(401).json({ error: "Not authenticated" });
 
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 
     const messages = await getMessages(reportId);

@@ -13,7 +13,6 @@ const pool = new Pool({
 
 // returns all categories
 export const getAllCategories = async () => {
-  try {
     const sql = 'SELECT * FROM categories';
     const result = await pool.query(sql);
 
@@ -22,8 +21,5 @@ export const getAllCategories = async () => {
       name: e.name,
       office_id: e.office_id
     }));
-  } catch (err) {
-    throw err;
-  }
 };
 

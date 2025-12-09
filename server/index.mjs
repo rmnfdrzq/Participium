@@ -65,8 +65,7 @@ app.use(
 );
 app.use(passport.authenticate("session"));
 
-/* ROUTES OF SECOND SPRINT */
-/* ROUTES OF THE FIRST SPRINT */
+/* ROUTES */
 app.use("/api", category);
 app.use("/api", citizen);
 app.use("/api", company);

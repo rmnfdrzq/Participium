@@ -13,11 +13,7 @@ const pool = new Pool({
 
 //returns all roles
 export const getAllRoles = async () => {
-  try {
     const sql = ' SELECT * FROM roles';
     const result = await pool.query(sql);
     return result.rows.map((e) => { return { id: e.role_id, name: e.name }; });
-  } catch (err) {
-    throw err;
-  }
 };

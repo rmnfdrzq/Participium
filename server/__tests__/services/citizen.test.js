@@ -35,6 +35,9 @@ describe('services/citizen', () => {
   beforeEach(() => {
     queryMock.mockReset();
     sendEmailMock.mockReset();
+    scryptSpy.mockClear();
+    randomBytesSpy.mockClear();
+    jest.spyOn(console, 'error').mockImplementation(() => {}); 
   });
 
   test('createUser: inserts and returns new citizen id', async () => {
@@ -58,8 +61,21 @@ describe('services/citizen', () => {
   });
 
   test('createUser: propagates scrypt error', async () => {
-    scryptSpy.mockImplementationOnce((password, salt, len, cb) => cb(new Error('scrypt fail')));
+    const scryptErrorSpy = jest.spyOn(crypto, 'scrypt');
+    scryptErrorSpy.mockImplementation((password, salt, len, cb) => {
+      cb(new Error('scrypt fail'));
+    });
+    
     await expect(svc.createUser('u', 'a', 'F', 'L', true, 'p')).rejects.toThrow('scrypt fail');
+    
+    scryptErrorSpy.mockRestore();
+  });
+
+  test('createUser: propagates database error', async () => {
+    queryMock.mockRejectedValueOnce(new Error('DB insert failed'));
+
+    await expect(svc.createUser('uname', 'e@mail', 'First', 'Last', true, 'secret'))
+      .rejects.toThrow('DB insert failed');
   });
 
   test('getUserInfoById: returns row or null', async () => {
@@ -72,6 +88,12 @@ describe('services/citizen', () => {
     queryMock.mockResolvedValueOnce({ rows: [] });
     const res2 = await svc.getUserInfoById(999);
     expect(res2).toBeNull();
+  });
+
+  test('getUserInfoById: propagates database error', async () => {
+    queryMock.mockRejectedValueOnce(new Error('DB query failed'));
+
+    await expect(svc.getUserInfoById(5)).rejects.toThrow('DB query failed');
   });
 
   test('updateUserById: returns null when no updates', async () => {
@@ -92,6 +114,13 @@ describe('services/citizen', () => {
     expect(params[1]).toBe(7); // userId appended
   });
 
+  test('updateUserById: propagates database error', async () => {
+    queryMock.mockRejectedValueOnce(new Error('Update failed'));
+
+    await expect(svc.updateUserById(7, { first_name: 'New' }))
+      .rejects.toThrow('Update failed');
+  });
+
   test('generateEmailVerificationCode: does not call sendEmail when user not found', async () => {
     queryMock
       .mockResolvedValueOnce({}) // DELETE
@@ -102,6 +131,53 @@ describe('services/citizen', () => {
     const expires_at = await svc.generateEmailVerificationCode(99);
     expect(expires_at instanceof Date).toBe(true);
     expect(sendEmailMock).not.toHaveBeenCalled();
+  });
+
+  test('generateEmailVerificationCode: calls sendEmail when user found', async () => {
+    const userInfo = {
+      email: 'user@example.com',
+      username: 'testuser'
+    };
+
+    queryMock
+      .mockResolvedValueOnce({}) // DELETE
+      .mockResolvedValueOnce({}) // INSERT
+      .mockResolvedValueOnce({ rows: [userInfo] }); // getUserInfoById
+
+    sendEmailMock.mockResolvedValueOnce({ messageId: '123' });
+
+    const expires_at = await svc.generateEmailVerificationCode(5);
+
+    expect(expires_at instanceof Date).toBe(true);
+    expect(queryMock).toHaveBeenCalledTimes(3);
+    
+    // Verify DELETE was called
+    const [deleteSql, deleteParams] = queryMock.mock.calls[0];
+    expect(deleteSql).toMatch(/DELETE FROM verification_codes/i);
+    expect(deleteParams).toEqual([5]);
+
+    // Verify INSERT was called with code and expires_at
+    const [insertSql, insertParams] = queryMock.mock.calls[1];
+    expect(insertSql).toMatch(/INSERT INTO verification_codes/i);
+    expect(insertParams[0]).toBe(5); // userId
+    expect(insertParams[1]).toMatch(/^\d{6}$/); // 6-digit code
+    expect(insertParams[2] instanceof Date).toBe(true); // expires_at
+  });
+
+  test('generateEmailVerificationCode: propagates database error on DELETE', async () => {
+    queryMock.mockRejectedValueOnce(new Error('DELETE failed'));
+
+    await expect(svc.generateEmailVerificationCode(5))
+      .rejects.toThrow('DELETE failed');
+  });
+
+  test('generateEmailVerificationCode: propagates database error on INSERT', async () => {
+    queryMock
+      .mockResolvedValueOnce({}) // DELETE succeeds
+      .mockRejectedValueOnce(new Error('INSERT failed')); // INSERT fails
+
+    await expect(svc.generateEmailVerificationCode(5))
+      .rejects.toThrow('INSERT failed');
   });
 
   test('verifyEmailCode: returns false when no matching code', async () => {
@@ -125,8 +201,25 @@ describe('services/citizen', () => {
     expect(queryMock).toHaveBeenCalledWith(expect.stringMatching(/DELETE FROM verification_codes/), [2]);
   });
 
-  test('verifyEmailCode: propagates DB errors', async () => {
-    queryMock.mockRejectedValueOnce(new Error('db fail'));
-    await expect(svc.verifyEmailCode(1, 'x')).rejects.toThrow('db fail');
+  test('verifyEmailCode: propagates DB error on SELECT', async () => {
+    queryMock.mockRejectedValueOnce(new Error('SELECT failed'));
+    await expect(svc.verifyEmailCode(1, 'x')).rejects.toThrow('SELECT failed');
+  });
+
+  test('verifyEmailCode: propagates DB error on UPDATE', async () => {
+    queryMock
+      .mockResolvedValueOnce({ rows: [{ code_id: 1 }] }) // SELECT succeeds
+      .mockRejectedValueOnce(new Error('UPDATE failed')); // UPDATE fails
+
+    await expect(svc.verifyEmailCode(2, '123456')).rejects.toThrow('UPDATE failed');
+  });
+
+  test('verifyEmailCode: propagates DB error on DELETE', async () => {
+    queryMock
+      .mockResolvedValueOnce({ rows: [{ code_id: 1 }] }) // SELECT succeeds
+      .mockResolvedValueOnce({}) // UPDATE succeeds
+      .mockRejectedValueOnce(new Error('DELETE failed')); // DELETE fails
+
+    await expect(svc.verifyEmailCode(2, '123456')).rejects.toThrow('DELETE failed');
   });
 });

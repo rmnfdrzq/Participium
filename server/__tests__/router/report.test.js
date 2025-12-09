@@ -273,7 +273,7 @@ describe('router/report', () => {
     let res = await requestLib(app).post('/reports/3/internal-comments').send({ content: 'note' });
     expect(res.status).toBe(403);
 
-    currentUser = { id: 12, type: 'operator' };
+    currentUser = { id: 12, role: 'Technical office staff member' };
     app = makeApp();
     res = await requestLib(app).post('/reports/abc/internal-comments').send({ content: 'note' });
     expect(res.status).toBe(422);
@@ -303,7 +303,7 @@ describe('router/report', () => {
     res = await requestLib(app).get('/reports/3/internal-comments');
     expect(res.status).toBe(403);
 
-    currentUser = { id: 12, type: 'operator' };
+    currentUser = { id: 12, role: 'Technical office staff member' };
     app = makeApp();
     res = await requestLib(app).get('/reports/abc/internal-comments');
     expect(res.status).toBe(422);

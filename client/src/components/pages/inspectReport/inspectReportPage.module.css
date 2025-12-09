@@ -232,6 +232,56 @@
   transform: none;
 }
 
+.warningButton {
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #ff9800;
+  border: none;
+  color: var(--static-white);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.warningButton:hover:not(:disabled) {
+  background-color: #f57c00;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.warningButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.successButton {
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #4caf50;
+  border: none;
+  color: var(--static-white);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.successButton:hover:not(:disabled) {
+  background-color: #388e3c;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.successButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .secondaryButton {
   flex: 1;
   padding: 14px 24px;
@@ -265,6 +315,13 @@
 
 .backButton:hover {
   background-color: var(--border-light);
+}
+
+.footerButtons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 24px;
 }
 
 /* Modal */

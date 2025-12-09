@@ -60,14 +60,11 @@ export default function CommentsPage({ user }) {
         <div className={styles.contentWrapper}>
             {/* Header Card */}
             <div className={styles.headerCard}>
-                <button className={styles.backArrow} onClick={() => navigate(-1)}>
-                    ←
+                <h1 className={styles.title}>{selectedReport.title}</h1>
+                <p className={styles.subtitle}>View and add comments to the company report</p>
+                <button className={styles.backButton} onClick={() => navigate(-1)}>
+                    Back
                 </button>
-                <div className={styles.headerContent}>
-                    <h1 className={styles.title}>{selectedReport.title}</h1>
-                    <p className={styles.subtitle}>View and add comments to the company report</p>
-                </div>
-                <div /> {/* Spacer per bilanciare la griglia */}
             </div>
 
             {/* New Comment Form */}

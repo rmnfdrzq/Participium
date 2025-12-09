@@ -23,17 +23,18 @@
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
   padding: 32px 40px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  text-align: center;
 }
 
 .title {
   font-size: 28px;
   font-weight: 700;
   color: var(--static-black);
-  margin-bottom: 8px;
+  margin: 0;
 }
 
 .subtitle {
@@ -42,26 +43,21 @@
   margin: 0;
 }
 
-.backArrow {
-  background: none;
-  border: none;
-  font-size: 32px;
-  cursor: pointer;
+.backButton {
+  padding: 10px 24px;
+  background-color: var(--background-default);
+  border: 1px solid var(--border-light);
   color: var(--static-black);
-  padding: 0;
-  display: flex;
-  align-items: center;
-  transition: transform 0.2s ease;
-  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 8px;
 }
 
-.backArrow:hover {
-  transform: translateX(-4px);
-}
-
-.headerContent {
-  text-align: center;
-  grid-column: 2;
+.backButton:hover {
+  background-color: var(--border-light);
 }
 
 /* Main Card */

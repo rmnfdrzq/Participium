@@ -9,13 +9,16 @@ import styles from "./inspectReportPage.module.css";
 function InspectReportPage() {
   const selectedReport = useSelector((state) => state.report.selected);
   const navigate = useNavigate();
-  
+
   const [loggedUser, setLoggedUser] = useState(null);
-  const isTechnicalOfficer = loggedUser?.role === "Technical office staff member";
-  const isExternalMaintainer = loggedUser?.role === "External Maintainers";
+  const isTechnicalOfficer =
+    loggedUser?.role === "Technical office staff member";
+  const isExternalMaintainer = loggedUser?.role === "External maintainer";
 
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [newStatusId, setNewStatusId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const [officers, setOfficers] = useState([]);
   const [selectedOfficer, setSelectedOfficer] = useState(null);
@@ -27,22 +30,20 @@ function InspectReportPage() {
   const [maintainer, setMaintainer] = useState(null);
 
   useEffect(() => {
-  const load = async () => {
-    try {
-      const user = await API.getUserInfo();
-      setLoggedUser(user);
-      if (selectedReport) {
-        loadOfficers();
-        loadAddress();
+    const load = async () => {
+      try {
+        const user = await API.getUserInfo();
+        setLoggedUser(user);
+        if (selectedReport) {
+          loadOfficers();
+          loadAddress();
+        }
+      } catch (err) {
+        console.error("Failed to load user", err);
       }
-      
-    } catch (err) {
-      console.error("Failed to load user", err);
-    }
-  };
-  load();
-}, [selectedReport]);
-
+    };
+    load();
+  }, [selectedReport]);
 
   const loadAddress = async () => {
     if (!selectedReport?.latitude || !selectedReport?.longitude) {
@@ -71,8 +72,10 @@ function InspectReportPage() {
         selectedReport.office.id
       );
       setOfficers(officersData);
-      if(selectedReport.assigned_to_external){
-        const reportMaintainer =officersData.find((o) => o.id === selectedReport.assigned_to_external); 
+      if (selectedReport.assigned_to_external) {
+        const reportMaintainer = officersData.find(
+          (o) => o.id === selectedReport.assigned_to_external
+        );
         setMaintainer(reportMaintainer);
       }
     } catch (err) {
@@ -105,6 +108,17 @@ function InspectReportPage() {
     await API.setOperatorByReport(selectedReport.id, selectedOfficer);
     await API.updateReportStatus(selectedReport.id, 2);
     setShowApproveModal(false);
+    navigate(-1);
+  };
+
+  const handleStatusChange = (statusId) => {
+    setNewStatusId(statusId);
+    setShowStatusModal(true);
+  };
+
+  const confirmStatusUpdate = async () => {
+    await API.updateReportStatus(selectedReport.id, newStatusId);
+    setShowStatusModal(false);
     navigate(-1);
   };
 
@@ -163,7 +177,7 @@ function InspectReportPage() {
           </div>
 
           {/* Show assigned maintainer if exists   */}
-          {(selectedReport.assigned_to_external) && (
+          {selectedReport.assigned_to_external && (
             <div className={styles.row}>
               <span className={styles.label}>Assigned Maintainer</span>
               <span className={styles.value}>
@@ -262,33 +276,32 @@ function InspectReportPage() {
           </div>
         )}
 
-        {isTechnicalOfficer && selectedReport.assigned_to_external == null &&(
-            <div className={`${styles.section} ${styles.sectionNoBorder}`}>
+        {isTechnicalOfficer && selectedReport.assigned_to_external == null && (
+          <div className={`${styles.section} ${styles.sectionNoBorder}`}>
             <h3 className={styles.sectionTitle}>Assign External Maintainer</h3>
 
-    <select
-      value={selectedMaintainer || ""}
-      onChange={(e) => setSelectedMaintainer(Number(e.target.value))}
-      className={styles.select}
-    >
-      <option value="">Select a maintainer...</option>
-      {officers.map((maintainer) => (
-        <option key={maintainer.id} value={maintainer.id}>
-          {maintainer.username} — {maintainer.company}
-        </option>
-      ))}
-      </select>
+            <select
+              value={selectedMaintainer || ""}
+              onChange={(e) => setSelectedMaintainer(Number(e.target.value))}
+              className={styles.select}
+            >
+              <option value="">Select a maintainer...</option>
+              {officers.map((maintainer) => (
+                <option key={maintainer.id} value={maintainer.id}>
+                  {maintainer.username} — {maintainer.company}
+                </option>
+              ))}
+            </select>
 
-          <button
-            className={styles.primaryButton}
-            onClick={handleAssignMaintainer}
-            disabled={!selectedMaintainer}
-             >
-        Assign Maintainer
-           </button>
-         </div>
+            <button
+              className={styles.primaryButton}
+              onClick={handleAssignMaintainer}
+              disabled={!selectedMaintainer}
+            >
+              Assign Maintainer
+            </button>
+          </div>
         )}
-
 
         {/* Action Buttons */}
         {selectedReport.status.id === 1 && (
@@ -308,6 +321,28 @@ function InspectReportPage() {
           </div>
         )}
 
+        {/* External Maintainer Status Update */}
+        {isExternalMaintainer && selectedReport.status.id !== 6 && (
+          <div className={`${styles.section} ${styles.sectionNoBorder}`}>
+            <h3 className={styles.sectionTitle}>Update Status</h3>
+            <div className={styles.actionButtons}>
+              <button
+                className={styles.warningButton}
+                onClick={() => handleStatusChange(4)}
+                disabled={selectedReport.status.id === 4}
+              >
+                Mark as Suspended
+              </button>
+              <button
+                className={styles.successButton}
+                onClick={() => handleStatusChange(6)}
+              >
+                Mark as Resolved
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Back Button */}
         <div className={styles.footerButtons}>
           <button className={styles.backButton} onClick={() => navigate(-1)}>
@@ -315,11 +350,14 @@ function InspectReportPage() {
           </button>
 
           {/*Comment page button */}
-          {(isTechnicalOfficer || isExternalMaintainer) &&
-          <button className={styles.backButton} onClick={() => navigate('/comments')}>
+          {(isTechnicalOfficer || isExternalMaintainer) && (
+            <button
+              className={styles.backButton}
+              onClick={() => navigate("/comments")}
+            >
               View Comments
             </button>
-          }
+          )}
         </div>
       </div>
 
@@ -382,6 +420,37 @@ function InspectReportPage() {
                 disabled={rejectReason.trim().length < 5}
               >
                 Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Status Update Confirmation Modal */}
+      {showStatusModal && (
+        <div
+          className={styles.confirmModalOverlay}
+          onClick={(e) =>
+            e.target === e.currentTarget && setShowStatusModal(false)
+          }
+        >
+          <div className={styles.confirmModal}>
+            <p className={styles.confirmQuestion}>
+              Are you sure you want to change the status to{" "}
+              <strong>{STATUS_MAP[newStatusId]?.label}</strong>?
+            </p>
+            <div className={styles.confirmModalButtons}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowStatusModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmButton}
+                onClick={confirmStatusUpdate}
+              >
+                Confirm
               </button>
             </div>
           </div>

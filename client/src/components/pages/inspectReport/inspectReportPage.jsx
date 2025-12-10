@@ -177,7 +177,7 @@ function InspectReportPage() {
           </div>
 
           {/* Show assigned maintainer if exists   */}
-          {selectedReport.assigned_to_external && (
+          {(isTechnicalOfficer && selectedReport.assigned_to_external) && (
             <div className={styles.row}>
               <span className={styles.label}>Assigned Maintainer</span>
               <span className={styles.value}>
@@ -326,6 +326,13 @@ function InspectReportPage() {
           <div className={`${styles.section} ${styles.sectionNoBorder}`}>
             <h3 className={styles.sectionTitle}>Update Status</h3>
             <div className={styles.actionButtons}>
+              <button
+                className={styles.primaryButton}
+                onClick={() => handleStatusChange(3)}
+                disabled={selectedReport.status.id === 3}
+              >
+                Mark as In Progress
+              </button>
               <button
                 className={styles.warningButton}
                 onClick={() => handleStatusChange(4)}

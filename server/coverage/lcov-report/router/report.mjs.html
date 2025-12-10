@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.57% </span>
+                <span class="strong">85.4% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>117/140</span>
+                <span class='fraction'>117/137</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">83.94% </span>
+                <span class="strong">85.82% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>115/137</span>
+                <span class='fraction'>115/134</span>
             </div>
         
             
@@ -354,10 +354,7 @@
 <a name='L289'></a><a href='#L289'>289</a>
 <a name='L290'></a><a href='#L290'>290</a>
 <a name='L291'></a><a href='#L291'>291</a>
-<a name='L292'></a><a href='#L292'>292</a>
-<a name='L293'></a><a href='#L293'>293</a>
-<a name='L294'></a><a href='#L294'>294</a>
-<a name='L295'></a><a href='#L295'>295</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L292'></a><a href='#L292'>292</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -576,7 +573,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -597,7 +593,6 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -627,7 +622,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -736,8 +730,8 @@ router.put("/reports/:id/status", async (req, res) =&gt; {
     <span class="missing-if-branch" title="if path not taken" >I</span>if (req.user.role === "user" || req.user.role === "Municipal administrator")
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: "Forbidden" });</span>
 &nbsp;
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(423).json({ error: "Invalid report id" });
 &nbsp;
     const { status_id, rejection_reason } = req.body;
@@ -767,8 +761,8 @@ router.put("/reports/:id/operator", async (req, res) =&gt; {
       req.user.role !== "Admin"
     )
       return res.status(403).json({ error: "Forbidden" });
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(423).json({ error: "Invalid report id" });
     const { operatorId } = req.body;
     if (typeof operatorId !== "number")
@@ -793,8 +787,8 @@ router.put("/reports/:id/mainteiner", async (req, res) =&gt; {
 <span class="branch-1 cbranch-no" title="branch not covered" >      req.user.role !== "Admin"</span>
     )
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: "Forbidden" });</span>
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(423).json({ error: "Invalid report id" });
 &nbsp;
     const { operatorId } = req.body;
@@ -853,8 +847,8 @@ router.post("/reports/:id/internal-comments", async (req, res) =&gt; {
       return res.status(403).json({ error: "Forbidden - operators only" });
     }
 &nbsp;
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 &nbsp;
     const { content } = req.body;
@@ -869,7 +863,6 @@ router.post("/reports/:id/internal-comments", async (req, res) =&gt; {
     );
   return res.status(201).json(comment);
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    console.error(err);</span>
 <span class="cstat-no" title="statement not covered" >  return res.status(503).json({ error: "Database error during comment creation" });</span>
   }
 });
@@ -884,14 +877,13 @@ router.get("/reports/:id/internal-comments", async (req, res) =&gt; {
       return res.status(403).json({ error: "Forbidden - operators only" });
     }
 &nbsp;
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 &nbsp;
     const comments = await getInternalComments(reportId);
   return res.status(200).json(comments);
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    console.error(err);</span>
 <span class="cstat-no" title="statement not covered" >  return res.status(503).json({ error: "Database error during comment retrieval" });</span>
   }
 });
@@ -902,8 +894,8 @@ router.post("/reports/:id/messages", async (req, res) =&gt; {
     <span class="missing-if-branch" title="if path not taken" >I</span>if (!req.isAuthenticated())
 <span class="cstat-no" title="statement not covered" >      return res.status(401).json({ error: "Not authenticated" });</span>
 &nbsp;
-    const reportId = parseInt(req.params.id, 10);
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (Number.isNaN(reportId))
 <span class="cstat-no" title="statement not covered" >      return res.status(422).json({ error: "Invalid report id" });</span>
 &nbsp;
     const { content } = req.body;
@@ -921,7 +913,6 @@ router.post("/reports/:id/messages", async (req, res) =&gt; {
     );
   return res.status(201).json(message);
   } catch (err) {
-<span class="cstat-no" title="statement not covered" >    console.error(err);</span>
 <span class="cstat-no" title="statement not covered" >  return res.status(503).json({ error: "Database error during message creation" });</span>
   }
 });
@@ -932,8 +923,8 @@ router.get("/reports/:id/messages", async (req, res) =&gt; {
     <span class="missing-if-branch" title="if path not taken" >I</span>if (!req.isAuthenticated())
 <span class="cstat-no" title="statement not covered" >      return res.status(401).json({ error: "Not authenticated" });</span>
 &nbsp;
-    const reportId = parseInt(req.params.id, 10);
-    if (isNaN(reportId))
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 &nbsp;
     const messages = await getMessages(reportId);
@@ -952,7 +943,7 @@ export default router;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-12-09T16:45:42.661Z
+                at 2025-12-10T09:58:06.474Z
             </div>
         <script src="../prettify.js"></script>
         <script>

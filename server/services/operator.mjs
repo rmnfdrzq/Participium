@@ -64,12 +64,12 @@ export const getUser = async (username, password) => {
 };
 
 //get all mainteiners by office_id
-export const getMainteinerByOffice = async () => {
+export const getMainteinerByOffice = async ( office_id ) => {
   const sql = `SELECT o.operator_id, o.username, c.name AS company_name
     FROM operators o LEFT JOIN companies c ON o.company_id = c.company_id
-    WHERE o.role_id = (SELECT role_id FROM roles WHERE name = 'External maintainer')`;
-
-  const result = await pool.query(sql);
+    WHERE o.role_id = (SELECT role_id FROM roles WHERE name = 'External maintainer') 
+    AND o.office_id = $1`;  
+  const result = await pool.query(sql,[office_id]);
 
   return result.rows.map(e => ({ id: e.operator_id, username: e.username, company: e.company_name }));
 };

@@ -361,6 +361,7 @@ function InspectReportPage() {
             <button
               className={styles.backButton}
               onClick={() => navigate("/comments")}
+              disabled={!maintainer && isTechnicalOfficer} 
             >
               View Comments
             </button>

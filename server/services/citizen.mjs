@@ -119,18 +119,20 @@ const sendEmail = async (to, subject, text) => {
 export const generateEmailVerificationCode = async (userId) => {
   try {
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
-    const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
 
-    // Check if there's an existing code for the user and delete it
+    // Remove any existing code for the user
     const deleteSql = "DELETE FROM verification_codes WHERE citizen_id = $1";
     await pool.query(deleteSql, [userId]);
 
-    // Insert new citizen-code pair
+    // Insert new citizen-code pair using DB-side UTC timestamps
     const sql = `
       INSERT INTO verification_codes (citizen_id, code, created_at, expires_at)
-      VALUES ($1, $2, NOW(), $3);
+      VALUES ($1, $2, NOW() AT TIME ZONE 'UTC', (NOW() AT TIME ZONE 'UTC') + INTERVAL '30 minutes')
+      RETURNING expires_at;
     `;
-    await pool.query(sql, [userId, code, expires_at]);
+    const { rows } = await pool.query(sql, [userId, code]);
+
+    const expires_at = rows[0].expires_at;
 
     // Send the code via email
     const userInfo = await getUserInfoById(userId);

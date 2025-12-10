@@ -294,7 +294,7 @@ function InspectReportPage() {
             </select>
 
             <button
-              className={styles.primaryButton}
+              className={`${styles.primaryButton} ${styles.buttonSpaced}`}
               onClick={handleAssignMaintainer}
               disabled={!selectedMaintainer}
             >
@@ -361,6 +361,7 @@ function InspectReportPage() {
             <button
               className={styles.backButton}
               onClick={() => navigate("/comments")}
+              disabled={!maintainer}
             >
               View Comments
             </button>

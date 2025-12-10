@@ -30,11 +30,6 @@ export function LoginPage(props) {
         // Don't set user state - keep them "not logged in" on frontend
         // But session exists on server for verification API calls
         props.setIsUnverifiedSession(true);
-        try {
-          await API.requestVerificationCode();
-        } catch (verifyErr) {
-          console.error("Failed to send verification code:", verifyErr);
-        }
         navigate("/verify-email");
         return;
       }

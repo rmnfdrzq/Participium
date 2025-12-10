@@ -18,6 +18,7 @@ function InspectReportPage() {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [showMaintainerModal, setShowMaintainerModal] = useState(false);
   const [newStatusId, setNewStatusId] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const [officers, setOfficers] = useState([]);
@@ -100,7 +101,17 @@ function InspectReportPage() {
   };
 
   const handleAssignMaintainer = async () => {
+    if (!selectedMaintainer) {
+      setWarning("Please select a maintainer.");
+      setTimeout(() => setWarning(""), 3000);
+      return;
+    }
+    setShowMaintainerModal(true);
+  };
+
+  const confirmAssignMaintainer = async () => {
     await API.setMaintainerByReport(selectedReport.id, selectedMaintainer);
+    setShowMaintainerModal(false);
     navigate(-1);
   };
 
@@ -457,6 +468,36 @@ function InspectReportPage() {
               <button
                 className={styles.confirmButton}
                 onClick={confirmStatusUpdate}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Maintainer Assignment Confirmation Modal */}
+      {showMaintainerModal && (
+        <div
+          className={styles.confirmModalOverlay}
+          onClick={(e) =>
+            e.target === e.currentTarget && setShowMaintainerModal(false)
+          }
+        >
+          <div className={styles.confirmModal}>
+            <p className={styles.confirmQuestion}>
+              Are you sure you want to assign this report to the selected maintainer?
+            </p>
+            <div className={styles.confirmModalButtons}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowMaintainerModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.confirmButton}
+                onClick={confirmAssignMaintainer}
               >
                 Confirm
               </button>

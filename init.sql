@@ -197,7 +197,7 @@ INSERT INTO offices (name, description) VALUES
 ('Traffic Department', 'Handles road signs and traffic lights'),
 ('Public Works', 'Manages roads and urban furnishings'),
 ('Parks Department', 'Manages public green areas and playgrounds'),
-('General Services', 'Handles miscellaneous issues'),
+('General Services', 'Handles miscellaneous issues');
 
 -- 2. Categories
 INSERT INTO categories (name, office_id) VALUES

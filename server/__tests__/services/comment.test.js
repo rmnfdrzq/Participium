@@ -20,22 +20,40 @@ describe('services/comment - addInternalComment / getInternalComments / addMessa
   });
 
   test('addInternalComment: returns created comment row and calls DB with expected params', async () => {
-    const row = {
-      internal_comment_id: 11,
-      report_id: 5,
-      sender_operator_id: 2,
-      content: 'Please inspect',
-      created_at: '2025-01-01T00:00:00Z'
-    };
-    queryMock.mockResolvedValueOnce({ rows: [row] });
-
-    const res = await svc.addInternalComment(5, 2, 'Please inspect');
-    expect(res).toEqual(row);
-
-    const [sql, params] = queryMock.mock.calls[0];
-    expect(sql).toMatch(/INSERT INTO internal_comment/i);
-    expect(params).toEqual([5, 2, 'Please inspect']);
+  const row = {
+    internal_comment_id: 11,
+    report_id: 5,
+    sender_operator_id: 2,
+    content: 'Please inspect',
+    created_at: '2025-01-01T00:00:00Z'
+  };
+  
+  // Mock per la prima query (controllo status)
+  queryMock.mockResolvedValueOnce({ 
+    rows: [{ status_id: 1 }] // Status valido (non 5 o 6)
   });
+  
+  // Mock per la seconda query (insert del commento)
+  queryMock.mockResolvedValueOnce({ 
+    rows: [row] 
+  });
+
+  const res = await svc.addInternalComment(5, 2, 'Please inspect');
+  expect(res).toEqual(row);
+
+  // Verifica che siano state fatte 2 chiamate
+  expect(queryMock).toHaveBeenCalledTimes(2);
+
+  // Verifica la prima chiamata (check status)
+  const [checkSql, checkParams] = queryMock.mock.calls[0];
+  expect(checkSql).toMatch(/SELECT status_id FROM reports/i);
+  expect(checkParams).toEqual([5]);
+
+  // Verifica la seconda chiamata (insert comment)
+  const [insertSql, insertParams] = queryMock.mock.calls[1];
+  expect(insertSql).toMatch(/INSERT INTO internal_comment/i);
+  expect(insertParams).toEqual([5, 2, 'Please inspect']);
+});
 
   test('getInternalComments: maps DB rows to API shape', async () => {
     const dbRow = {

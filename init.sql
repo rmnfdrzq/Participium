@@ -417,7 +417,6 @@ WITH new_report AS (
         (SELECT office_id FROM offices WHERE name='Lighting Department'),
         (SELECT status_id FROM statuses WHERE name='Assigned'),
         (SELECT operator_id FROM operators WHERE username='tec_lighting'),
-        NULL,
         'Streetlight completely broken',
         'The streetlight has been off for several days, the area is very dark at night.',
         45.063248, 7.659290,  -- Close to the first two

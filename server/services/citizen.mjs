@@ -6,11 +6,15 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
+  secure: true,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
-  }
+  },
+  tls: {
+    rejectUnauthorized: true, // Verify server certificate
+  },
 });
 
 const pool = new Pool({
@@ -104,7 +108,7 @@ export const updateUserById = async (userId, updates) => {
 const sendEmail = async (to, subject, text) => {
   try {
     const info = await transporter.sendMail({
-       from: `"Participium" <${process.env.GMAIL_USER}>`,
+      from: `"Participium" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       text,

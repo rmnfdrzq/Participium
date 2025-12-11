@@ -118,7 +118,7 @@ const sendEmail = async (to, subject, text) => {
 
 export const generateEmailVerificationCode = async (userId) => {
   try {
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+    const code = crypto.randomInt(100000, 1000000).toString(); // Cryptographically secure 6-digit code
 
     // Remove any existing code for the user
     const deleteSql = "DELETE FROM verification_codes WHERE citizen_id = $1";

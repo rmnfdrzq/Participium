@@ -100,30 +100,32 @@ tec.parks@participium.local - participium
 tec.general@participium.local - participium
 
 # DB
+citizens( citizen_id, email, username, first_name, last_name, password_hash, salt, profile_photo_url, telegram_username, email_notifications, created_at, verified )
 
-citizens( citizen_id, email, username, first_name, last_name, password_hash, salt,profile_photo_url, email_notifications,telegram_username,email_notifications, created_at )
+verification_codes( code_id, citizen_id, code, created_at, expires_at )
 
-offices( office_id, name, description )
+categories( category_id, name, office )
 
-categories( category_id, name, office_id )
+companies( company_id, name, description )
 
-company(company_id, name, description)
+company_categories( company_id, category_id )
 
 statuses( status_id, name )
 
-reports( report_id, citizen_id, category_id, office_id, status_id,assigned_to_operator_id,assigned_to_external_id, title, description, latitude, longitude, anonymous rejection_reason, created_at, updated_at )
+roles( role_id, name, description )
+
+operators( operator_id, email, username, password_hash, salt, role_id, company_id )
+
+operator_categories( operator_id, category_id )
+
+reports( report_id, citizen_id, category_id, status_id, assigned_to_operator_id, assigned_to_company_id, assigned_to_external_id, title, description, latitude, longitude, anonymous, rejection_reason, created_at, updated_at )
 
 photos( photo_id, report_id, image_url, uploaded_at )
 
-roles( role_id, name, description )
+internal_comment( internal_comment_id, report_id, sender_operator_id, content, created_at )
 
-operators(operator_id, email, username, password_hash, salt, office_id, role_id,company_id,category_id)
+messages( message_id, report_id, sender_type, sender_id, content, sent_at )
 
-internal_comment( internal_comment_id, report_id, sender_operator_id, content, created_at)
+notifications( notification_id, citizen_id, report_id, message, sent_at, seen )
 
-messages(message_id, report_id, sender_type, sender_id, content, sent_at)
-
-notifications (notification_id, citizen_id, report_id, message,sent_at, seen)
-
-telegram_users(telegram_user_id, citizen_id, chat_id, linked_at)
-
+telegram_users( telegram_user_id, citizen_id, chat_id, linked_at )

@@ -151,3 +151,45 @@ export const createMunicipalityUser = async (email, username, password, office_i
     });
   });
 };
+// Add a category to an operator (only if operator is Technical staff and his company manages the category)
+export const addOperatorCategory = async (operator_id, category_id) => {
+  // Check operator exists and is Technical office staff member, and get company_id
+  const opSql = `SELECT o.operator_id, o.company_id, r.name as role_name
+    FROM operators o JOIN roles r ON o.role_id = r.role_id
+    WHERE o.operator_id = $1`;
+  const opRes = await pool.query(opSql, [operator_id]);
+  const op = opRes.rows[0];
+  if (!op) throw { status: 404, message: 'Operator not found' };
+  if (op.role_name !== 'Technical office staff member') throw { status: 422, message: 'Operator is not a technical staff member' };
+
+  // Check company manages the category
+  const compSql = `SELECT 1 FROM company_categories WHERE company_id = $1 AND category_id = $2`;
+  const compRes = await pool.query(compSql, [op.company_id, category_id]);
+  if (compRes.rows.length === 0) throw { status: 422, message: 'Company does not manage this category' };
+
+  // Insert association
+  const insertSql = `INSERT INTO operator_categories (operator_id, category_id) VALUES ($1, $2) RETURNING operator_id, category_id`;
+  try {
+    const ins = await pool.query(insertSql, [operator_id, category_id]);
+    return ins.rows[0];
+  } catch (err) {
+    // Unique violation
+    if (err.code === '23505') throw { status: 409, message: 'Operator already has this category' };
+    throw err;
+  }
+};
+
+// Remove a category from an operator (only if operator is Technical staff member)
+export const removeOperatorCategory = async (operator_id, category_id) => {
+  // Check operator exists and is Technical office staff member
+  const opSql = `SELECT o.operator_id, r.name as role_name FROM operators o JOIN roles r ON o.role_id = r.role_id WHERE o.operator_id = $1`;
+  const opRes = await pool.query(opSql, [operator_id]);
+  const op = opRes.rows[0];
+  if (!op) throw { status: 404, message: 'Operator not found' };
+  if (op.role_name !== 'Technical office staff member') throw { status: 422, message: 'Operator is not a technical staff member' };
+
+  const delSql = `DELETE FROM operator_categories WHERE operator_id = $1 AND category_id = $2 RETURNING operator_id`;
+  const delRes = await pool.query(delSql, [operator_id, category_id]);
+  if (delRes.rows.length === 0) throw { status: 404, message: 'Operator-category association not found' };
+  return { operator_id, category_id };
+};

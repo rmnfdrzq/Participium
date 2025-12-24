@@ -4,7 +4,9 @@ import {
   getAllOperators, 
   getTechnicalOfficersByOffice, 
   getMainteinerByOffice, 
-  createMunicipalityUser  
+  createMunicipalityUser,
+  addOperatorCategory,
+  removeOperatorCategory
 } from '../dao.mjs';
 const router = Router();
 
@@ -117,6 +119,47 @@ router.post('/admin/createuser', [
     } else {
       return res.status(503).json({ error: 'Database error during user creation' });
     }
+  }
+});
+
+
+// POST /api/admin/addcategory -> Admin adds a category to an operator
+router.post('/admin/addcategory', [
+  check('operator_id').isInt().withMessage('Operator ID must be an integer'),
+  check('category_id').isInt().withMessage('Category ID must be an integer')
+], async (req, res) => {
+  if (!req.isAuthenticated() || req.user.role !== 'Admin') return res.status(401).json({ error: 'Not authorized' });
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+  try {
+    const { operator_id, category_id } = req.body;
+    const result = await addOperatorCategory(operator_id, category_id);
+    return res.status(201).json(result);
+  } catch (err) {
+    if (err && err.status) return res.status(err.status).json({ error: err.message });
+    return res.status(500).json({ error: 'Failed to add operator category' });
+  }
+});
+
+// DELETE /api/admin/removecategory -> Admin removes a category from an operator
+router.delete('/admin/removecategory', [
+  check('operator_id').isInt().withMessage('Operator ID must be an integer'),
+  check('category_id').isInt().withMessage('Category ID must be an integer')
+], async (req, res) => {
+  if (!req.isAuthenticated() || req.user.role !== 'Admin') return res.status(401).json({ error: 'Not authorized' });
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+  try {
+    const { operator_id, category_id } = req.body;
+    const result = await removeOperatorCategory(operator_id, category_id);
+    return res.status(200).json(result);
+  } catch (err) {
+    if (err && err.status) return res.status(err.status).json({ error: err.message });
+    return res.status(500).json({ error: 'Failed to remove operator category' });
   }
 });
 

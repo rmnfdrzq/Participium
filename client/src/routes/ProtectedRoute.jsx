@@ -10,9 +10,9 @@ function ProtectedRoute({ children, isUnverifiedSession, requireAuth = false, us
     return <Navigate to="/verify-email" />;
   }
   
-  // If authentication is required and user is not logged in, redirect to home
+  // If authentication is required and user is not logged in, redirect to login page
   if (requireAuth && !user) {
-    return <Navigate to="/" />;
+    return <Navigate to="/login" />;
   }
   
   return children;

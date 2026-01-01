@@ -1,3 +1,25 @@
+/* Map Showcase Section */
+.map-showcase-section {
+  padding: 4rem 0;
+  background-color: #ffffff;
+}
+
+.map-container-wrapper {
+  margin: 2rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  height: 600px;
+}
+
+.map-container-wrapper > * {
+  height: 100%;
+  width: 100%;
+}
+
+
+
+
 .home-page {
   width: 100%;
   overflow-x: hidden;

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router';
 import './HomePage.css';
+import { MapPage } from "../map/MapPage";
 
 const HomePage = ({ user }) => {
   const navigate = useNavigate();
@@ -40,7 +41,22 @@ const HomePage = ({ user }) => {
         </div>
       </section>
 
-      {/* How it Works Section */}
+      <section className="map-showcase-section">
+        <div className="container">
+          <h2 className="section-title">Explore Reports on the Map</h2>
+          <p className="section-subtitle">
+            View all reported issues in Turin and select a location to create your own report
+          </p>
+          
+          <div className="map-container-wrapper">
+            <MapPage />
+          </div>
+
+        </div>
+      </section>
+
+      {/* 
+
       <section className="how-it-works">
         <div className="container">
           <h2 className="section-title">How It Works</h2>
@@ -76,7 +92,6 @@ const HomePage = ({ user }) => {
         </div>
       </section>
 
-      {/* Categories Section */}
       <section className="categories-section">
         <div className="container">
           <h2 className="section-title">Report Categories</h2>
@@ -140,7 +155,6 @@ const HomePage = ({ user }) => {
         </div>
       </section>
 
-      {/* Report Lifecycle Section */}
       <section className="lifecycle-section">
         <div className="container">
           <h2 className="section-title">Report Lifecycle</h2>
@@ -178,7 +192,10 @@ const HomePage = ({ user }) => {
             </div>
           </div>
         </div>
-      </section>
+      </section> 
+      
+      */}
+      
 
       {/* CTA Section */}
       <section className="cta-section">

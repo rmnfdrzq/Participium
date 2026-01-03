@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAllCategories } from '../dao.mjs';
+import { getAllCategories, getCompanyCategories } from '../dao.mjs';
 
 const router = Router();
 
@@ -17,5 +17,23 @@ router.get('/categories', async (req, res) => {
   }
 });
 
+// GET /api/admin/companies/:companyId/categories
+router.get('/admin/companies/:companyId/categories', async (req, res) => {
+
+  if (!req.isAuthenticated() || req.user.role !== 'Admin') {
+    return res.status(401).json({ error: 'Not authorized' });
+  }
+
+  try {
+    const { companyId } = req.params;
+    
+    const result = await getCompanyCategories(companyId); 
+    
+    return res.status(200).json(result);
+  } catch (err) {
+    console.error(err); 
+    res.status(503).json({ error: 'Database error' });
+  }
+});
 
 export default router;

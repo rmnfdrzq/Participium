@@ -63,7 +63,7 @@ router.get('/operators', [
     }
 
     if(req.user.role === "External maintainer"){
-      return res.status(200).json([]); // to not have errrore in get report page
+      return res.status(200).json([]); // to not have an error in get report page
     }
   
     return res.status(422).json({ error: 'Forbidden' }); // if not authorized
@@ -79,11 +79,18 @@ router.post('/admin/createuser', [
   check('username')
     .not().isEmail().withMessage('Username cannot be an email')
     .notEmpty().withMessage('Username is required'),
-  check('email').isEmail().withMessage('Invalid email format'),
-  check('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  check('office_id').isInt().withMessage('Office ID must be an integer'),
-  check('company').isInt().withMessage('Company ID must be an integer'),
-  check('role').isInt().withMessage('Role ID must be an integer')
+  check('email')
+    .isEmail().withMessage('Invalid email format'),
+  check('password')
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  check('company')
+    .isInt().withMessage('Company ID must be an integer'),
+  check('role')
+    .isInt().withMessage('Role ID must be an integer'),
+  check('office_id')
+    .isArray({ min: 1 }).withMessage('office_id must be a non-empty array'),
+  check('office_id.*')
+    .isInt().withMessage('Each office_id must be an integer')
 ], async (req, res) => {
 
   if (!req.isAuthenticated() || req.user.role !== 'Admin') {
@@ -96,23 +103,44 @@ router.post('/admin/createuser', [
   }
 
   try {
-    let { username, email, password, office_id, role, company } = req.body;
+    let { username, email, password, role, company, office_id } = req.body;
 
-    if ((role !== 3 && role !== 5) && office_id !== 1){
-      // 3 = Technical office staff member
-      // 5 = External maintainer
-      // 1 = Organization office
-      office_id = 1; // corrects the input without giving an error
+    /**
+     * Ruoli:
+     * 3 = Technical office staff member
+     * 5 = External maintainer
+     * 1 = Organization office
+     */
+
+    if (company !== 1 && role === 5) {
+      return res.status(400).json({ error: 'Needs to be different from an External maintainer' });
     }
 
-    if((company!==1 && role===5) || (company===1 && role!==5)){
-      // 1 = Participium
-      return res.status(400).json({ error: 'Needs to be External mainteiner' });
+    if (company === 1 && role !== 5) {
+      return res.status(400).json({ error: 'Needs to be an External maintainer' });
     }
 
+    const user = await createMunicipalityUser(
+      email,
+      username,
+      password,
+      role,
+      company
+    );
 
-    const user = await createMunicipalityUser(email, username, password, office_id, role, company);
+    const operator_id = user.id;
+
+    if (role !== 3 && role !== 5) {
+      return res.status(201).json(user); // non aggiunge alla tabella delle categorie
+    }
+
+    // Inserimento categorie/uffici
+    for (const office of office_id) {
+      await addOperatorCategory(operator_id, office);
+    }
+
     return res.status(201).json(user);
+
   } catch (err) {
     if (err.code === '23505') {
       return res.status(409).json({ error: 'Username or email already exists' });

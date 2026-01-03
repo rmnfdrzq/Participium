@@ -21,7 +21,6 @@ CREATE TABLE verification_codes (
     expires_at TIMESTAMP NOT NULL
 );
 
-
 CREATE TABLE categories (
     category_id SERIAL PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL,
@@ -253,6 +252,7 @@ INSERT INTO roles (name, description) VALUES
 
 -- 3. Categories (con campo office)
 INSERT INTO categories (name, office) VALUES
+('Organization', 'Organization Office'),
 ('Water Supply – Drinking Water', 'Water Department'),
 ('Architectural Barriers', 'Accessibility Office'),
 ('Sewer System', 'Sewage Department'),

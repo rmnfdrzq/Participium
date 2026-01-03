@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
-import API from "../../../API/API.js";
+import API from "../../../API/API.js"; 
 import "./CreateUserPage.css";
 
 const CreateUserPage = () => {
@@ -14,9 +14,9 @@ const CreateUserPage = () => {
     username: "",
     email: "",
     password: "",
-    office_ids: [],
-    role: "",
-    company: "",
+    office_id: [], //array for the offices ids
+    role: "", // external mainteiner
+    company: "", // participium
   });
 
   // Find id of the restricted roles
@@ -29,8 +29,8 @@ const CreateUserPage = () => {
 
   // Return the list of visible offices
   const filteredOffices = isRestrictedOffice 
-    ? offices.filter(o => o.name === "Organization Office") 
-    : offices;
+    ? offices.filter(o => o.office === "Organization Office") 
+    : offices.filter(o => o.office !== "Organization Office") ;
 
   const participium = companies.find(c => c.name === "Participium");
   const filteredRoles = participium && newUser.company === participium.id.toString()
@@ -45,7 +45,7 @@ const CreateUserPage = () => {
 
   const loadOffices = async () => {
     try {
-      const data = await API.getAllOffices();
+      const data = await API.getAllCategories();
       setOffices(data);
     } catch (err) {
       setError("Failed to load offices");
@@ -71,6 +71,28 @@ const CreateUserPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (newUser.company) {
+      loadCompanyCategories(newUser.company);
+    } else {
+      loadOffices();
+      setNewUser(prev => ({ ...prev, office_id: [] }));
+    }
+  }, [newUser.company]);
+
+  const loadCompanyCategories = async (companyId) => {
+    setLoading(true);
+    try {
+      const data = await API.getCompanyCategories(companyId);
+      setOffices(data);
+    } catch (err) {
+      setError("Failed to load categories for this company");
+      loadOffices();
+    }finally {
+      setLoading(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewUser((prev) => ({ ...prev, [name]: value }));
@@ -78,12 +100,12 @@ const CreateUserPage = () => {
 
   const handleOfficeToggle = (officeId) => {
     setNewUser((prev) => {
-      const isSelected = prev.office_ids.includes(officeId);
+      const isSelected = prev.office_id.includes(officeId);
       return {
         ...prev,
-        office_ids: isSelected
-          ? prev.office_ids.filter(id => id !== officeId)
-          : [...prev.office_ids, officeId]
+        office_id: isSelected
+          ? prev.office_id.filter(id => id !== officeId)
+          : [...prev.office_id, officeId]
       };
     });
   };
@@ -92,7 +114,7 @@ const CreateUserPage = () => {
     e.preventDefault();
     setError("");
 
-    if (newUser.office_ids.length === 0) {
+    if (newUser.office_id.length === 0) {
       setError("Please select at least one office");
       return;
     }
@@ -220,11 +242,11 @@ const CreateUserPage = () => {
             <div className="form-field">
               <label>Offices</label>
               <div className="checkbox-group">
-                {filteredOffices.map((office) => (
+                {filteredOffices.sort((a, b) => a.id - b.id).map((office) => (
                   <label key={office.id} className="checkbox-label">
                     <input
                       type="checkbox"
-                      checked={newUser.office_ids.includes(office.id)}
+                      checked={newUser.office_id.includes(office.id)}
                       onChange={() => handleOfficeToggle(office.id)}
                     />
                     <span>{office.name}</span>

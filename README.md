@@ -1,3 +1,8 @@
+# DB CHANGES - DIAGRAM ER
+To see the diagram ER to understand better the changes in the DB
+
+https://www.mermaidchart.com/d/79cd4c71-ca44-412d-bd18-f9a8536e063b
+
 # commands
 terminal BE : cd server;npm i;nodemon index.mjs
 terminal FE : cd client;npm i;npm run dev 
@@ -8,6 +13,12 @@ retrospective: cd retrospective; node calculate.mjs
 commads to reset and restart postgreSQL db : docker compose down; Remove-Item -Recurse -Force .\db_data; docker compose up -d
 commands to remove a container named participium_db: docker rm -f participium_db
 
+# da controllare 
+  getAllRoles,
+  createMunicipalityUser,
+  getAllCategories,
+  getAllCompanies,
+  getCompanyCategories,
 
 # Docker compose using participium image example
 

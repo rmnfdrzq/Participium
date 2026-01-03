@@ -120,7 +120,7 @@ export default function InsertReportPage() {
     const fetchCategories = async () => {
       try {
         const data = await API.getAllCategories(); // returns [{id, name},...]
-        setCategories(data);
+        setCategories(data.filter(e => e.id !== 1));
       } catch (error) {
         console.error("Error in get all offices:", error);
         setCategories([]); // fallback vuoto

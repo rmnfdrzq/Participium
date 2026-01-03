@@ -16,12 +16,12 @@ export const getAllOperators = async () => {
   return await axiosInstance.get("/api/admin");
 };
 
-// Get all offices
-export const getAllOffices = async () => {
-  return await axiosInstance.get("/api/offices");
-};
-
 // Get all companies
 export const getAllCompanies = async () => {
   return await axiosInstance.get("/api/companies");
+};
+
+// Get specific categories for company
+export const getCompanyCategories = async (companyId) => {
+  return await axiosInstance.get(`/api/admin/companies/${companyId}/categories`);
 };

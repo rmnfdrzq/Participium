@@ -139,7 +139,7 @@ export const getAllOperators = async () => {
 };
 
 //given operator data creates an operator
-export const createMunicipalityUser = async (email, username, password, office_id, role_id, company_id) => {
+export const createMunicipalityUser = async (email, username, password,role_id, company_id) => {
   const salt = crypto.randomBytes(16).toString('hex');
 
   return new Promise((resolve, reject) => {
@@ -147,11 +147,11 @@ export const createMunicipalityUser = async (email, username, password, office_i
       if (err) return reject(err);
 
       const sql = `
-        INSERT INTO operators (email, username, password_hash, salt, office_id, role_id, company_id)
+        INSERT INTO operators (email, username, password_hash, salt, role_id, company_id)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
         RETURNING operator_id
       `;
-      const values = [email, username, hashedPassword.toString('hex'), salt, office_id, role_id,company_id];
+      const values = [email, username, hashedPassword.toString('hex'), salt, role_id,company_id];
 
       try {
         const result = await pool.query(sql, values);
@@ -162,6 +162,7 @@ export const createMunicipalityUser = async (email, username, password, office_i
     });
   });
 };
+
 // Add a category to an operator (only if operator is Technical staff and his company manages the category)
 export const addOperatorCategory = async (operator_id, category_id) => {
   // Check operator exists and is Technical office staff member, and get company_id
@@ -171,7 +172,7 @@ export const addOperatorCategory = async (operator_id, category_id) => {
   const opRes = await pool.query(opSql, [operator_id]);
   const op = opRes.rows[0];
   if (!op) throw { status: 404, message: 'Operator not found' };
-  if (op.role_name !== 'Technical office staff member') throw { status: 422, message: 'Operator is not a technical staff member' };
+  if (op.role_name !== 'Technical office staff member' && op.role_name !== 'External maintainer') throw { status: 422, message: 'Operator is not a technical staff member or an external mainteiner' };
 
   // Check company manages the category
   const compSql = `SELECT 1 FROM company_categories WHERE company_id = $1 AND category_id = $2`;
@@ -197,7 +198,7 @@ export const removeOperatorCategory = async (operator_id, category_id) => {
   const opRes = await pool.query(opSql, [operator_id]);
   const op = opRes.rows[0];
   if (!op) throw { status: 404, message: 'Operator not found' };
-  if (op.role_name !== 'Technical office staff member') throw { status: 422, message: 'Operator is not a technical staff member' };
+  if (op.role_name !== 'Technical office staff member' && op.role_name !== 'External maintainer') throw { status: 422, message: 'Operator is not a technical staff member or an external mainteiner' };
 
   const delSql = `DELETE FROM operator_categories WHERE operator_id = $1 AND category_id = $2 RETURNING operator_id`;
   const delRes = await pool.query(delSql, [operator_id, category_id]);

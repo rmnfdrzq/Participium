@@ -4,6 +4,8 @@ import {
   getAllOperators,
   getAllCompanies,
   getCompanyCategories,
+  addOperatorCategory,
+  removeOperatorCategory,
 } from "./admin.js";
 import { logIn, getUserInfo, logOut, signUp } from "./auth.js";
 import { getAllApprovedReports } from "./map.js";
@@ -42,6 +44,8 @@ const API = {
   getAllOperators,
   getAllCompanies,
   getCompanyCategories,
+  addOperatorCategory,
+  removeOperatorCategory,
 
   // Auth methods
   logIn,

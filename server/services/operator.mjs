@@ -148,7 +148,7 @@ export const createMunicipalityUser = async (email, username, password,role_id, 
 
       const sql = `
         INSERT INTO operators (email, username, password_hash, salt, role_id, company_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6)
         RETURNING operator_id
       `;
       const values = [email, username, hashedPassword.toString('hex'), salt, role_id,company_id];

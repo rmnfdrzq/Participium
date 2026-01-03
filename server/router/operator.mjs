@@ -84,12 +84,15 @@ router.post('/admin/createuser', [
   check('password')
     .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
   check('company')
+    .notEmpty().withMessage('Company is required')
     .isInt().withMessage('Company ID must be an integer'),
   check('role')
+    .notEmpty().withMessage('Role is required')
     .isInt().withMessage('Role ID must be an integer'),
   check('office_id')
     .isArray({ min: 1 }).withMessage('office_id must be a non-empty array'),
   check('office_id.*')
+    .notEmpty().withMessage('Each office_id is required')
     .isInt().withMessage('Each office_id must be an integer')
 ], async (req, res) => {
 
@@ -105,21 +108,16 @@ router.post('/admin/createuser', [
   try {
     let { username, email, password, role, company, office_id } = req.body;
 
-    /**
-     * Ruoli:
-     * 3 = Technical office staff member
-     * 5 = External maintainer
-     * 1 = Organization office
-     */
+    role = parseInt(role, 10);
+    company = parseInt(company, 10); 
 
-    if (company !== 1 && role === 5) {
+    if (company === 1 && role === 5) {
       return res.status(400).json({ error: 'Needs to be different from an External maintainer' });
     }
 
-    if (company === 1 && role !== 5) {
+    if (company !== 1 && role !== 5) {
       return res.status(400).json({ error: 'Needs to be an External maintainer' });
     }
-
     const user = await createMunicipalityUser(
       email,
       username,
@@ -131,21 +129,31 @@ router.post('/admin/createuser', [
     const operator_id = user.id;
 
     if (role !== 3 && role !== 5) {
-      return res.status(201).json(user); // non aggiunge alla tabella delle categorie
+      return res.status(201).json(user);
     }
 
-    // Inserimento categorie/uffici
     for (const office of office_id) {
-      await addOperatorCategory(operator_id, office);
+      console.log('Attempting to add category:', office, 'to operator:', operator_id);
+      try {
+        await addOperatorCategory(operator_id, office);
+        console.log('Successfully added category:', office);
+      } catch (err) {
+        console.error('Failed to add category:', office, 'Error:', err);
+        // Non fare throw qui, per vedere tutti gli errori
+      }
     }
 
     return res.status(201).json(user);
 
   } catch (err) {
+    
     if (err.code === '23505') {
       return res.status(409).json({ error: 'Username or email already exists' });
     } else {
-      return res.status(503).json({ error: 'Database error during user creation' });
+      return res.status(503).json({ 
+        error: 'Database error during user creation',
+        details: err.message // Mostra il messaggio di errore
+      });
     }
   }
 });

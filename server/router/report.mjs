@@ -11,7 +11,9 @@ import {
   addInternalComment,
   getInternalComments,
   addMessage,
-  getMessages
+  getMessages,
+  autoAssignMaintainer,
+  autoAssignTechnicalOfficer
  } from '../dao.mjs';
 
 const router = Router();
@@ -129,6 +131,35 @@ router.put("/reports/:id/operator", async (req, res) => {
   }
 });
 
+// POST /api/reports/:id/auto-assign-officer -> Auto-assign technical officer to report (requires relation officer/admin)
+router.post("/reports/:id/auto-assign-officer", async (req, res) => {
+  try {
+    if (!req.isAuthenticated())
+      return res.status(401).json({ error: "Not authenticated" });
+    
+    if (
+      req.user.role !== "Municipal public relations officer" &&
+      req.user.role !== "Admin"
+    )
+      return res.status(403).json({ error: "Forbidden" });
+    
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
+      return res.status(422).json({ error: "Invalid report id" });
+
+    const result = await autoAssignTechnicalOfficer(reportId);
+    
+    return res.status(200).json({
+        id: result.assigned_officer.operator_id,
+        username: result.assigned_officer.username,
+        email: result.assigned_officer.email
+    });
+    
+  } catch (err) {  
+    return res.status(503).json({ error: "Database error during officer assignment" });
+  }
+});
+
 //PUT /reports/:id/mainteiner -> set mainteiner for a report (requires tec.officer/admin)
 router.put("/reports/:id/mainteiner", async (req, res) => {
   try {
@@ -153,6 +184,35 @@ router.put("/reports/:id/mainteiner", async (req, res) => {
     res
       .status(503)
       .json({ error: "Database error during operator assignment" });
+  }
+});
+
+// POST /api/reports/:id/auto-assign-maintainer -> Auto-assign maintainer to report (requires tech officer/admin)
+router.post("/reports/:id/auto-assign-maintainer", async (req, res) => {
+  try {
+    if (!req.isAuthenticated())
+      return res.status(401).json({ error: "Not authenticated" });
+    
+    if (
+      req.user.role !== "Technical office staff member" &&
+      req.user.role !== "Admin"
+    )
+      return res.status(403).json({ error: "Forbidden" });
+    
+    const reportId = Number.parseInt(req.params.id, 10);
+    if (Number.isNaN(reportId))
+      return res.status(422).json({ error: "Invalid report id" });
+
+    const result = await autoAssignMaintainer(reportId);
+    
+    return res.status(200).json({
+        id: result.assigned_maintainer.operator_id,
+        username: result.assigned_maintainer.username,
+        company: result.assigned_maintainer.company_name
+    });
+    
+  } catch (err) {  
+    return res.status(503).json({ error: "Database error during maintainer assignment" });
   }
 });
 

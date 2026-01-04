@@ -56,6 +56,18 @@
   transition: all 0.2s ease;
 }
 
+.expiryText {
+  font-size: 14px;         
+  color: var(--foreground-default);
+  margin-bottom: 16px;    
+  line-height: 1.5;
+}
+
+.expiryText strong {
+  font-weight: 600;         
+}
+
+
 .codeInput::placeholder {
   color: var(--border-light);
   letter-spacing: 8px;

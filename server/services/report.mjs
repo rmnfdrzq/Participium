@@ -454,3 +454,187 @@ export const setMainteinerByReport = async (report_id, operator_id) => {
     return result.rows[0];
  
 };
+
+
+// Assegna automaticamente il maintainer con meno report attivi
+export const autoAssignMaintainer = async (report_id) => {
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    
+    // 1. Ottieni la categoria del report
+    const reportQuery = `
+      SELECT category_id, status_id
+      FROM reports 
+      WHERE report_id = $1
+    `;
+    const reportResult = await client.query(reportQuery, [report_id]);
+    
+    if (reportResult.rows.length === 0) {
+      throw new Error('Report non trovato');
+    }
+    
+    const { category_id, status_id } = reportResult.rows[0];
+    
+    // Verifica che il report non sia già risolto o respinto
+    if (status_id === 5 || status_id === 6) {
+      throw new Error('Impossibile assegnare un maintainer a un report già risolto o respinto');
+    }
+    
+    // 2. Trova tutti i maintainer per quella categoria con il conteggio dei report attivi
+    const maintainersQuery = `
+      SELECT 
+        o.operator_id,
+        o.username,
+        c.name AS company_name,
+        COUNT(r.report_id) AS assigned_reports_count
+      FROM operators o
+      LEFT JOIN companies c ON o.company_id = c.company_id
+      INNER JOIN operator_categories oc ON o.operator_id = oc.operator_id
+      LEFT JOIN reports r ON r.assigned_to_external_id = o.operator_id 
+        AND r.status_id NOT IN (5, 6)
+      WHERE o.role_id = (SELECT role_id FROM roles WHERE name = 'External maintainer')
+        AND oc.category_id = $1
+      GROUP BY o.operator_id, o.username, c.name
+      ORDER BY assigned_reports_count ASC, RANDOM()
+    `;
+    const maintainersResult = await client.query(maintainersQuery, [category_id]);
+    
+    if (maintainersResult.rows.length === 0) {
+      throw new Error(`Nessun maintainer disponibile per la categoria con ID ${category_id}`);
+    }
+    
+    // 3. Prendi il maintainer con meno report (o random tra quelli con lo stesso numero)
+    const minCount = maintainersResult.rows[0].assigned_reports_count;
+    const candidates = maintainersResult.rows.filter(m => m.assigned_reports_count === minCount);
+    const selectedMaintainer = candidates[Math.floor(Math.random() * candidates.length)];
+    
+    // 4. Assegna il maintainer al report e aggiorna lo stato ad "Assigned" se necessario
+    const newStatusId = status_id === 1 ? 2 : status_id; // Se è "Pending Approval" (1), passa ad "Assigned" (2)
+    
+    const updateQuery = `
+      UPDATE reports
+      SET assigned_to_external_id = $2,
+          status_id = $3,
+          updated_at = NOW()
+      WHERE report_id = $1
+      RETURNING 
+        report_id,
+        assigned_to_external_id,
+        category_id,
+        title,
+        status_id,
+        updated_at
+    `;
+    const updateResult = await client.query(updateQuery, [report_id, selectedMaintainer.operator_id, newStatusId]);
+    
+    await client.query('COMMIT');
+    
+    return {
+      report: updateResult.rows[0],
+      assigned_maintainer: {
+        operator_id: selectedMaintainer.operator_id,
+        username: selectedMaintainer.username,
+        company_name: selectedMaintainer.company_name,
+        previous_assigned_count: selectedMaintainer.assigned_reports_count
+      }
+    };
+    
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+// Assegna automaticamente il technical officer con meno report attivi
+export const autoAssignTechnicalOfficer = async (report_id) => {
+  const client = await pool.connect();
+  
+  try {
+    await client.query('BEGIN');
+    
+    // 1. Ottieni la categoria del report
+    const reportQuery = `
+      SELECT category_id, status_id
+      FROM reports 
+      WHERE report_id = $1
+    `;
+    const reportResult = await client.query(reportQuery, [report_id]);
+    
+    if (reportResult.rows.length === 0) {
+      throw new Error('Report non trovato');
+    }
+    
+    const { category_id, status_id } = reportResult.rows[0];
+    
+    // Verifica che il report sia in pending approval
+    if (status_id !== 1) {
+      throw new Error('Impossibile assegnare un technical officer a un report non in pending approval');
+    }
+    
+    // 2. Trova tutti i technical officers per quella categoria con il conteggio dei report attivi
+    const officersQuery = `
+      SELECT 
+        o.operator_id,
+        o.username,
+        o.email,
+        COUNT(r.report_id) AS assigned_reports_count
+      FROM operators o
+      INNER JOIN operator_categories oc ON o.operator_id = oc.operator_id
+      LEFT JOIN reports r ON r.assigned_to_operator_id = o.operator_id 
+        AND r.status_id NOT IN (5, 6)
+      WHERE o.role_id = (SELECT role_id FROM roles WHERE name = 'Technical office staff member')
+        AND oc.category_id = $1
+      GROUP BY o.operator_id, o.username, o.email
+      ORDER BY assigned_reports_count ASC, RANDOM()
+    `;
+    const officersResult = await client.query(officersQuery, [category_id]);
+    
+    if (officersResult.rows.length === 0) {
+      throw new Error(`Nessun technical officer disponibile per la categoria con ID ${category_id}`);
+    }
+    
+    // 3. Prendi il technical officer con meno report (o random tra quelli con lo stesso numero)
+    const minCount = officersResult.rows[0].assigned_reports_count;
+    const candidates = officersResult.rows.filter(o => o.assigned_reports_count === minCount);
+    const selectedOfficer = candidates[Math.floor(Math.random() * candidates.length)];
+    
+    // 4. Assegna il technical officer al report e aggiorna lo stato ad "Assigned"
+    const updateQuery = `
+      UPDATE reports
+      SET assigned_to_operator_id = $2,
+          status_id = 2,
+          updated_at = NOW()
+      WHERE report_id = $1
+      RETURNING 
+        report_id,
+        assigned_to_operator_id,
+        category_id,
+        title,
+        status_id,
+        updated_at
+    `;
+    const updateResult = await client.query(updateQuery, [report_id, selectedOfficer.operator_id]);
+    
+    await client.query('COMMIT');
+    
+    return {
+      report: updateResult.rows[0],
+      assigned_officer: {
+        operator_id: selectedOfficer.operator_id,
+        username: selectedOfficer.username,
+        email: selectedOfficer.email,
+        previous_assigned_count: selectedOfficer.assigned_reports_count
+      }
+    };
+    
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
+  }
+};

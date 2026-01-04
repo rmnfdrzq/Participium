@@ -17,6 +17,8 @@ import {
   getOperatorsByOffice,
   setOperatorByReport,
   setMaintainerByReport,
+  autoAssignMaintainer,
+  autoAssignTechnicalOfficer,
 } from "./report.js";
 import {
   getAssignedReportsForMaintainer,
@@ -67,6 +69,8 @@ const API = {
   setMaintainerByReport,
   getAssignedReportsForMaintainer,
   updateReportStatusByMaintainer,
+  autoAssignMaintainer,
+  autoAssignTechnicalOfficer,
 
   // Image methods
   getImageUploadUrl,

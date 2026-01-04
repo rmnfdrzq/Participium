@@ -534,3 +534,23 @@
     width: 100%;
   }
 }
+
+.maintainerButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.maintainerButtons button {
+  flex: 1;
+}
+
+.threeButtonsRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.threeButtonsRow button {
+  flex: 1;
+}

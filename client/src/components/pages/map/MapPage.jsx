@@ -331,6 +331,15 @@ export function MapPage(props) {
         const lng = parseFloat(result.lon);
         const newCenter = [lat, lng];
 
+         const point = turf.point([lng, lat]);
+  const isInside = turf.booleanPointInPolygon(point, cityBoundaries);
+
+  if (!isInside) {
+    setSearchError("The searched address is outside the city limits");
+    dispatch(clearLocation());
+    return;
+  }
+
         setMapCenter(newCenter);
         setMapZoom(15);
         // Save to Redux store

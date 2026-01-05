@@ -184,13 +184,15 @@ function TechnicalOfficerPage() {
         </div>
 
         {/* Old Reports Section - Only show if there are old reports */}
-        {filteredOldReports.length > 0 && (
-          <div className="reports-section" style={{ marginTop: '40px' }}>
-            <h2 className="section-title" style={{ color: '#666' }}>
-              Old Reports (Unassigned Categories)
-            </h2>
-            {renderReportsTable(filteredOldReports, false)}
+        {filteredOldReports.length > 0 && (<>
+          <div className="content-header">
+            <h1 className="page-title" >
+              Old Reports
+            </h1>
           </div>
+          <div className="reports-section">
+          {renderReportsTable(filteredOldReports, false)}
+        </div> </>
         )}
       </div>
     </div>

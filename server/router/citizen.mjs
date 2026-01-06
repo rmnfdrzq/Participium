@@ -5,7 +5,8 @@ import {
   getUserInfoById,
   updateUserById,
   generateEmailVerificationCode,
-  verifyEmailCode
+  verifyEmailCode,
+  getActiveVerificationToken
 } from '../dao.mjs';
 
 const router = Router();
@@ -92,10 +93,6 @@ router.post("/citizens/verification-code", async (req, res) => {
     if (!req.isAuthenticated())
       return res.status(401).json({ error: "Not authenticated" });
     const userId = req.user.id;
-    console.log(
-      "Received request to generate verification code for user:",
-      req.user
-    );
     if (isNaN(userId))
       return res.status(423).json({ error: "Invalid user id" });
 
@@ -128,5 +125,22 @@ router.post("/citizens/verify-email", async (req, res) => {
   }
 });
 
+// GET /citizens/verification-token
+router.get("/citizens/verification-token",  async (req, res) => {
+  try {
+    if (!req.isAuthenticated())
+      return res.status(401).json({ error: "Not authenticated" });
+    const userId = req.user.id;
+    if (isNaN(userId))
+      return res.status(423).json({ error: "Invalid user id" });
+    const token = await getActiveVerificationToken(userId);
+    if (!token) return res.status(404).json({ error: "No active verification token found" });
+    return res.status(200).json(token);
+  } catch (err) {
+    return res
+      .status(503)
+      .json({ error: "Database error during verification token retrieval" });
+  }
+});
 
 export default router;

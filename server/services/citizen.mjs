@@ -6,11 +6,15 @@ import nodemailer from "nodemailer";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
+  secure: true,
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
-  }
+  },
+  tls: {
+    rejectUnauthorized: true, // Verify server certificate
+  },
 });
 
 const pool = new Pool({
@@ -104,7 +108,7 @@ export const updateUserById = async (userId, updates) => {
 const sendEmail = async (to, subject, text) => {
   try {
     const info = await transporter.sendMail({
-       from: `"Participium" <${process.env.GMAIL_USER}>`,
+      from: `"Participium" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       text,
@@ -118,19 +122,21 @@ const sendEmail = async (to, subject, text) => {
 
 export const generateEmailVerificationCode = async (userId) => {
   try {
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
-    const expires_at = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes from now
+    const code = crypto.randomInt(100000, 1000000).toString(); // Cryptographically secure 6-digit code
 
-    // Check if there's an existing code for the user and delete it
+    // Remove any existing code for the user
     const deleteSql = "DELETE FROM verification_codes WHERE citizen_id = $1";
     await pool.query(deleteSql, [userId]);
 
-    // Insert new citizen-code pair
+    // Insert new citizen-code pair using DB-side UTC timestamps
     const sql = `
       INSERT INTO verification_codes (citizen_id, code, created_at, expires_at)
-      VALUES ($1, $2, NOW(), $3);
+      VALUES ($1, $2, NOW(), NOW() + INTERVAL '30 minutes')
+      RETURNING expires_at;
     `;
-    await pool.query(sql, [userId, code, expires_at]);
+    const { rows } = await pool.query(sql, [userId, code]);
+
+    const expires_at = rows[0].expires_at;
 
     // Send the code via email
     const userInfo = await getUserInfoById(userId);
@@ -138,7 +144,7 @@ export const generateEmailVerificationCode = async (userId) => {
       await sendEmail(
         userInfo.email,
         "Your Email Verification Code",
-        `Your verification code is: ${code}`
+        `Your verification code is: ${code}, it will expire in 30 minutes`
       );
     }
 
@@ -171,6 +177,22 @@ export const verifyEmailCode = async (userId, code) => {
     const deleteSql = "DELETE FROM verification_codes WHERE citizen_id = $1";
     await pool.query(deleteSql, [userId]);
     return true;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getActiveVerificationToken = async (userId) => {
+  try {
+    const sql = `
+      SELECT  expires_at FROM verification_codes
+      WHERE citizen_id = $1 AND expires_at > NOW()
+    `;
+    const result = await pool.query(sql, [userId]);
+    if (result.rows.length === 0) {
+      return null;
+    }
+    return result.rows[0];
   } catch (err) {
     throw err;
   }

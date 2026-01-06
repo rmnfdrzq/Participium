@@ -10,21 +10,57 @@ import { STATUS_MAP } from "../../../constants/statusMap";
 function TechnicalOfficerPage() {
   const dispatch = useDispatch();
   const [reports, setReports] = useState([]);
+  const [myCategories, setMyCategories] = useState([]);
+  const [currentReports, setCurrentReports] = useState([]);
+  const [oldReports, setOldReports] = useState([]);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadReports();
+    loadData();
   }, []);
 
-  const loadReports = async () => {
+  useEffect(() => {
+    // Quando reports o myCategories cambiano, dividi i report
+    divideReports();
+  }, [reports, myCategories]);
+
+  const loadData = async () => {
     try {
-      const data = await API.getAllReportsForTechOfficer();
-      setReports(data);
+      // Carica sia i report che le categorie dell'operatore
+      const [reportsData, categoriesData] = await Promise.all([
+        API.getAllReportsForTechOfficer(),
+        API.getMyCategories()
+      ]);
+      
+      setReports(reportsData);
+      setMyCategories(categoriesData.categories || [1]);
     } catch (err) {
-      setError("Failed to load reports: " + err);
+      setError("Failed to load data: " + err);
     }
+  };
+
+  const divideReports = () => {
+    if (reports.length === 0 || myCategories.length === 0) {
+      setCurrentReports(reports);
+      setOldReports([]);
+      return;
+    }
+
+    const current = [];
+    const old = [];
+
+    reports.forEach(report => {
+      if (myCategories.includes(report.category?.id)) {
+        current.push(report);
+      } else {
+        old.push(report);
+      }
+    });
+
+    setCurrentReports(current);
+    setOldReports(old);
   };
 
   const formatDate = (isoString) => {
@@ -39,12 +75,77 @@ function TechnicalOfficerPage() {
   };
 
   // Filter reports based on selected status
-  const filteredReports =
-    statusFilter === "all"
-      ? reports
-      : reports.filter(
+  const filterReportsByStatus = (reportsList) => {
+    return statusFilter === "all"
+      ? reportsList
+      : reportsList.filter(
           (report) => report.status?.id === parseInt(statusFilter)
         );
+  };
+
+  const filteredCurrentReports = filterReportsByStatus(currentReports);
+  const filteredOldReports = filterReportsByStatus(oldReports);
+
+  const handleRowClick = (report) => {
+    dispatch(setSelectedReport(report));
+    navigate("/inspectReport");
+  };
+
+  const renderReportsTable = (reportsList, showEmpty = true) => {
+    if (reportsList.length === 0 && !showEmpty) {
+      return null;
+    }
+
+    return (
+      <div className="users-table-container">
+        <table className="users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Created At</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {reportsList.length === 0 ? (
+              <tr>
+                <td colSpan="4" style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
+                  No reports found
+                </td>
+              </tr>
+            ) : (
+              reportsList.map((report) => (
+                <tr
+                  key={report.id}
+                  className="clickable-row"
+                  onClick={() => handleRowClick(report)}
+                >
+                  <td className="report-id">{report.id}</td>
+                  <td className="report-title">{report.title}</td>
+                  <td className="report-date">
+                    {formatDate(report.created_at)}
+                  </td>
+                  <td>
+                    <span
+                      className="status-pill"
+                      style={{
+                        backgroundColor:
+                          STATUS_MAP[report.status?.id]?.color || "gray",
+                      }}
+                    >
+                      {STATUS_MAP[report.status?.id]?.label || "Unknown"}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
 
   return (
     <div className="admin-page">
@@ -77,48 +178,22 @@ function TechnicalOfficerPage() {
           </div>
         </div>
 
-        <div className="users-table-container">
-          <table className="users-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Created At</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredReports.map((report) => (
-                <tr
-                  key={report.id}
-                  className="clickable-row"
-                  onClick={() => {
-                    dispatch(setSelectedReport(report));
-                    navigate("/inspectReport");
-                  }}
-                >
-                  <td className="report-id">{report.id}</td>
-                  <td className="report-title">{report.title}</td>
-                  <td className="report-date">
-                    {formatDate(report.created_at)}
-                  </td>
-                  <td>
-                    <span
-                      className="status-pill"
-                      style={{
-                        backgroundColor:
-                          STATUS_MAP[report.status?.id]?.color || "gray",
-                      }}
-                    >
-                      {STATUS_MAP[report.status?.id]?.label || "Unknown"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        {/* Current Reports Section */}
+        <div className="reports-section">
+          {renderReportsTable(filteredCurrentReports, true)}
         </div>
+
+        {/* Old Reports Section - Only show if there are old reports */}
+        {filteredOldReports.length > 0 && (<>
+          <div className="content-header">
+            <h1 className="page-title" >
+              Old Reports
+            </h1>
+          </div>
+          <div className="reports-section">
+          {renderReportsTable(filteredOldReports, false)}
+        </div> </>
+        )}
       </div>
     </div>
   );

@@ -6,6 +6,19 @@
   flex-direction: column;
 }
 
+.reports-section {
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
 .admin-content {
   padding: 20px 160px;
   max-width: 1280px;

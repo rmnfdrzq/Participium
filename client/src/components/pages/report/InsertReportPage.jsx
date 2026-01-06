@@ -120,7 +120,7 @@ export default function InsertReportPage() {
     const fetchCategories = async () => {
       try {
         const data = await API.getAllCategories(); // returns [{id, name},...]
-        setCategories(data);
+        setCategories(data.filter(e => e.id !== 1));
       } catch (error) {
         console.error("Error in get all offices:", error);
         setCategories([]); // fallback vuoto
@@ -380,7 +380,7 @@ function InsertReportForm({
               )}
             </div>
 
-            <div className={styles.formGroup} style={{ display: "none" }}>
+            <div className={styles.formGroup}>
               <label className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
@@ -456,9 +456,9 @@ function ReportSummary({ report, user, message, categories }) {
               {categories.find((cat) => cat.id === report.category_id)?.name ||
                 "Unknown"}
             </p>
-            {/*<p>
+            <p>
             <strong>Anonymous:</strong> {report.anonymous ? "Yes" : "No"}
-          </p>*/}
+          </p>
             <p>
               <strong>Images:</strong> {report.images.length} file(s) attached
             </p>

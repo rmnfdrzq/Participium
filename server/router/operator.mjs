@@ -4,7 +4,9 @@ import {
   getAllOperators, 
   getTechnicalOfficersByOffice, 
   getMainteinerByOffice, 
-  createMunicipalityUser  
+  createMunicipalityUser,
+  addOperatorCategory,
+  removeOperatorCategory
 } from '../dao.mjs';
 const router = Router();
 
@@ -34,7 +36,7 @@ router.get('/admin', async (req, res) => {
 // if I am relation officer (id report office) -> get list operators in that office
 // if I am technical officer (id report office) -> get list external maintainer in that office
 router.get('/operators', [
-  check('office_id').isInt().withMessage('Office ID must be an integer')
+  check('category_id').isInt().withMessage('Category ID must be an integer')
   ] , async (req, res) => {
 
   if (!req.isAuthenticated()) {
@@ -47,21 +49,21 @@ router.get('/operators', [
   }
 
   try {
-    const { office_id } = req.query;
+    const { category_id } = req.query;
 
     if (req.user.role === 'Municipal public relations officer') {
-      const operators = await getTechnicalOfficersByOffice( office_id );
+      const operators = await getTechnicalOfficersByOffice( category_id );
       return res.status(200).json(operators);
     }
 
     if (req.user.role === 'Technical office staff member') {
       // do the same thing for assigning external maintainer
-      const maintainers = await getMainteinerByOffice( office_id );
+      const maintainers = await getMainteinerByOffice( category_id );
       return res.status(200).json(maintainers);
     }
 
     if(req.user.role === "External maintainer"){
-      return res.status(200).json([]); // to not have errrore in get report page
+      return res.status(200).json([]); // to not have an error in get report page
     }
   
     return res.status(422).json({ error: 'Forbidden' }); // if not authorized
@@ -77,11 +79,21 @@ router.post('/admin/createuser', [
   check('username')
     .not().isEmail().withMessage('Username cannot be an email')
     .notEmpty().withMessage('Username is required'),
-  check('email').isEmail().withMessage('Invalid email format'),
-  check('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  check('office_id').isInt().withMessage('Office ID must be an integer'),
-  check('company').isInt().withMessage('Company ID must be an integer'),
-  check('role').isInt().withMessage('Role ID must be an integer')
+  check('email')
+    .isEmail().withMessage('Invalid email format'),
+  check('password')
+    .isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
+  check('company')
+    .notEmpty().withMessage('Company is required')
+    .isInt().withMessage('Company ID must be an integer'),
+  check('role')
+    .notEmpty().withMessage('Role is required')
+    .isInt().withMessage('Role ID must be an integer'),
+  check('office_id')
+    .isArray({ min: 1 }).withMessage('office_id must be a non-empty array'),
+  check('office_id.*')
+    .notEmpty().withMessage('Each office_id is required')
+    .isInt().withMessage('Each office_id must be an integer')
 ], async (req, res) => {
 
   if (!req.isAuthenticated() || req.user.role !== 'Admin') {
@@ -94,29 +106,96 @@ router.post('/admin/createuser', [
   }
 
   try {
-    let { username, email, password, office_id, role, company } = req.body;
+    let { username, email, password, role, company, office_id } = req.body;
 
-    if ((role !== 3 && role !== 5) && office_id !== 1){
-      // 3 = Technical office staff member
-      // 5 = External maintainer
-      // 1 = Organization office
-      office_id = 1; // corrects the input without giving an error
+    role = parseInt(role, 10);
+    company = parseInt(company, 10); 
+
+    if (company === 1 && role === 5) {
+      return res.status(400).json({ error: 'Needs to be different from an External maintainer' });
     }
 
-    if((company!==1 && role===5) || (company===1 && role!==5)){
-      // 1 = Participium
-      return res.status(400).json({ error: 'Needs to be External mainteiner' });
+    if (company !== 1 && role !== 5) {
+      return res.status(400).json({ error: 'Needs to be an External maintainer' });
+    }
+    const user = await createMunicipalityUser(
+      email,
+      username,
+      password,
+      role,
+      company
+    );
+
+    const operator_id = user.id;
+
+    if (role !== 3 && role !== 5) {
+      return res.status(201).json(user);
     }
 
+    for (const office of office_id) {
+      console.log('Attempting to add category:', office, 'to operator:', operator_id);
+      try {
+        await addOperatorCategory(operator_id, office);
+        console.log('Successfully added category:', office);
+      } catch (err) {
+        console.error('Failed to add category:', office, 'Error:', err);
+        // Non fare throw qui, per vedere tutti gli errori
+      }
+    }
 
-    const user = await createMunicipalityUser(email, username, password, office_id, role, company);
     return res.status(201).json(user);
+
   } catch (err) {
+    
     if (err.code === '23505') {
       return res.status(409).json({ error: 'Username or email already exists' });
     } else {
-      return res.status(503).json({ error: 'Database error during user creation' });
+      return res.status(503).json({ 
+        error: 'Database error during user creation',
+        details: err.message // Mostra il messaggio di errore
+      });
     }
+  }
+});
+
+
+// POST /api/admin/addcategory -> Admin adds a category to an operator
+router.post('/admin/addcategory', [
+  check('operator_id').isInt().withMessage('Operator ID must be an integer'),
+  check('category_id').isInt().withMessage('Category ID must be an integer')
+], async (req, res) => {
+  if (!req.isAuthenticated() || req.user.role !== 'Admin') return res.status(401).json({ error: 'Not authorized' });
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+  try {
+    const { operator_id, category_id } = req.body;
+    const result = await addOperatorCategory(operator_id, category_id);
+    return res.status(201).json(result);
+  } catch (err) {
+    if (err && err.status) return res.status(err.status).json({ error: err.message });
+    return res.status(500).json({ error: 'Failed to add operator category' });
+  }
+});
+
+// DELETE /api/admin/removecategory -> Admin removes a category from an operator
+router.delete('/admin/removecategory', [
+  check('operator_id').isInt().withMessage('Operator ID must be an integer'),
+  check('category_id').isInt().withMessage('Category ID must be an integer')
+], async (req, res) => {
+  if (!req.isAuthenticated() || req.user.role !== 'Admin') return res.status(401).json({ error: 'Not authorized' });
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(422).json({ errors: errors.array() });
+
+  try {
+    const { operator_id, category_id } = req.body;
+    const result = await removeOperatorCategory(operator_id, category_id);
+    return res.status(200).json(result);
+  } catch (err) {
+    if (err && err.status) return res.status(err.status).json({ error: err.message });
+    return res.status(500).json({ error: 'Failed to remove operator category' });
   }
 });
 

@@ -2,8 +2,10 @@ import {
   getAllRoles,
   createMunicipalityUser,
   getAllOperators,
-  getAllOffices,
   getAllCompanies,
+  getCompanyCategories,
+  addOperatorCategory,
+  removeOperatorCategory,
 } from "./admin.js";
 import { logIn, getUserInfo, logOut, signUp } from "./auth.js";
 import { getAllApprovedReports } from "./map.js";
@@ -15,18 +17,21 @@ import {
   getOperatorsByOffice,
   setOperatorByReport,
   setMaintainerByReport,
+  autoAssignMaintainer,
+  autoAssignTechnicalOfficer,
 } from "./report.js";
 import {
   getAssignedReportsForMaintainer,
   updateReportStatusByMaintainer,
 } from "./maintainer.js";
 import { getImageUploadUrl, uploadImageToSignedUrl } from "./image.js";
-import { getAllReportsForTechOfficer } from "./techofficer.js";
+import { getAllReportsForTechOfficer, getMyCategories } from "./techofficer.js";
 import {
   getCitizenProfile,
   updateCitizenProfile,
   requestVerificationCode,
   verifyEmail,
+  checkValidateToken,
 } from "./citizen.js";
 import {
   getMessages,
@@ -40,8 +45,10 @@ const API = {
   getAllRoles,
   createMunicipalityUser,
   getAllOperators,
-  getAllOffices,
   getAllCompanies,
+  getCompanyCategories,
+  addOperatorCategory,
+  removeOperatorCategory,
 
   // Auth methods
   logIn,
@@ -62,6 +69,8 @@ const API = {
   setMaintainerByReport,
   getAssignedReportsForMaintainer,
   updateReportStatusByMaintainer,
+  autoAssignMaintainer,
+  autoAssignTechnicalOfficer,
 
   // Image methods
   getImageUploadUrl,
@@ -69,12 +78,14 @@ const API = {
 
   // Tech Officer methods
   getAllReportsForTechOfficer,
+  getMyCategories,
 
   // Citizen methods
   getCitizenProfile,
   updateCitizenProfile,
   requestVerificationCode,
   verifyEmail,
+  checkValidateToken,
 
   //comments methods
   getMessages,

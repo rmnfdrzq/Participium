@@ -9,21 +9,57 @@ import "./MaintainerPage.css";
 function MaintainerPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [reports, setReports] = useState([]);
+  const [myCategories, setMyCategories] = useState([]);
+  const [currentReports, setCurrentReports] = useState([]);
+  const [oldReports, setOldReports] = useState([]);
+
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
-    loadReports();
+    loadData();
   }, []);
 
-  const loadReports = async () => {
+  useEffect(() => {
+    divideReports();
+  }, [reports, myCategories]);
+
+  const loadData = async () => {
     try {
-      const data = await API.getAssignedReportsForMaintainer();
-      setReports(data);
+      const [reportsData, categoriesData] = await Promise.all([
+        API.getAssignedReportsForMaintainer(),
+        API.getMyCategories(),
+      ]);
+
+      setReports(reportsData);
+      setMyCategories(categoriesData.categories || []);
     } catch (err) {
       setError("Failed to load reports: " + err);
     }
+  };
+
+  const divideReports = () => {
+    if (reports.length === 0 || myCategories.length === 0) {
+      setCurrentReports(reports);
+      setOldReports([]);
+      return;
+    }
+
+    const current = [];
+    const old = [];
+
+    reports.forEach((report) => {
+      if (myCategories.includes(report.category?.id)) {
+        current.push(report);
+      } else {
+        old.push(report);
+      }
+    });
+
+    setCurrentReports(current);
+    setOldReports(old);
   };
 
   const formatDate = (isoString) => {
@@ -37,57 +73,48 @@ function MaintainerPage() {
     });
   };
 
-  // Filter reports based on selected status
-  const filteredReports =
-    statusFilter === "all"
-      ? reports
-      : reports.filter(
+  const filterReportsByStatus = (reportsList) => {
+    return statusFilter === "all"
+      ? reportsList
+      : reportsList.filter(
           (report) => report.status?.id === parseInt(statusFilter)
         );
+  };
 
-  return (
-    <div className="admin-page">
-      <div className="admin-content">
-        {error && (
-          <div className="alert alert-error">
-            {error}
-            <button className="alert-close" onClick={() => setError("")}>
-              ×
-            </button>
-          </div>
-        )}
+  const filteredCurrentReports = filterReportsByStatus(currentReports);
+  const filteredOldReports = filterReportsByStatus(oldReports);
 
-        <div className="content-header">
-          <h1 className="page-title">My Assigned Reports</h1>
-          <div className="filter-container">
-            <span className="filter-label">Filter:</span>
-            <select
-              className="status-filter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">Default (All)</option>
-              <option value="2">Assigned</option>
-              <option value="3">In Progress</option>
-              <option value="4">Suspended</option>
-              <option value="6">Resolved</option>
-            </select>
-          </div>
-        </div>
+  const renderReportsTable = (reportsList, showEmpty = true) => {
+    if (reportsList.length === 0 && !showEmpty) return null;
 
-        <div className="users-table-container">
-          <table className="users-table">
-            <thead>
+    return (
+      <div className="users-table-container">
+        <table className="users-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Created At</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {reportsList.length === 0 ? (
               <tr>
-                <th>ID</th>
-                <th>Title</th>
-                <th>Created At</th>
-                <th>Status</th>
+                <td
+                  colSpan="4"
+                  style={{
+                    textAlign: "center",
+                    padding: "20px",
+                    color: "#666",
+                  }}
+                >
+                  No reports found
+                </td>
               </tr>
-            </thead>
-
-            <tbody>
-              {filteredReports.map((report) => (
+            ) : (
+              reportsList.map((report) => (
                 <tr
                   key={report.id}
                   className="clickable-row"
@@ -113,10 +140,61 @@ function MaintainerPage() {
                     </span>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    );
+  };
+
+  return (
+    <div className="admin-page">
+      <div className="admin-content">
+        {error && (
+          <div className="alert alert-error">
+            {error}
+            <button className="alert-close" onClick={() => setError("")}>
+              ×
+            </button>
+          </div>
+        )}
+
+        {/* HEADER */}
+        <div className="content-header">
+          <h1 className="page-title">Assigned Reports</h1>
+          <div className="filter-container">
+            <span className="filter-label">Filter:</span>
+            <select
+              className="status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Default (All)</option>
+              <option value="2">Assigned</option>
+              <option value="3">In Progress</option>
+              <option value="4">Suspended</option>
+              <option value="6">Resolved</option>
+            </select>
+          </div>
         </div>
+
+        {/* CURRENT REPORTS */}
+        <div className="reports-section">
+          {renderReportsTable(filteredCurrentReports, true)}
+        </div>
+
+        {/* OLD REPORTS */}
+        {filteredOldReports.length > 0 && (
+          <>
+            <div className="content-header">
+              <h1 className="page-title">Old Reports</h1>
+            </div>
+            <div className="reports-section">
+              {renderReportsTable(filteredOldReports, false)}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

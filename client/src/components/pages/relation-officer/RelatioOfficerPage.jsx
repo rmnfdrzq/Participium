@@ -3,16 +3,17 @@ import API from "../../../API/API.js";
 import { useNavigate } from "react-router";
 import "./RelationOfficerPage.css";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setSelectedReport } from "../../../store/reportSlice";
 import { STATUS_MAP } from "../../../constants/statusMap";
 
 function RelationOfficerPage() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [reports, setReports] = useState([]);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const navigate = useNavigate();
 
   useEffect(() => {
     loadReports();
@@ -20,7 +21,7 @@ function RelationOfficerPage() {
 
   const loadReports = async () => {
     try {
-      const data = await API.getAllPendingReports(); //to load reports
+      const data = await API.getAllPendingReports();
       setReports(data);
     } catch (err) {
       setError("Failed to load reports: " + err);
@@ -38,11 +39,16 @@ function RelationOfficerPage() {
     });
   };
 
-  // Filter reports based on selected status
-  const filteredReports =
-    statusFilter === "all"
-      ? reports
-      : reports.filter((report) => report.status.id === parseInt(statusFilter));
+  // Same filter logic as other pages
+  const filterReportsByStatus = (reportsList) => {
+    return statusFilter === "all"
+      ? reportsList
+      : reportsList.filter(
+          (report) => report.status?.id === parseInt(statusFilter)
+        );
+  };
+
+  const filteredReports = filterReportsByStatus(reports);
 
   return (
     <div className="admin-page">
@@ -56,6 +62,7 @@ function RelationOfficerPage() {
           </div>
         )}
 
+        {/* HEADER */}
         <div className="content-header">
           <h1 className="page-title">Reports Overview</h1>
           <div className="filter-container">
@@ -75,6 +82,7 @@ function RelationOfficerPage() {
           </div>
         </div>
 
+        {/* REPORTS TABLE */}
         <div className="users-table-container">
           <table className="users-table">
             <thead>
@@ -87,33 +95,48 @@ function RelationOfficerPage() {
             </thead>
 
             <tbody>
-              {filteredReports.map((report) => (
-                <tr
-                  key={report.id}
-                  className="clickable-row"
-                  onClick={() => {
-                    dispatch(setSelectedReport(report));
-                    navigate("/inspectReport");
-                  }}
-                >
-                  <td className="report-id">{report.id}</td>
-                  <td className="report-title">{report.title}</td>
-                  <td className="report-date">
-                    {formatDate(report.created_at)}
-                  </td>
-                  <td>
-                    <span
-                      className="status-pill"
-                      style={{
-                        backgroundColor:
-                          STATUS_MAP[report.status.id]?.color || "gray",
-                      }}
-                    >
-                      {STATUS_MAP[report.status.id]?.label || "Unknown"}
-                    </span>
+              {filteredReports.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="4"
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#666",
+                    }}
+                  >
+                    No reports found
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredReports.map((report) => (
+                  <tr
+                    key={report.id}
+                    className="clickable-row"
+                    onClick={() => {
+                      dispatch(setSelectedReport(report));
+                      navigate("/inspectReport");
+                    }}
+                  >
+                    <td className="report-id">{report.id}</td>
+                    <td className="report-title">{report.title}</td>
+                    <td className="report-date">
+                      {formatDate(report.created_at)}
+                    </td>
+                    <td>
+                      <span
+                        className="status-pill"
+                        style={{
+                          backgroundColor:
+                            STATUS_MAP[report.status?.id]?.color || "gray",
+                        }}
+                      >
+                        {STATUS_MAP[report.status?.id]?.label || "Unknown"}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

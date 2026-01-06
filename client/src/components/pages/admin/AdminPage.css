@@ -324,6 +324,21 @@
   font-size: 1.2em;
 }
 
+.offices-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.office-cell {
+  max-width: 300px;
+}
+
+.offices-list span {
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .admin-content {
     padding: 20px;

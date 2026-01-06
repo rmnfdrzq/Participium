@@ -4,3 +4,8 @@ import axiosInstance from "./axiosInstance";
 export const getAllReportsForTechOfficer = async () => {
   return await axiosInstance.get("/api/reports/assigned");
 };
+
+// Get categories for authenticated operator
+export const getMyCategories = async () => {
+  return await axiosInstance.get('/api/operators/my-categories');
+};

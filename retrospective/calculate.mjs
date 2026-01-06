@@ -1,6 +1,6 @@
 import fs from "fs";
 
-const csv = fs.readFileSync("CSV/TR02.csv", "utf-8"); // reads csv
+const csv = fs.readFileSync("CSV/TR03.csv", "utf-8"); // reads csv
 const lines = csv.split("\n").slice(1); // salta l’intestazione
 
 const estimated = [];

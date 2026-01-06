@@ -331,6 +331,15 @@ export function MapPage(props) {
         const lng = parseFloat(result.lon);
         const newCenter = [lat, lng];
 
+         const point = turf.point([lng, lat]);
+  const isInside = turf.booleanPointInPolygon(point, cityBoundaries);
+
+  if (!isInside) {
+    setSearchError("The searched address is outside the city limits");
+    dispatch(clearLocation());
+    return;
+  }
+
         setMapCenter(newCenter);
         setMapZoom(15);
         // Save to Redux store
@@ -517,7 +526,7 @@ function ReportPopup({ report, onViewDetails }) {
         <strong>Status:</strong> {report.status.name}
       </p>
       <p className={styles.reportPopupInfo}>
-        <strong>Reported by:</strong> {report.citizen.username}
+        <strong>Reported by:</strong> {report.citizen?.username || "Anonymous"}
       </p>
       <button className={styles.reportPopupButton} onClick={onViewDetails}>
         Details
@@ -669,7 +678,7 @@ function ReportDetailsModal({ report, onClose }) {
 
             <div className={styles.detailRow}>
               <strong>Reported by:</strong>
-              <p>{report.citizen.username || "Anonymous"}</p>
+              <p>{report.citizen?.username || "Anonymous"}</p>
             </div>
 
             <div className={styles.detailRow}>

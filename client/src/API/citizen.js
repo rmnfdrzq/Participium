@@ -19,3 +19,8 @@ export const requestVerificationCode = async () => {
 export const verifyEmail = async (code) => {
   return await axiosInstance.post("/api/citizens/verify-email", { code });
 };
+
+// Get active email verification token info
+export const checkValidateToken = async () => {
+  return await axiosInstance.get("/api/citizens/verification-token");
+};

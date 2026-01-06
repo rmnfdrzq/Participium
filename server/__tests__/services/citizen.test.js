@@ -134,7 +134,7 @@ describe('services/citizen', () => {
   test('generateEmailVerificationCode: does not call sendMail when user not found', async () => {
     mockQuery
       .mockResolvedValueOnce({ rows: [] }) // DELETE
-      .mockResolvedValueOnce({ rows: [] }) // INSERT
+      .mockResolvedValueOnce({ rows: [{ expires_at: new Date() }] }) // INSERT with RETURNING
       .mockResolvedValueOnce({ rows: [] }); // getUserInfoById -> null
 
     const expires_at = await svc.generateEmailVerificationCode(99);
@@ -150,7 +150,7 @@ describe('services/citizen', () => {
 
     mockQuery
       .mockResolvedValueOnce({ rows: [] }) // DELETE
-      .mockResolvedValueOnce({ rows: [] }) // INSERT
+      .mockResolvedValueOnce({ rows: [{ expires_at: new Date() }] }) // INSERT with RETURNING
       .mockResolvedValueOnce({ rows: [userInfo] }); // getUserInfoById
 
     sendMailMock.mockResolvedValueOnce({ messageId: '123' });
@@ -188,7 +188,7 @@ describe('services/citizen', () => {
 
     mockQuery
       .mockResolvedValueOnce({ rows: [] }) // DELETE
-      .mockResolvedValueOnce({ rows: [] }) // INSERT
+      .mockResolvedValueOnce({ rows: [{ expires_at: new Date() }] }) // INSERT with RETURNING
       .mockResolvedValueOnce({ rows: [userInfo] }); // getUserInfoById
 
     sendMailMock.mockRejectedValueOnce(new Error('Email sending failed'));

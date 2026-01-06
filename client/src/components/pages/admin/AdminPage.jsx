@@ -69,7 +69,6 @@ function AdminPage() {
   };
 
   const getOfficeClass = (office) => {
-    // Puoi personalizzare gli stili per ogni ufficio
     switch (office) {
       case "Organization Office":
         return "office-organization";
@@ -94,6 +93,28 @@ function AdminPage() {
       default:
         return "office-default";
     }
+  };
+
+  const renderOffices = (officeData) => {
+    // Se officeData è un array, mostra tutti gli uffici
+    if (Array.isArray(officeData)) {
+      return (
+        <div className="offices-list">
+          {officeData.map((office, index) => (
+            <span key={index} className={getOfficeClass(office)}>
+              {getOfficeDisplay(office)}
+            </span>
+          ))}
+        </div>
+      );
+    }
+    
+    // Altrimenti mostra un singolo ufficio (retrocompatibilità)
+    return (
+      <span className={getOfficeClass(officeData)}>
+        {getOfficeDisplay(officeData)}
+      </span>
+    );
   };
 
   return (
@@ -140,9 +161,7 @@ function AdminPage() {
                   <td className="user-name">{userItem.username}</td>
                   <td className="user-login">{userItem.email}</td>
                   <td className="office-cell">
-                    <span className={getOfficeClass(userItem.office_name)}>
-                      {getOfficeDisplay(userItem.office_name)}
-                    </span>
+                    {renderOffices(userItem.offices || userItem.office_name)}
                   </td>
                   <td className="role-cell">
                     <span className={getRoleClass(userItem.role)}>

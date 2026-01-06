@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1765377256546" clover="3.2.0">
-  <project timestamp="1765377256546" name="All files">
-    <metrics statements="530" coveredstatements="497" conditionals="256" coveredconditionals="211" methods="75" coveredmethods="75" elements="861" coveredelements="783" complexity="0" loc="530" ncloc="530" packages="2" files="16" classes="16"/>
+<coverage generated="1767706002652" clover="3.2.0">
+  <project timestamp="1767706002652" name="All files">
+    <metrics statements="530" coveredstatements="504" conditionals="256" coveredconditionals="225" methods="75" coveredmethods="75" elements="861" coveredelements="804" complexity="0" loc="530" ncloc="530" packages="2" files="16" classes="16"/>
     <package name="router">
       <metrics statements="273" coveredstatements="252" conditionals="163" coveredconditionals="148" methods="23" coveredmethods="23"/>
-      <file name="category.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\router\category.mjs">
+      <file name="category.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\router\category.mjs">
         <metrics statements="8" coveredstatements="8" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
         <line num="4" count="3" type="stmt"/>
         <line num="8" count="3" type="stmt"/>
@@ -15,7 +15,7 @@
         <line num="14" count="1" type="stmt"/>
         <line num="16" count="1" type="stmt"/>
       </file>
-      <file name="citizen.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\router\citizen.mjs">
+      <file name="citizen.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\router\citizen.mjs">
         <metrics statements="62" coveredstatements="62" conditionals="30" coveredconditionals="30" methods="5" coveredmethods="5"/>
         <line num="11" count="24" type="stmt"/>
         <line num="16" count="24" type="stmt"/>
@@ -80,7 +80,7 @@
         <line num="125" count="1" type="stmt"/>
         <line num="127" count="1" type="stmt"/>
       </file>
-      <file name="company.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\router\company.mjs">
+      <file name="company.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\router\company.mjs">
         <metrics statements="8" coveredstatements="8" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
         <line num="3" count="3" type="stmt"/>
         <line num="7" count="3" type="stmt"/>
@@ -91,7 +91,7 @@
         <line num="13" count="1" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
       </file>
-      <file name="office.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\router\office.mjs">
+      <file name="office.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\router\office.mjs">
         <metrics statements="8" coveredstatements="8" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
         <line num="4" count="3" type="stmt"/>
         <line num="7" count="3" type="stmt"/>
@@ -102,7 +102,7 @@
         <line num="13" count="1" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
       </file>
-      <file name="operator.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\router\operator.mjs">
+      <file name="operator.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\router\operator.mjs">
         <metrics statements="45" coveredstatements="43" conditionals="33" coveredconditionals="31" methods="3" coveredmethods="3"/>
         <line num="9" count="16" type="stmt"/>
         <line num="14" count="16" type="stmt"/>
@@ -150,7 +150,7 @@
         <line num="116" count="1" type="stmt"/>
         <line num="118" count="1" type="stmt"/>
       </file>
-      <file name="report.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\router\report.mjs">
+      <file name="report.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\router\report.mjs">
         <metrics statements="134" coveredstatements="115" conditionals="92" coveredconditionals="79" methods="11" coveredmethods="11"/>
         <line num="17" count="13" type="stmt"/>
         <line num="20" count="13" type="stmt"/>
@@ -287,21 +287,21 @@
         <line num="283" count="1" type="stmt"/>
         <line num="285" count="1" type="stmt"/>
       </file>
-      <file name="role.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\router\role.mjs">
+      <file name="role.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\router\role.mjs">
         <metrics statements="8" coveredstatements="8" conditionals="2" coveredconditionals="2" methods="1" coveredmethods="1"/>
-        <line num="4" count="3" type="stmt"/>
-        <line num="7" count="3" type="stmt"/>
-        <line num="8" count="3" type="stmt"/>
-        <line num="9" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="4" count="4" type="stmt"/>
+        <line num="7" count="4" type="stmt"/>
+        <line num="8" count="4" type="stmt"/>
+        <line num="9" count="4" type="cond" truecount="2" falsecount="0"/>
         <line num="10" count="1" type="stmt"/>
-        <line num="12" count="2" type="stmt"/>
-        <line num="13" count="1" type="stmt"/>
+        <line num="12" count="3" type="stmt"/>
+        <line num="13" count="2" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
       </file>
     </package>
     <package name="services">
-      <metrics statements="257" coveredstatements="245" conditionals="93" coveredconditionals="63" methods="52" coveredmethods="52"/>
-      <file name="category.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\category.mjs">
+      <metrics statements="257" coveredstatements="252" conditionals="93" coveredconditionals="77" methods="52" coveredmethods="52"/>
+      <file name="category.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\category.mjs">
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="4" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
@@ -310,7 +310,7 @@
         <line num="17" count="3" type="stmt"/>
         <line num="19" count="2" type="stmt"/>
       </file>
-      <file name="citizen.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\citizen.mjs">
+      <file name="citizen.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\citizen.mjs">
         <metrics statements="65" coveredstatements="64" conditionals="12" coveredconditionals="11" methods="10" coveredmethods="10"/>
         <line num="6" count="1" type="stmt"/>
         <line num="8" count="1" type="stmt"/>
@@ -378,7 +378,7 @@
         <line num="173" count="1" type="stmt"/>
         <line num="175" count="3" type="stmt"/>
       </file>
-      <file name="comment.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\comment.mjs">
+      <file name="comment.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\comment.mjs">
         <metrics statements="25" coveredstatements="23" conditionals="6" coveredconditionals="4" methods="6" coveredmethods="6"/>
         <line num="4" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
@@ -406,7 +406,7 @@
         <line num="143" count="2" type="stmt"/>
         <line num="144" count="1" type="stmt"/>
       </file>
-      <file name="company.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\company.mjs">
+      <file name="company.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\company.mjs">
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="4" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
@@ -415,7 +415,7 @@
         <line num="17" count="3" type="stmt"/>
         <line num="19" count="2" type="stmt"/>
       </file>
-      <file name="office.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\office.mjs">
+      <file name="office.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\office.mjs">
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="4" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
@@ -424,7 +424,7 @@
         <line num="18" count="3" type="stmt"/>
         <line num="19" count="2" type="stmt"/>
       </file>
-      <file name="operator.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\operator.mjs">
+      <file name="operator.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\operator.mjs">
         <metrics statements="58" coveredstatements="58" conditionals="20" coveredconditionals="19" methods="17" coveredmethods="17"/>
         <line num="5" count="1" type="stmt"/>
         <line num="7" count="1" type="stmt"/>
@@ -485,76 +485,76 @@
         <line num="147" count="1" type="stmt"/>
         <line num="149" count="1" type="stmt"/>
       </file>
-      <file name="report.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\report.mjs">
-        <metrics statements="80" coveredstatements="71" conditionals="55" coveredconditionals="29" methods="10" coveredmethods="10"/>
+      <file name="report.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\report.mjs">
+        <metrics statements="80" coveredstatements="78" conditionals="55" coveredconditionals="43" methods="10" coveredmethods="10"/>
         <line num="5" count="1" type="stmt"/>
         <line num="7" count="1" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
-        <line num="16" count="3" type="stmt"/>
-        <line num="18" count="3" type="stmt"/>
-        <line num="19" count="3" type="stmt"/>
-        <line num="22" count="3" type="stmt"/>
-        <line num="24" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="16" count="6" type="stmt"/>
+        <line num="18" count="6" type="stmt"/>
+        <line num="19" count="6" type="stmt"/>
+        <line num="22" count="6" type="stmt"/>
+        <line num="24" count="6" type="cond" truecount="2" falsecount="0"/>
         <line num="25" count="1" type="stmt"/>
-        <line num="28" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="28" count="5" type="cond" truecount="2" falsecount="0"/>
         <line num="29" count="1" type="stmt"/>
-        <line num="33" count="1" type="stmt"/>
-        <line num="34" count="1" type="stmt"/>
-        <line num="36" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="37" count="0" type="stmt"/>
-        <line num="40" count="1" type="stmt"/>
-        <line num="43" count="1" type="stmt"/>
-        <line num="44" count="1" type="stmt"/>
-        <line num="45" count="1" type="stmt"/>
-        <line num="47" count="1" type="stmt"/>
-        <line num="52" count="1" type="cond" truecount="2" falsecount="0"/>
-        <line num="53" count="1" type="stmt"/>
-        <line num="54" count="1" type="stmt"/>
-        <line num="56" count="1" type="stmt"/>
-        <line num="61" count="1" type="stmt"/>
-        <line num="62" count="1" type="stmt"/>
+        <line num="33" count="4" type="stmt"/>
+        <line num="34" count="4" type="stmt"/>
+        <line num="36" count="4" type="cond" truecount="2" falsecount="0"/>
+        <line num="37" count="1" type="stmt"/>
+        <line num="40" count="3" type="stmt"/>
+        <line num="43" count="3" type="stmt"/>
+        <line num="44" count="3" type="stmt"/>
+        <line num="45" count="3" type="stmt"/>
+        <line num="47" count="2" type="stmt"/>
+        <line num="52" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="53" count="2" type="stmt"/>
+        <line num="54" count="2" type="stmt"/>
+        <line num="56" count="2" type="stmt"/>
+        <line num="61" count="2" type="stmt"/>
+        <line num="62" count="2" type="stmt"/>
         <line num="63" count="2" type="stmt"/>
         <line num="64" count="2" type="stmt"/>
-        <line num="67" count="1" type="stmt"/>
-        <line num="69" count="1" type="stmt"/>
-        <line num="71" count="2" type="stmt"/>
-        <line num="72" count="2" type="stmt"/>
-        <line num="74" count="3" type="stmt"/>
+        <line num="67" count="2" type="stmt"/>
+        <line num="69" count="2" type="stmt"/>
+        <line num="71" count="4" type="stmt"/>
+        <line num="72" count="4" type="stmt"/>
+        <line num="74" count="6" type="stmt"/>
         <line num="79" count="1" type="stmt"/>
-        <line num="80" count="1" type="stmt"/>
-        <line num="117" count="1" type="stmt"/>
-        <line num="118" count="1" type="stmt"/>
+        <line num="80" count="4" type="stmt"/>
+        <line num="117" count="4" type="stmt"/>
+        <line num="118" count="4" type="stmt"/>
         <line num="147" count="1" type="stmt"/>
-        <line num="148" count="1" type="stmt"/>
-        <line num="189" count="1" type="stmt"/>
-        <line num="190" count="1" type="stmt"/>
+        <line num="148" count="2" type="stmt"/>
+        <line num="189" count="2" type="stmt"/>
+        <line num="190" count="2" type="stmt"/>
         <line num="221" count="1" type="cond" truecount="0" falsecount="1"/>
-        <line num="222" count="2" type="stmt"/>
-        <line num="223" count="2" type="stmt"/>
-        <line num="226" count="2" type="stmt"/>
-        <line num="229" count="2" type="stmt"/>
-        <line num="231" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="222" count="6" type="stmt"/>
+        <line num="223" count="6" type="stmt"/>
+        <line num="226" count="6" type="stmt"/>
+        <line num="229" count="6" type="stmt"/>
+        <line num="231" count="6" type="cond" truecount="2" falsecount="0"/>
         <line num="232" count="1" type="stmt"/>
-        <line num="235" count="1" type="stmt"/>
-        <line num="238" count="1" type="cond" truecount="2" falsecount="2"/>
-        <line num="240" count="0" type="stmt"/>
-        <line num="241" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="242" count="0" type="cond" truecount="0" falsecount="2"/>
-        <line num="245" count="0" type="stmt"/>
-        <line num="254" count="0" type="stmt"/>
-        <line num="256" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="235" count="5" type="stmt"/>
+        <line num="238" count="5" type="cond" truecount="4" falsecount="0"/>
+        <line num="240" count="3" type="stmt"/>
+        <line num="241" count="3" type="cond" truecount="2" falsecount="0"/>
+        <line num="242" count="2" type="cond" truecount="1" falsecount="1"/>
+        <line num="245" count="3" type="stmt"/>
+        <line num="254" count="3" type="stmt"/>
+        <line num="256" count="3" type="cond" truecount="1" falsecount="1"/>
         <line num="257" count="0" type="stmt"/>
-        <line num="262" count="1" type="stmt"/>
-        <line num="304" count="1" type="stmt"/>
-        <line num="306" count="1" type="stmt"/>
-        <line num="307" count="1" type="cond" truecount="1" falsecount="1"/>
-        <line num="309" count="1" type="stmt"/>
+        <line num="262" count="5" type="stmt"/>
+        <line num="304" count="5" type="stmt"/>
+        <line num="306" count="5" type="stmt"/>
+        <line num="307" count="5" type="cond" truecount="1" falsecount="1"/>
+        <line num="309" count="5" type="stmt"/>
         <line num="342" count="0" type="stmt"/>
-        <line num="344" count="2" type="stmt"/>
+        <line num="344" count="6" type="stmt"/>
         <line num="348" count="1" type="stmt"/>
-        <line num="349" count="1" type="stmt"/>
-        <line num="381" count="1" type="stmt"/>
-        <line num="382" count="1" type="stmt"/>
+        <line num="349" count="2" type="stmt"/>
+        <line num="381" count="2" type="stmt"/>
+        <line num="382" count="4" type="stmt"/>
         <line num="403" count="1" type="stmt"/>
         <line num="404" count="2" type="stmt"/>
         <line num="415" count="2" type="stmt"/>
@@ -568,16 +568,16 @@
         <line num="440" count="1" type="stmt"/>
         <line num="443" count="1" type="stmt"/>
       </file>
-      <file name="role.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\role.mjs">
+      <file name="role.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\role.mjs">
         <metrics statements="6" coveredstatements="6" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
         <line num="4" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>
         <line num="15" count="1" type="stmt"/>
-        <line num="16" count="3" type="stmt"/>
-        <line num="17" count="3" type="stmt"/>
-        <line num="18" count="2" type="stmt"/>
+        <line num="16" count="4" type="stmt"/>
+        <line num="17" count="4" type="stmt"/>
+        <line num="18" count="3" type="stmt"/>
       </file>
-      <file name="utils.mjs" path="C:\Users\prici\Desktop\SE2\Participium\server\services\utils.mjs">
+      <file name="utils.mjs" path="C:\Users\youbi\Desktop\process\polito\magistrale\second-year\software enginnering 2\Participium\server\services\utils.mjs">
         <metrics statements="5" coveredstatements="5" conditionals="0" coveredconditionals="0" methods="1" coveredmethods="1"/>
         <line num="4" count="1" type="stmt"/>
         <line num="6" count="1" type="stmt"/>

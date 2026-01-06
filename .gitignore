@@ -6,3 +6,6 @@ db_data/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+#remove coverage folder that are into server folder
+server/coverage/

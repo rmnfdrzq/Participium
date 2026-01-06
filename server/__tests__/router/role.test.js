@@ -41,6 +41,7 @@ describe('router/role - GET /api/roles', () => {
     const res = await request(app).get('/api/roles');
     expect(res.status).toBe(401);
     expect(res.body).toEqual({ error: 'Not authenticated' });
+    expect(getAllRolesMock).not.toHaveBeenCalled();
   });
 
   test('returns roles -> 200', async () => {
@@ -50,10 +51,21 @@ describe('router/role - GET /api/roles', () => {
 
     const res = await request(app).get('/api/roles');
     expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/json/);
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body).toEqual(rows);
 
     expect(getAllRolesMock).toHaveBeenCalled();
+  });
+
+  test('returns empty array -> 200', async () => {
+    isAuth = true;
+    getAllRolesMock.mockResolvedValueOnce([]);
+
+    const res = await request(app).get('/api/roles');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual([]);
+    expect(getAllRolesMock).toHaveBeenCalledTimes(1);
   });
 
   test('DB error -> 503', async () => {

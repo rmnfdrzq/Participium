@@ -54,9 +54,7 @@ const HomePage = ({ user }) => {
 
         </div>
       </section>
-
-      {/* 
-
+      
       <section className="how-it-works">
         <div className="container">
           <h2 className="section-title">How It Works</h2>
@@ -91,111 +89,6 @@ const HomePage = ({ user }) => {
           </div>
         </div>
       </section>
-
-      <section className="categories-section">
-        <div className="container">
-          <h2 className="section-title">Report Categories</h2>
-          <p className="section-subtitle">Report problems in different areas of the urban territory</p>
-          
-          <div className="categories-grid">
-            <div className="category-item">
-              <div className="category-icon">💧</div>
-              <h4>Water Supply</h4>
-              <p>Drinking water</p>
-            </div>
-            
-            <div className="category-item">
-              <div className="category-icon">♿</div>
-              <h4>Architectural Barriers</h4>
-              <p>Accessibility</p>
-            </div>
-            
-            <div className="category-item">
-              <div className="category-icon">🚰</div>
-              <h4>Sewage</h4>
-              <p>Sewage system</p>
-            </div>
-            
-            <div className="category-item">
-              <div className="category-icon">💡</div>
-              <h4>Public Lighting</h4>
-              <p>Street lights and lamps</p>
-            </div>
-            
-            <div className="category-item">
-              <div className="category-icon">🗑️</div>
-              <h4>Waste</h4>
-              <p>Collection and cleaning</p>
-            </div>
-            
-            <div className="category-item">
-              <div className="category-icon">🚦</div>
-              <h4>Signs and Traffic Lights</h4>
-              <p>Road signs and traffic lights</p>
-            </div>
-            
-            <div className="category-item">
-              <div className="category-icon">🛣️</div>
-              <h4>Roads and Street Furniture</h4>
-              <p>Road surface and urban elements</p>
-            </div>
-            
-            <div className="category-item">
-              <div className="category-icon">🌳</div>
-              <h4>Public Green Spaces</h4>
-              <p>Parks and playgrounds</p>
-            </div>
-            
-            <div className="category-item">
-              <div className="category-icon">📋</div>
-              <h4>Other</h4>
-              <p>Other issues</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="lifecycle-section">
-        <div className="container">
-          <h2 className="section-title">Report Lifecycle</h2>
-          <div className="lifecycle-timeline">
-            <div className="timeline-item">
-              <div className="timeline-badge badge-pending">Pending</div>
-              <div className="timeline-content">
-                <h4>Pending Approval</h4>
-                <p>Your report has been received and is undergoing preliminary verification.</p>
-              </div>
-            </div>
-            
-            <div className="timeline-item">
-              <div className="timeline-badge badge-assigned">Assigned</div>
-              <div className="timeline-content">
-                <h4>Assigned</h4>
-                <p>After approval, the report is sent to the relevant technical office.</p>
-              </div>
-            </div>
-            
-            <div className="timeline-item">
-              <div className="timeline-badge badge-progress">In Progress</div>
-              <div className="timeline-content">
-                <h4>In Progress</h4>
-                <p>The intervention has been planned and resolution has begun.</p>
-              </div>
-            </div>
-            
-            <div className="timeline-item">
-              <div className="timeline-badge badge-resolved">Resolved</div>
-              <div className="timeline-content">
-                <h4>Resolved</h4>
-                <p>The problem has been resolved and the report is closed.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> 
-      
-      */}
-      
 
       {/* CTA Section */}
       <section className="cta-section">

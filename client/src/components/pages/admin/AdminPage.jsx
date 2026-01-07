@@ -26,6 +26,10 @@ function AdminPage() {
     navigate("/admin/createuser");
   };
 
+  const handleEditOperator = (operatorId) => {
+    navigate(`/admin/edit/${operatorId}`);
+  };
+
   const getRoleDisplay = (role) => {
     const roleMap = {
       Admin: "Admin",
@@ -33,6 +37,7 @@ function AdminPage() {
         "Municipal public relations officer",
       "Technical office staff member": "Technical office staff member",
       "Municipal administrator": "Municipal administrator",
+      "External maintainer": "External maintainer",
     };
     return roleMap[role] || role;
   };
@@ -53,24 +58,39 @@ function AdminPage() {
   };
 
   const getOfficeDisplay = (office) => {
-    const officeMap = {
-      "Organization Office": "Organization",
-      "Water Department": "Water",
-      "Accessibility Office": "Accessibility",
-      "Sewage Department": "Sewage",
-      "Lighting Department": "Lighting",
-      "Waste Management": "Waste",
-      "Traffic Department": "Traffic",
-      "Public Works": "Public Works",
-      "Parks Department": "Parks",
-      "General Services": "General",
-    };
-    return officeMap[office] || office;
+    switch (office) {
+      case undefined:
+      case null:
+      case "":
+        return "Organization";
+      case "Water Department":
+        return "Water";
+      case "Accessibility Office":
+        return "Accessibility";
+      case "Sewage Department":
+        return "Sewage";
+      case "Lighting Department":
+        return "Lighting";
+      case "Waste Management":
+        return "Waste";
+      case "Traffic Department":
+        return "Traffic";
+      case "Public Works":
+        return "Public Works";
+      case "Parks Department":
+        return "Parks";
+      case "General Services":
+        return "General";
+      default:
+        return office;
+    }
   };
 
   const getOfficeClass = (office) => {
     switch (office) {
-      case "Organization Office":
+      case undefined:
+      case null:
+      case "":
         return "office-organization";
       case "Water Department":
         return "office-water";
@@ -96,7 +116,13 @@ function AdminPage() {
   };
 
   const renderOffices = (officeData) => {
-    // Se officeData è un array, mostra tutti gli uffici
+    if(!officeData || (Array.isArray(officeData) && officeData.length === 0)) {
+      return (
+      <span className="office-organization">
+        Organization
+      </span>
+    );
+  }
     if (Array.isArray(officeData)) {
       return (
         <div className="offices-list">
@@ -109,7 +135,6 @@ function AdminPage() {
       );
     }
     
-    // Altrimenti mostra un singolo ufficio (retrocompatibilità)
     return (
       <span className={getOfficeClass(officeData)}>
         {getOfficeDisplay(officeData)}
@@ -153,6 +178,7 @@ function AdminPage() {
                 <th>Login</th>
                 <th>Office</th>
                 <th>Role</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -167,6 +193,24 @@ function AdminPage() {
                     <span className={getRoleClass(userItem.role)}>
                       {getRoleDisplay(userItem.role)}
                     </span>
+                  </td>
+                  <td>
+                    {userItem.role !== "Technical office staff member" && (
+                      <button 
+                      className="btn-edit"
+                      disabled
+                    >
+                      Not editable
+                    </button>
+                    ) || (
+                      <button 
+                      className="btn-edit"
+                      onClick={() => handleEditOperator(userItem.id)}
+                    >
+                      Edit
+                    </button>
+                    )}  
+                    
                   </td>
                 </tr>
               ))}

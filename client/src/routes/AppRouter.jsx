@@ -4,6 +4,7 @@ import InsertReportPage from "../components/pages/report/InsertReportPage";
 import { LoginPage } from "../components/pages/login/LoginPage";
 import AdminPage from "../components/pages/admin/AdminPage";
 import CreateUserPage from "../components/pages/admin/CreateUserPage";
+import EditOperatorPage from "../components/pages/admin/EditOperatorPage.jsx";
 import InspectReportPage from "../components/pages/inspectReport/inspectReportPage.jsx";
 import ProfilePage from "../components/pages/profile/ProfilePage";
 import VerifyEmailPage from "../components/pages/verify-email/VerifyEmailPage";
@@ -192,6 +193,18 @@ function AppRouter({
               <InsertReportPage user={user} />
             </ProtectedRoute>
           }
+        />
+
+        <Route 
+          path="/admin/edit/:operatorId" 
+          element={
+          <ProtectedRoute
+            isUnverifiedSession={isUnverifiedSession}
+            isAuthLoading={isAuthLoading}
+          >
+            <EditOperatorPage />
+          </ProtectedRoute>
+          } 
         />
 
         <Route

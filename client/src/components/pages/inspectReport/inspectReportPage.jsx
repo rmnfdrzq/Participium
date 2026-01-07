@@ -420,6 +420,16 @@ function InspectReportPage() {
           </div>
         )}
 
+        {/* Open Chat Button - Full width for Technical Officers and External Maintainers */}
+        {(isTechnicalOfficer || isExternalMaintainer) && (
+          <button
+            className={styles.openChatButton}
+            onClick={() => navigate(`/chats?reportId=${selectedReport.id}`)}
+          >
+            💬 Open Chat
+          </button>
+        )}
+
         {/* Back Button */}
         <div className={styles.footerButtons}>
           <button className={styles.backButton} onClick={() => navigate(-1)}>

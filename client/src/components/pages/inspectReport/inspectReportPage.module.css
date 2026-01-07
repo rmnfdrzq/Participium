@@ -355,6 +355,30 @@
   cursor: not-allowed;
 }
 
+/* Open Chat Button */
+.openChatButton {
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--gradient-primary);
+  border: none;
+  color: var(--static-white);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 16px;
+}
+
+.openChatButton:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.openChatButton:active {
+  transform: translateY(0);
+}
+
 .footerButtons {
   display: flex;
   gap: 12px;

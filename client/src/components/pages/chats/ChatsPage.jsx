@@ -69,6 +69,23 @@ export default function ChatsPage({ user }) {
         setSelectedChat(data);
         setMessages(data.messages || []);
         
+        // Reset unread count for this chat in local state (server already marked as read)
+        setChats((prev) => {
+          const targetChat = prev.find(c => c.report_id === parseInt(activeReportId, 10));
+          const readCount = targetChat?.unread_count || 0;
+          
+          // Dispatch event to update header badge
+          if (readCount > 0) {
+            window.dispatchEvent(new CustomEvent('chat-read', { detail: { count: readCount } }));
+          }
+          
+          return prev.map((chat) =>
+            chat.report_id === parseInt(activeReportId, 10)
+              ? { ...chat, unread_count: 0 }
+              : chat
+          );
+        });
+        
         // Focus on input after loading
         setTimeout(() => {
           inputRef.current?.focus();
@@ -124,6 +141,17 @@ export default function ChatsPage({ user }) {
               chat.last_message?.content === message.content) {
             return chat;
           }
+          
+          // Increment unread count if:
+          // - This chat is NOT currently open
+          // - For citizens: message is from operator (including system messages)
+          // - For operators: message is from citizen
+          const isCurrentChat = message.report_id === parseInt(activeReportId, 10);
+          const isFromOther = user.role === "user" 
+            ? message.sender_type === "operator"
+            : message.sender_type === "citizen";
+          const shouldIncrementUnread = !isCurrentChat && isFromOther;
+          
           return {
             ...chat,
             last_message: {
@@ -133,6 +161,9 @@ export default function ChatsPage({ user }) {
             },
             message_count: chat.message_count + 1,
             last_activity: message.sent_at,
+            unread_count: shouldIncrementUnread 
+              ? (chat.unread_count || 0) + 1 
+              : chat.unread_count,
           };
         })
       );
@@ -259,9 +290,16 @@ export default function ChatsPage({ user }) {
               >
                 <div className={styles.chatItemHeader}>
                   <span className={styles.chatTitle}>{chat.title}</span>
-                  <span className={styles.chatTime}>
-                    {formatTime(chat.last_activity)}
-                  </span>
+                  <div className={styles.chatHeaderRight}>
+                    {chat.unread_count > 0 && (
+                      <span className={styles.unreadBadge}>
+                        {chat.unread_count > 9 ? "9+" : chat.unread_count}
+                      </span>
+                    )}
+                    <span className={styles.chatTime}>
+                      {formatTime(chat.last_activity)}
+                    </span>
+                  </div>
                 </div>
                 <div className={styles.chatItemBody}>
                   <span className={`${styles.chatStatus} ${getStatusClass(chat.status_id)}`}>
@@ -312,16 +350,10 @@ export default function ChatsPage({ user }) {
                 </span>
               </div>
               <button
-                className={styles.viewReportButton}
+                className={styles.showOnMapButton}
                 onClick={() => navigate(`/map?reportId=${selectedChat.report_id}`)}
-                aria-label="View on map"
-                title="View on map"
               >
-                <img 
-                  src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png" 
-                  alt="Map marker"
-                  className={styles.markerIcon}
-                />
+                Show on Map
               </button>
             </div>
 

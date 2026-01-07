@@ -44,7 +44,18 @@ export const getChatsByCitizen = async (citizen_id) => {
         SELECT MAX(m.sent_at)
         FROM messages m
         WHERE m.report_id = r.report_id
-      ) as last_activity
+      ) as last_activity,
+      (
+        SELECT COUNT(*)::int
+        FROM messages m
+        WHERE m.report_id = r.report_id
+        AND m.sender_type != 'citizen'
+        AND m.sent_at > COALESCE(
+          (SELECT last_read_at FROM chat_reads cr 
+           WHERE cr.user_type = 'citizen' AND cr.user_id = $1 AND cr.report_id = r.report_id),
+          '1970-01-01'::timestamp
+        )
+      ) as unread_count
     FROM reports r
     JOIN statuses s ON r.status_id = s.status_id
     WHERE r.citizen_id = $1
@@ -66,6 +77,7 @@ export const getChatsByCitizen = async (citizen_id) => {
     last_message: row.last_message,
     message_count: row.message_count,
     last_activity: row.last_activity || row.report_created_at,
+    unread_count: row.unread_count || 0,
   }));
 };
 
@@ -73,7 +85,7 @@ export const getChatsByCitizen = async (citizen_id) => {
  * Get all chats for an operator (reports assigned to them)
  * @param {number} operator_id - The operator ID
  * @param {string} role - The operator role
- * @returns {array} List of chats with last message
+ * @returns {array} List of chats with last message and unread count
  */
 export const getChatsByOperator = async (operator_id, role) => {
   let whereClause;
@@ -113,7 +125,18 @@ export const getChatsByOperator = async (operator_id, role) => {
         SELECT MAX(m.sent_at)
         FROM messages m
         WHERE m.report_id = r.report_id
-      ) as last_activity
+      ) as last_activity,
+      (
+        SELECT COUNT(*)::int
+        FROM messages m
+        WHERE m.report_id = r.report_id
+        AND m.sender_type != 'operator'
+        AND m.sent_at > COALESCE(
+          (SELECT last_read_at FROM chat_reads cr 
+           WHERE cr.user_type = 'operator' AND cr.user_id = $1 AND cr.report_id = r.report_id),
+          '1970-01-01'::timestamp
+        )
+      ) as unread_count
     FROM reports r
     JOIN statuses s ON r.status_id = s.status_id
     LEFT JOIN citizens c ON r.citizen_id = c.citizen_id
@@ -140,6 +163,7 @@ export const getChatsByOperator = async (operator_id, role) => {
     last_message: row.last_message,
     message_count: row.message_count,
     last_activity: row.last_activity || row.report_created_at,
+    unread_count: row.unread_count || 0,
   }));
 };
 
@@ -215,5 +239,81 @@ export const getReportParticipants = async (report_id) => {
   const result = await pool.query(sql, [report_id]);
   if (result.rows.length === 0) return null;
   return result.rows[0];
+};
+
+/**
+ * Mark a chat as read for a user (updates last_read_at timestamp)
+ * @param {string} userType - 'citizen' or 'operator'
+ * @param {number} userId - The user's ID
+ * @param {number} reportId - The report/chat ID
+ */
+export const markChatAsRead = async (userType, userId, reportId) => {
+  const sql = `
+    INSERT INTO chat_reads (user_type, user_id, report_id, last_read_at)
+    VALUES ($1, $2, $3, NOW())
+    ON CONFLICT (user_type, user_id, report_id)
+    DO UPDATE SET last_read_at = NOW()
+    RETURNING *
+  `;
+
+  const result = await pool.query(sql, [userType, userId, reportId]);
+  return result.rows[0];
+};
+
+/**
+ * Get total unread message count for a user across all chats
+ * @param {string} userType - 'citizen' or 'operator'
+ * @param {number} userId - The user's ID
+ * @returns {number} Total unread count
+ */
+export const getTotalUnreadCount = async (userType, userId) => {
+  let sql;
+  
+  if (userType === 'citizen') {
+    sql = `
+      SELECT COALESCE(SUM(unread), 0)::int as total
+      FROM (
+        SELECT 
+          (
+            SELECT COUNT(*)
+            FROM messages m
+            WHERE m.report_id = r.report_id
+            AND m.sender_type != 'citizen'
+            AND m.sent_at > COALESCE(
+              (SELECT last_read_at FROM chat_reads cr 
+               WHERE cr.user_type = 'citizen' AND cr.user_id = $1 AND cr.report_id = r.report_id),
+              '1970-01-01'::timestamp
+            )
+          ) as unread
+        FROM reports r
+        WHERE r.citizen_id = $1
+        AND r.status_id NOT IN (1, 5)
+      ) sub
+    `;
+  } else {
+    sql = `
+      SELECT COALESCE(SUM(unread), 0)::int as total
+      FROM (
+        SELECT 
+          (
+            SELECT COUNT(*)
+            FROM messages m
+            WHERE m.report_id = r.report_id
+            AND m.sender_type != 'operator'
+            AND m.sent_at > COALESCE(
+              (SELECT last_read_at FROM chat_reads cr 
+               WHERE cr.user_type = 'operator' AND cr.user_id = $1 AND cr.report_id = r.report_id),
+              '1970-01-01'::timestamp
+            )
+          ) as unread
+        FROM reports r
+        WHERE (r.assigned_to_operator_id = $1 OR r.assigned_to_external_id = $1)
+        AND r.status_id NOT IN (1, 5)
+      ) sub
+    `;
+  }
+
+  const result = await pool.query(sql, [userId]);
+  return result.rows[0]?.total || 0;
 };
 

@@ -10,14 +10,11 @@ export function Header(props) {
   const { socket } = useSocket();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isChatsOpen, setIsChatsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [recentChats, setRecentChats] = useState([]);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const menuRef = useRef(null);
   const notifRef = useRef(null);
-  const chatsRef = useRef(null);
 
   const isCitizen = props.user?.role === "user";
   const isTechOfficer = props.user?.role === "Technical office staff member" || props.user?.role === "External maintainer";
@@ -44,20 +41,20 @@ export function Header(props) {
     loadNotifications();
   }, [isCitizen]);
 
-  // Load recent chats for users who can access chats
+  // Load unread messages count from database
   useEffect(() => {
     if (!canAccessChats) return;
 
-    const loadRecentChats = async () => {
+    const loadUnreadMessagesCount = async () => {
       try {
-        const chats = await API.getChats();
-        setRecentChats(chats.slice(0, 3));
+        const data = await API.getUnreadMessagesCount();
+        setUnreadMessagesCount(data.count);
       } catch (error) {
-        console.error("Failed to load chats:", error);
+        console.error("Failed to load unread messages count:", error);
       }
     };
 
-    loadRecentChats();
+    loadUnreadMessagesCount();
   }, [canAccessChats]);
 
   // Listen for new notifications via WebSocket
@@ -79,6 +76,22 @@ export function Header(props) {
   // Track processed message IDs to prevent duplicate badge increments
   const processedMessageIds = useRef(new Set());
 
+  // Listen for chat-read events to decrease unread count
+  useEffect(() => {
+    if (!canAccessChats) return;
+
+    const handleChatRead = (event) => {
+      const { count } = event.detail;
+      setUnreadMessagesCount((prev) => Math.max(0, prev - count));
+    };
+
+    window.addEventListener('chat-read', handleChatRead);
+
+    return () => {
+      window.removeEventListener('chat-read', handleChatRead);
+    };
+  }, [canAccessChats]);
+
   // Listen for new messages via WebSocket
   useEffect(() => {
     if (!socket || !canAccessChats) return;
@@ -90,24 +103,24 @@ export function Header(props) {
       }
       processedMessageIds.current.add(message.id);
 
-      // Only increment if we're not on the chats page
-      if (!window.location.pathname.includes("/chats")) {
+      // Skip if this message is from the current user (they sent it)
+      const isFromMe = (isCitizen && message.sender_type === "citizen") ||
+                       (isTechOfficer && message.sender_type === "operator");
+      if (isFromMe) {
+        return;
+      }
+
+      // Check if user is currently viewing this specific chat
+      const urlParams = new URLSearchParams(window.location.search);
+      const activeReportId = urlParams.get("reportId");
+      const isViewingThisChat = window.location.pathname.includes("/chats") && 
+                                activeReportId && 
+                                parseInt(activeReportId, 10) === message.report_id;
+
+      // Only increment if not currently viewing this chat
+      if (!isViewingThisChat) {
         setUnreadMessagesCount((prev) => prev + 1);
       }
-      // Update recent chats with new message
-      setRecentChats((prev) => {
-        const updated = prev.map((chat) =>
-          chat.report_id === message.report_id
-            ? { ...chat, last_message: { content: message.content, sender_type: message.sender_type, sent_at: message.sent_at } }
-            : chat
-        );
-        // Sort by last activity
-        return updated.sort((a, b) => {
-          const aTime = a.last_message?.sent_at || a.last_activity;
-          const bTime = b.last_message?.sent_at || b.last_activity;
-          return new Date(bTime) - new Date(aTime);
-        });
-      });
     };
 
     socket.on("new_message", handleNewMessage);
@@ -115,7 +128,7 @@ export function Header(props) {
     return () => {
       socket.off("new_message", handleNewMessage);
     };
-  }, [socket, canAccessChats]);
+  }, [socket, canAccessChats, isCitizen, isTechOfficer]);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -125,9 +138,6 @@ export function Header(props) {
       }
       if (notifRef.current && !notifRef.current.contains(event.target)) {
         setIsNotifOpen(false);
-      }
-      if (chatsRef.current && !chatsRef.current.contains(event.target)) {
-        setIsChatsOpen(false);
       }
     };
 
@@ -207,76 +217,6 @@ export function Header(props) {
               {props.user.username || props.user.name || props.user.email}
             </div>
 
-            {/* Chats icon - for citizens and tech officers */}
-            {canAccessChats && (
-              <div className={styles.notificationContainer} ref={chatsRef}>
-                <button
-                  className={styles.notificationButton}
-                  onClick={() => {
-                    setIsChatsOpen(!isChatsOpen);
-                    // Reset unread count when opening dropdown
-                    if (!isChatsOpen) {
-                      setUnreadMessagesCount(0);
-                    }
-                  }}
-                  aria-label="Chats"
-                >
-                  💬
-                  {unreadMessagesCount > 0 && (
-                    <span className={styles.notificationBadge}>
-                      {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
-                    </span>
-                  )}
-                </button>
-
-                {isChatsOpen && (
-                  <div className={styles.notificationDropdown}>
-                    <div className={styles.notificationHeader}>
-                      <span>Recent Chats</span>
-                    </div>
-
-                    <div className={styles.notificationList}>
-                      {recentChats.length === 0 ? (
-                        <div className={styles.noNotifications}>
-                          No chats yet
-                        </div>
-                      ) : (
-                        recentChats.map((chat) => (
-                          <div
-                            key={chat.report_id}
-                            className={styles.chatItem}
-                            onClick={() => {
-                              setIsChatsOpen(false);
-                              setUnreadMessagesCount(0);
-                              navigate(`/chats?reportId=${chat.report_id}`);
-                            }}
-                          >
-                            <p className={styles.chatTitle}>{chat.title}</p>
-                            {chat.last_message && (
-                              <small className={styles.chatPreview}>
-                                {chat.last_message.content}
-                              </small>
-                            )}
-                          </div>
-                        ))
-                      )}
-                    </div>
-
-                    <button
-                      className={styles.viewAllButton}
-                      onClick={() => {
-                        setIsChatsOpen(false);
-                        setUnreadMessagesCount(0);
-                        navigate("/chats");
-                      }}
-                    >
-                      View all chats
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Notification bell - only for citizens */}
             {isCitizen && (
               <div className={styles.notificationContainer} ref={notifRef}>
@@ -308,7 +248,7 @@ export function Header(props) {
                           No notifications yet
                         </div>
                       ) : (
-                        notifications.slice(0, 5).map((notif) => (
+                        notifications.slice(0, 10).map((notif) => (
                           <div
                             key={notif.id}
                             className={`${styles.notificationItem} ${
@@ -322,18 +262,6 @@ export function Header(props) {
                         ))
                       )}
                     </div>
-
-                    {notifications.length > 0 && (
-                      <button
-                        className={styles.viewAllButton}
-                        onClick={() => {
-                          setIsNotifOpen(false);
-                          navigate("/notifications");
-                        }}
-                      >
-                        View all notifications
-                      </button>
-                    )}
                   </div>
                 )}
               </div>
@@ -357,10 +285,33 @@ export function Header(props) {
                     {getInitials()}
                   </span>
                 )}
+                {/* Unread messages badge on avatar */}
+                {canAccessChats && unreadMessagesCount > 0 && (
+                  <span className={styles.avatarBadge}>
+                    {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                  </span>
+                )}
               </div>
 
               {isMenuOpen && (
                 <div className={styles.avatarDropdown}>
+                  {/* Messages button for citizens and tech officers */}
+                  {canAccessChats && (
+                    <button
+                      className={styles.dropdownItem}
+                      onClick={() => {
+                        navigate("/chats");
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      Messages
+                      {unreadMessagesCount > 0 && (
+                        <span className={styles.dropdownBadge}>
+                          {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
                   {isCitizen && (
                     <button
                       className={styles.dropdownItem}

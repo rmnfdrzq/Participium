@@ -401,7 +401,7 @@ router.post("/reports/:id/messages", async (req, res) => {
       return res.status(422).json({ error: "Content is required" });
     }
 
-    const senderType = req.user.type === "operator" ? "operator" : "citizen";
+    const senderType = req.user.role === "user" ? "citizen" : "operator";
 
     const message = await addMessage(
       reportId,

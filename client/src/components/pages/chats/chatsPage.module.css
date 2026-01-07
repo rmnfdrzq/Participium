@@ -130,6 +130,27 @@
   gap: 12px;
 }
 
+.chatHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.unreadBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: #c33;
+  color: var(--static-white);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+
 .chatTitle {
   font-size: 15px;
   font-weight: 600;
@@ -299,33 +320,27 @@
   line-height: 1.3;
 }
 
-.viewReportButton {
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  padding: 0;
-  background: transparent;
-  border: none;
+.showOnMapButton {
+  padding: 6px 12px;
+  background: var(--static-white);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--static-black);
+  white-space: nowrap;
 }
 
-.viewReportButton:hover {
-  transform: scale(1.15);
+.showOnMapButton:hover {
+  background: var(--background-light);
+  border-color: var(--static-black);
 }
 
-.viewReportButton:active {
-  transform: scale(0.95);
-}
-
-.markerIcon {
-  width: 18px;
-  height: 30px;
-  object-fit: contain;
+.showOnMapButton:active {
+  transform: scale(0.97);
 }
 
 /* =====================================================
@@ -650,15 +665,9 @@
     font-size: 16px;
   }
 
-  .viewReportButton {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-  }
-
-  .markerIcon {
-    width: 16px;
-    height: 26px;
+  .showOnMapButton {
+    padding: 5px 10px;
+    font-size: 11px;
   }
 
   /* Messages area mobile */
@@ -773,15 +782,9 @@
     font-size: 15px;
   }
 
-  .viewReportButton {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-  }
-
-  .markerIcon {
-    width: 14px;
-    height: 23px;
+  .showOnMapButton {
+    padding: 4px 8px;
+    font-size: 10px;
   }
 
   .messagesArea {
@@ -853,7 +856,7 @@
   .loadingSpinner,
   .chatItem,
   .sendButton,
-  .viewReportButton,
+  .showOnMapButton,
   .backButton {
     animation: none;
     transition: none;

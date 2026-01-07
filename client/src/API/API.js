@@ -47,7 +47,7 @@ import {
   getReportMessages,
   sendReportMessage,
 } from "./notification.js";
-import { getChats, getChatDetails } from "./chat.js";
+import { getChats, getChatDetails, getUnreadMessagesCount, markChatAsRead } from "./chat.js";
 
 const API = {
   // Admin methods
@@ -113,6 +113,8 @@ const API = {
   // Chat methods
   getChats,
   getChatDetails,
+  getUnreadMessagesCount,
+  markChatAsRead,
 };
 
 export default API;

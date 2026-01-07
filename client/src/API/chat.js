@@ -10,3 +10,13 @@ export const getChatDetails = async (reportId) => {
   return await axiosInstance.get(`/api/chats/${reportId}`);
 };
 
+// Get total unread messages count
+export const getUnreadMessagesCount = async () => {
+  return await axiosInstance.get("/api/chats/unread/count");
+};
+
+// Mark a chat as read
+export const markChatAsRead = async (reportId) => {
+  return await axiosInstance.post(`/api/chats/${reportId}/read`);
+};
+

@@ -124,6 +124,16 @@ CREATE TABLE telegram_users (
     linked_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Tracks when users last read each chat (for unread message counts)
+CREATE TABLE chat_reads (
+    id SERIAL PRIMARY KEY,
+    user_type VARCHAR(10) CHECK (user_type IN ('citizen','operator')) NOT NULL,
+    user_id INT NOT NULL,
+    report_id INT REFERENCES reports(report_id) ON DELETE CASCADE,
+    last_read_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(user_type, user_id, report_id)
+);
+
 -- Funzione per controllare email duplicate tra citizens e operators
 CREATE OR REPLACE FUNCTION check_email_uniqueness()
 RETURNS TRIGGER AS $$

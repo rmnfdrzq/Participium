@@ -139,7 +139,6 @@ router.post('/admin/createuser', [
         console.log('Successfully added category:', office);
       } catch (err) {
         console.error('Failed to add category:', office, 'Error:', err);
-        // Non fare throw qui, per vedere tutti gli errori
       }
     }
 
@@ -152,7 +151,7 @@ router.post('/admin/createuser', [
     } else {
       return res.status(503).json({ 
         error: 'Database error during user creation',
-        details: err.message // Mostra il messaggio di errore
+        details: err.message 
       });
     }
   }

@@ -135,7 +135,6 @@ const CreateUserPage = () => {
     e.preventDefault();
     setError("");
 
-    // Validazione: tutti i campi devono essere compilati
     if (!newUser.username.trim()) {
       setError("Username is required");
       return;
@@ -158,11 +157,6 @@ const CreateUserPage = () => {
 
     if (!newUser.role) {
       setError("Please select a role");
-      return;
-    }
-
-    if (newUser.office_id.length === 0) {
-      setError("Please select at least one office");
       return;
     }
 
@@ -292,7 +286,7 @@ const CreateUserPage = () => {
               {!newUser.role ? (
                 <p className="form-text text-muted">Please select a role first</p>
               ) : filteredOffices.length === 0 ? (
-                <p className="form-text text-muted">No offices available for this selection</p>
+                <p className="form-text text-muted">Organization Office</p>
               ) : (
                 <div className="checkbox-group">
                   {filteredOffices.sort((a, b) => a.id - b.id).map((office) => (

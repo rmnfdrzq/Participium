@@ -1,4 +1,4 @@
-let createUserMock, getUserInfoByIdMock, updateUserByIdMock, generateEmailVerificationCodeMock, verifyEmailCodeMock;
+let createUserMock, getUserInfoByIdMock, updateUserByIdMock, generateEmailVerificationCodeMock, verifyEmailCodeMock, getActiveVerificationTokenMock;
 let request, expressApp, router;
 let isAuth = false;
 let currentUser = null;
@@ -12,6 +12,7 @@ describe('router/citizen', () => {
     updateUserByIdMock = jest.fn();
     generateEmailVerificationCodeMock = jest.fn();
     verifyEmailCodeMock = jest.fn();
+    getActiveVerificationTokenMock = jest.fn();
 
     // mock dao before importing router
     await jest.unstable_mockModule('../../dao.mjs', () => ({
@@ -19,7 +20,8 @@ describe('router/citizen', () => {
       getUserInfoById: getUserInfoByIdMock,
       updateUserById: updateUserByIdMock,
       generateEmailVerificationCode: generateEmailVerificationCodeMock,
-      verifyEmailCode: verifyEmailCodeMock
+      verifyEmailCode: verifyEmailCodeMock,
+      getActiveVerificationToken: getActiveVerificationTokenMock
     }));
 
     const express = (await import('express')).default;
@@ -276,6 +278,56 @@ describe('router/citizen', () => {
       const res = await request(expressApp).post('/api/citizens/verify-email').send({ code: '123456' });
       expect(res.status).toBe(503);
       expect(res.body).toEqual({ error: 'Database error during email verification' });
+    });
+  });
+
+  describe('GET /api/citizens/verification-token', () => {
+    test('unauthenticated -> 401', async () => {
+      isAuth = false;
+      const res = await request(expressApp).get('/api/citizens/verification-token');
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({ error: 'Not authenticated' });
+    });
+
+    test('invalid user id -> 423', async () => {
+      isAuth = true;
+      currentUser = { id: 'invalid' };
+      const res = await request(expressApp).get('/api/citizens/verification-token');
+      expect(res.status).toBe(423);
+      expect(res.body).toEqual({ error: 'Invalid user id' });
+    });
+
+    test('no active token -> 404', async () => {
+      isAuth = true;
+      currentUser = { id: 40 };
+      getActiveVerificationTokenMock.mockResolvedValueOnce(null);
+
+      const res = await request(expressApp).get('/api/citizens/verification-token');
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ error: 'No active verification token found' });
+      expect(getActiveVerificationTokenMock).toHaveBeenCalledWith(40);
+    });
+
+    test('returns token -> 200', async () => {
+      isAuth = true;
+      currentUser = { id: 41 };
+      const token = { token_id: 'abc123', expires_at: '2025-12-31' };
+      getActiveVerificationTokenMock.mockResolvedValueOnce(token);
+
+      const res = await request(expressApp).get('/api/citizens/verification-token');
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(token);
+      expect(getActiveVerificationTokenMock).toHaveBeenCalledWith(41);
+    });
+
+    test('DB error -> 503', async () => {
+      isAuth = true;
+      currentUser = { id: 42 };
+      getActiveVerificationTokenMock.mockRejectedValueOnce(new Error('db'));
+
+      const res = await request(expressApp).get('/api/citizens/verification-token');
+      expect(res.status).toBe(503);
+      expect(res.body).toEqual({ error: 'Database error during verification token retrieval' });
     });
   });
 });

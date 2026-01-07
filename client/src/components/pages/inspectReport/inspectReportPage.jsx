@@ -382,10 +382,10 @@ function InspectReportPage() {
                 Assign Selected
               </button> */}
               <button
-                className={styles.successButton}
+                className={styles.assignButton}
                 onClick={handleAutoAssignMaintainer}
               >
-                Assign automatic External Maintainer
+                Automatically assign to External Maintainer
               </button>
             
           </div>

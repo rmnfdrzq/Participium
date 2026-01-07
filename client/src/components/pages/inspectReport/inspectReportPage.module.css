@@ -302,6 +302,30 @@
 .secondaryButton:hover {
   background-color: var(--border-light);
 }
+.assignButton {
+  flex: 1;
+  padding: 14px 24px;
+  background-color: #009688;
+  border: 1px solid #00796b;
+  color: var(--static-white);
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.assignButton:hover:not(:disabled) {
+  background-color: #00796b;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.assignButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
 
 .backButton {
   padding: 12px 32px;

@@ -376,6 +376,7 @@
 .message {
   display: flex;
   max-width: 70%;
+  width: fit-content;
   animation: messageAppear 0.2s ease-out;
 }
 
@@ -392,10 +393,12 @@
 
 .myMessage {
   align-self: flex-end;
+  margin-left: auto;
 }
 
 .theirMessage {
   align-self: flex-start;
+  margin-right: auto;
 }
 
 .messageContent {
@@ -558,6 +561,7 @@
 
   .message {
     max-width: 80%;
+    width: fit-content;
   }
 }
 
@@ -665,6 +669,7 @@
 
   .message {
     max-width: 85%;
+    width: fit-content;
   }
 
   .messageContent {
@@ -785,6 +790,7 @@
 
   .message {
     max-width: 90%;
+    width: fit-content;
   }
 
   .messageContent p {

@@ -676,9 +676,15 @@ useEffect(() => {
   let isMounted = true;
 
   const checkLogin = async () => {
-    const loggedIn = await API.getUserInfo();
-    if (isMounted) {
-      setIsLoggedIn(loggedIn);
+    try {
+      const loggedIn = await API.getUserInfo();
+      if (isMounted) {
+        setIsLoggedIn(loggedIn);
+      }
+    } catch (err) {
+      if (isMounted) {
+        setIsLoggedIn(false);
+      }
     }
   };
 
@@ -691,6 +697,7 @@ useEffect(() => {
 
 
 
+
   const navigate = useNavigate();
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
 
@@ -699,10 +706,17 @@ useEffect(() => {
   //console.log("Report in modal:", report);
   //console.log("Is logged in:", isLoggedIn);
 
-  const isLoggedInUser = isLoggedIn?.id == report.citizen?.id;
-  
-  // Show chat button only for approved reports (not pending or rejected)
-  const showChatButton = isLoggedInUser &&report.status?.id !== 1 && report.status?.id !== 5;
+  const isAnonymous = report.anonymous === true;
+
+const isOwner =
+  !isAnonymous &&
+  isLoggedIn?.id != null &&
+  report.citizen?.id === isLoggedIn.id;
+
+const showChatButton =
+  isOwner &&
+  report.status?.id !== 1 &&
+  report.status?.id !== 5;
 
   return (
     <>

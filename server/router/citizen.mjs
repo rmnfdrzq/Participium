@@ -81,7 +81,11 @@ router.put("/citizens", async (req, res) => {
 
   return res.json(updatedUser);
   } catch (err) {
-  return res.status(500).json({ error: "Internal server error" });
+    // Handle unique constraint violation (username already exists)
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'Username already exists' });
+    }
+    return res.status(500).json({ error: "Internal server error" });
   }
 });
 

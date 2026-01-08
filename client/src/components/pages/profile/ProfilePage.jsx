@@ -152,11 +152,19 @@ export default function ProfilePage({
           : "";
 
       const updates = {
+        username: formData.username.trim(),
         first_name: formData.first_name,
         last_name: formData.last_name,
         telegram_username: cleanTelegramUsername,
         email_notifications: formData.email_notifications,
       };
+
+      // Validate username
+      if (!updates.username || updates.username.length < 3) {
+        setError("Username must be at least 3 characters");
+        setIsSaving(false);
+        return;
+      }
 
       await API.updateCitizenProfile(updates);
 
@@ -168,7 +176,12 @@ export default function ProfilePage({
       setSuccess("Changes saved successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.message || "Failed to save changes");
+      // Handle specific error messages from backend
+      if (err.response?.status === 409) {
+        setError("Username already taken. Please choose another one.");
+      } else {
+        setError(err.response?.data?.error || err.message || "Failed to save changes");
+      }
     } finally {
       setIsSaving(false);
     }
@@ -286,10 +299,11 @@ export default function ProfilePage({
               type="text"
               name="username"
               value={formData.username}
+              onChange={handleChange}
               className={styles.input}
-              disabled
+              minLength={3}
+              maxLength={50}
             />
-            <span className={styles.hint}>Username cannot be changed</span>
           </div>
 
           <div className={styles.formGroup}>

@@ -24,15 +24,18 @@ export default function ChatsPage({ user }) {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(null);
   
+  const messagesAreaRef = useRef(null);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
   // Get report ID from URL params
   const activeReportId = searchParams.get("reportId");
 
-  // Scroll to bottom of messages
+  // Scroll to bottom of messages (within container only, not the page)
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesAreaRef.current) {
+      messagesAreaRef.current.scrollTop = messagesAreaRef.current.scrollHeight;
+    }
   }, []);
 
   // Load chats list
@@ -359,7 +362,7 @@ export default function ChatsPage({ user }) {
             </div>
 
             {/* Messages area */}
-            <div className={styles.messagesArea}>
+            <div className={styles.messagesArea} ref={messagesAreaRef}>
               {messages.length === 0 ? (
                 <div className={styles.noMessages}>
                   <div className={styles.noMessagesIcon}>✉️</div>

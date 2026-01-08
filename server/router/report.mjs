@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { check } from "express-validator";
-import {
+import { 
   insertReport,
   getAllReports,
   updateReportStatus,
@@ -72,9 +72,9 @@ router.post(
   async (req, res) => {
     if (!req.isAuthenticated() || req.user.role !== "user") {
       return res.status(401).json({ error: "Not authenticated or forbidden" });
-    }
+  }
 
-    try {
+  try {
       const {
         title,
         description,
@@ -84,18 +84,18 @@ router.post(
         category_id,
         anonymous,
       } = req.body;
-      const report = await insertReport({
-        title,
-        citizen_id: req.user.id,
-        description,
-        image_urls,
-        latitude,
-        longitude,
-        category_id,
+    const report = await insertReport({ 
+      title, 
+      citizen_id: req.user.id, 
+      description, 
+      image_urls, 
+      latitude, 
+      longitude,
+      category_id,
         anonymous,
-      });
-      return res.status(201).json(report);
-    } catch (err) {
+    });
+  return res.status(201).json(report);
+  } catch (err) {
       return res.status(503).json({ error: err.message });
     }
   }
@@ -113,7 +113,7 @@ router.get("/reports", async (req, res) => {
       return res.status(403).json({ error: "Forbidden" });
 
     const reports = await getAllReports();
-    return res.status(200).json(reports);
+  return res.status(200).json(reports);
   } catch (err) {
     return res
       .status(503)
@@ -175,7 +175,7 @@ router.put("/reports/:id/status", async (req, res) => {
       }
     }
 
-    return res.status(200).json(updated);
+  return res.status(200).json(updated);
   } catch (err) {
     return res
       .status(503)
@@ -201,7 +201,7 @@ router.put("/reports/:id/operator", async (req, res) => {
       return res.status(422).json({ error: "operatorId must be a number" });
     const updated = await setOperatorByReport(reportId, operatorId);
     if (!updated) return res.status(404).json({ error: "Report not found" });
-    return res.sendStatus(200);
+  return res.sendStatus(200);
   } catch (err) {
     res.status(503).json({ error: "Database error during operator assignment" });
   }
@@ -212,25 +212,25 @@ router.post("/reports/:id/auto-assign-officer", async (req, res) => {
   try {
     if (!req.isAuthenticated())
       return res.status(401).json({ error: "Not authenticated" });
-
+    
     if (
       req.user.role !== "Municipal public relations officer" &&
       req.user.role !== "Admin"
     )
       return res.status(403).json({ error: "Forbidden" });
-
+    
     const reportId = Number.parseInt(req.params.id, 10);
     if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 
     const result = await autoAssignTechnicalOfficer(reportId);
-
+    
     return res.status(200).json({
-      id: result.assigned_officer.operator_id,
-      username: result.assigned_officer.username,
+        id: result.assigned_officer.operator_id,
+        username: result.assigned_officer.username,
       email: result.assigned_officer.email,
     });
-  } catch (err) {
+  } catch (err) {  
     return res
       .status(503)
       .json({ error: "Database error during officer assignment" });
@@ -256,7 +256,7 @@ router.put("/reports/:id/mainteiner", async (req, res) => {
       return res.status(422).json({ error: "operatorId must be a number" });
     const updated = await setMainteinerByReport(reportId, operatorId);
     if (!updated) return res.status(404).json({ error: "Report not found" });
-    return res.sendStatus(200);
+  return res.sendStatus(200);
   } catch (err) {
     res.status(503).json({ error: "Database error during operator assignment" });
   }
@@ -267,25 +267,25 @@ router.post("/reports/:id/auto-assign-maintainer", async (req, res) => {
   try {
     if (!req.isAuthenticated())
       return res.status(401).json({ error: "Not authenticated" });
-
+    
     if (
       req.user.role !== "Technical office staff member" &&
       req.user.role !== "Admin"
     )
       return res.status(403).json({ error: "Forbidden" });
-
+    
     const reportId = Number.parseInt(req.params.id, 10);
     if (Number.isNaN(reportId))
       return res.status(422).json({ error: "Invalid report id" });
 
     const result = await autoAssignMaintainer(reportId);
-
+    
     return res.status(200).json({
-      id: result.assigned_maintainer.operator_id,
-      username: result.assigned_maintainer.username,
+        id: result.assigned_maintainer.operator_id,
+        username: result.assigned_maintainer.username,
       company: result.assigned_maintainer.company_name,
     });
-  } catch (err) {
+  } catch (err) {  
     return res
       .status(503)
       .json({ error: "Database error during maintainer assignment" });
@@ -296,7 +296,7 @@ router.post("/reports/:id/auto-assign-maintainer", async (req, res) => {
 router.get("/reports/approved", async (req, res) => {
   try {
     const reports = await getAllApprovedReports();
-    return res.status(200).json(reports);
+  return res.status(200).json(reports);
   } catch (err) {
     return res
       .status(503)
@@ -317,7 +317,7 @@ router.get("/reports/assigned", async (req, res) => {
 
     const operatorId = req.user.id;
     const reports = await getReportsAssigned(operatorId);
-    return res.status(200).json(reports);
+  return res.status(200).json(reports);
   } catch (err) {
     res
       .status(503)
@@ -352,7 +352,7 @@ router.post("/reports/:id/internal-comments", async (req, res) => {
       req.user.id,
       content.trim()
     );
-    return res.status(201).json(comment);
+  return res.status(201).json(comment);
   } catch (err) {
     return res
       .status(503)
@@ -378,7 +378,7 @@ router.get("/reports/:id/internal-comments", async (req, res) => {
       return res.status(422).json({ error: "Invalid report id" });
 
     const comments = await getInternalComments(reportId);
-    return res.status(200).json(comments);
+  return res.status(200).json(comments);
   } catch (err) {
     return res
       .status(503)
@@ -443,7 +443,7 @@ router.post("/reports/:id/messages", async (req, res) => {
       }
     }
 
-    return res.status(201).json(message);
+  return res.status(201).json(message);
   } catch (err) {
     return res
       .status(503)
@@ -462,7 +462,7 @@ router.get("/reports/:id/messages", async (req, res) => {
       return res.status(422).json({ error: "Invalid report id" });
 
     const messages = await getMessages(reportId);
-    return res.status(200).json(messages);
+  return res.status(200).json(messages);
   } catch (err) {
     return res
       .status(503)

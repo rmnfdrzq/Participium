@@ -336,12 +336,13 @@ export default function ChatsPage({ user }) {
           <>
             {/* Chat header */}
             <div className={styles.chatHeader}>
-              <button 
-                className={styles.backButton} 
+              <button
+                type="button"
+                className={styles.mobileBackButton}
                 onClick={handleBackToList}
-                aria-label="Back to chats list"
+                aria-label="Back to chats"
               >
-                ‹
+                ←
               </button>
               <div className={styles.chatHeaderInfo}>
                 <h3>{selectedChat.title}</h3>

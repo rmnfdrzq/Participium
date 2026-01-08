@@ -321,14 +321,14 @@
 }
 
 .showOnMapButton {
-  padding: 6px 12px;
+  padding: 10px 14px;
   background: var(--static-white);
   border: 1px solid var(--border-default);
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--static-black);
   white-space: nowrap;
@@ -341,6 +341,11 @@
 
 .showOnMapButton:active {
   transform: scale(0.97);
+}
+
+/* Mobile back button - hidden on desktop */
+.mobileBackButton {
+  display: none;
 }
 
 /* =====================================================
@@ -648,26 +653,54 @@
     z-index: 20;
   }
 
-  /* Show back button on mobile */
-  .backButton {
-    display: flex;
-  }
-
-  .chatHeader {
-    padding: 12px 16px;
-    gap: 8px;
-    min-height: 64px;
-    /* Safe area for notched phones */
-    padding-top: max(12px, env(safe-area-inset-top));
-  }
-
   .chatHeaderInfo h3 {
     font-size: 16px;
   }
 
+  /* Show map button on mobile (same as desktop) */
   .showOnMapButton {
-    padding: 5px 10px;
-    font-size: 11px;
+    display: block;
+  }
+
+  /* Chat header needs safe area on mobile */
+  .chatHeader {
+    padding: 12px 16px;
+    gap: 8px;
+    min-height: 64px;
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+
+  /* Mobile back button - circular, similar height to Show on Map button */
+  .mobileBackButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    padding: 0;
+    background: var(--static-white);
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    color: var(--static-black);
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+
+  .mobileBackButton:active {
+    background: var(--background-light);
+    transform: scale(0.95);
+  }
+
+  /* Simplified chat header on mobile */
+  .chatHeader {
+    padding: 12px 16px;
+    gap: 8px;
+    min-height: auto;
+    padding-top: 12px;
   }
 
   /* Messages area mobile */
@@ -771,20 +804,15 @@
     padding: 10px 12px;
   }
 
-  .backButton {
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
-    font-size: 20px;
-  }
-
   .chatHeaderInfo h3 {
     font-size: 15px;
   }
 
-  .showOnMapButton {
-    padding: 4px 8px;
-    font-size: 10px;
+  .mobileBackButton {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: 14px;
   }
 
   .messagesArea {
@@ -846,6 +874,13 @@
     min-height: 64px;
     padding: 12px 16px;
   }
+
+  .mobileBackButton {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    font-size: 14px;
+  }
 }
 
 /* =====================================================
@@ -857,7 +892,8 @@
   .chatItem,
   .sendButton,
   .showOnMapButton,
-  .backButton {
+  .backButton,
+  .mobileBackButton {
     animation: none;
     transition: none;
   }
@@ -869,3 +905,4 @@
 @media (prefers-color-scheme: dark) {
   /* Can add dark mode styles here if needed */
 }
+

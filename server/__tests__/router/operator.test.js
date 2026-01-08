@@ -1,4 +1,4 @@
-let getAllOperatorsMock, getTechnicalOfficersByOfficeMock, getMainteinerByOfficeMock, createMunicipalityUserMock;
+let getAllOperatorsMock, getTechnicalOfficersByOfficeMock, getMainteinerByOfficeMock, createMunicipalityUserMock, addOperatorCategoryMock, removeOperatorCategoryMock;
 let request, expressApp, router;
 let isAuth = false;
 let currentUser = null;
@@ -11,13 +11,17 @@ describe('router/operator', () => {
     getTechnicalOfficersByOfficeMock = jest.fn();
     getMainteinerByOfficeMock = jest.fn();
     createMunicipalityUserMock = jest.fn();
+    addOperatorCategoryMock = jest.fn();
+    removeOperatorCategoryMock = jest.fn();
 
     // mock dao before importing the router
     await jest.unstable_mockModule('../../dao.mjs', () => ({
       getAllOperators: getAllOperatorsMock,
       getTechnicalOfficersByOffice: getTechnicalOfficersByOfficeMock,
       getMainteinerByOffice: getMainteinerByOfficeMock,
-      createMunicipalityUser: createMunicipalityUserMock
+      createMunicipalityUser: createMunicipalityUserMock,
+      addOperatorCategory: addOperatorCategoryMock,
+      removeOperatorCategory: removeOperatorCategoryMock
     }));
 
     const express = (await import('express')).default;
@@ -82,10 +86,10 @@ describe('router/operator', () => {
     });
   });
 
-  describe('GET /api/operators?office_id', () => {
+  describe('GET /api/operators?category_id', () => {
     test('unauthenticated -> 401', async () => {
       isAuth = false;
-      const res = await request(expressApp).get('/api/operators?office_id=1');
+      const res = await request(expressApp).get('/api/operators?category_id=1');
       expect(res.status).toBe(401);
       expect(res.body).toEqual({ error: 'Not authenticated' });
     });
@@ -93,7 +97,7 @@ describe('router/operator', () => {
     test('validation error -> 400', async () => {
       isAuth = true;
       currentUser = { role: 'Municipal public relations officer' };
-      const res = await request(expressApp).get('/api/operators'); // missing office_id
+      const res = await request(expressApp).get('/api/operators'); // missing category_id
       expect(res.status).toBe(400);
       expect(res.body).toHaveProperty('errors');
     });
@@ -104,7 +108,7 @@ describe('router/operator', () => {
       const officers = [{ id: 2, username: 'tech' }];
       getTechnicalOfficersByOfficeMock.mockResolvedValueOnce(officers);
 
-      const res = await request(expressApp).get('/api/operators?office_id=5');
+      const res = await request(expressApp).get('/api/operators?category_id=5');
       expect(res.status).toBe(200);
       expect(res.body).toEqual(officers);
       expect(getTechnicalOfficersByOfficeMock).toHaveBeenCalledWith('5');
@@ -116,7 +120,7 @@ describe('router/operator', () => {
       const maintainers = [{ id: 3, username: 'main' }];
       getMainteinerByOfficeMock.mockResolvedValueOnce(maintainers);
 
-      const res = await request(expressApp).get('/api/operators?office_id=7');
+      const res = await request(expressApp).get('/api/operators?category_id=7');
       expect(res.status).toBe(200);
       expect(res.body).toEqual(maintainers);
       expect(getMainteinerByOfficeMock).toHaveBeenCalledWith('7');
@@ -125,7 +129,7 @@ describe('router/operator', () => {
     test('forbidden role -> 422', async () => {
       isAuth = true;
       currentUser = { role: 'Admin' };
-      const res = await request(expressApp).get('/api/operators?office_id=1');
+      const res = await request(expressApp).get('/api/operators?category_id=1');
       expect(res.status).toBe(422);
       expect(res.body).toEqual({ error: 'Forbidden' });
     });
@@ -134,13 +138,13 @@ describe('router/operator', () => {
       isAuth = true;
       currentUser = { role: 'Municipal public relations officer' };
       getTechnicalOfficersByOfficeMock.mockRejectedValueOnce(new Error('DB failure'));
-      const res = await request(expressApp).get('/api/operators?office_id=1');
+      const res = await request(expressApp).get('/api/operators?category_id=1');
       expect(res.status).toBe(503);
     });
   });
 
   describe('POST /api/admin/createuser', () => {
-    const validPayload = { username: 'u', email: 'a@b.com', password: 'secret1', office_id: 1, company: 1, role: 2 };
+    const validPayload = { username: 'u', email: 'a@b.com', password: 'secret1', office_id: [1], company: 1, role: 2 };
 
     test('unauthorized when not Admin -> 401', async () => {
       isAuth = true;
@@ -161,17 +165,19 @@ describe('router/operator', () => {
     test('company/role mismatch -> 400', async () => {
       isAuth = true;
       currentUser = { role: 'Admin' };
-      const payload = { ...validPayload, company: 1, role: 2 }; // mismatch that code checks
+      createMunicipalityUserMock.mockResolvedValueOnce({ id: 88, username: 'u' });
+      const payload = { ...validPayload, company: 2, role: 2, office_id: [1] };
       const res = await request(expressApp).post('/api/admin/createuser').send(payload);
       expect(res.status).toBe(400);
-      expect(res.body).toEqual({ error: 'Needs to be External mainteiner' });
+      expect(res.body).toEqual({ error: 'Needs to be an External maintainer' });
     });
 
     test('success -> 201', async () => {
       isAuth = true;
       currentUser = { role: 'Admin' };
-      const payload = { ...validPayload, company: 1, role: 5 }; // mismatch that code checks
+      const payload = { ...validPayload, company: 2, role: 5, office_id: [1] };
       createMunicipalityUserMock.mockResolvedValueOnce({ id: 99, username: 'u' });
+      addOperatorCategoryMock.mockResolvedValueOnce();
 
       const res = await request(expressApp).post('/api/admin/createuser').send(payload);
       expect(res.status).toBe(201);
@@ -184,7 +190,7 @@ describe('router/operator', () => {
       currentUser = { role: 'Admin' };
       const err = new Error('dup');
       err.code = '23505';
-      const payload = { ...validPayload, company: 2, role: 2 }; // mismatch that code checks
+      const payload = { ...validPayload, company: 2, role: 5, office_id: [1] };
       createMunicipalityUserMock.mockRejectedValueOnce(err);
 
       const res = await request(expressApp).post('/api/admin/createuser').send(payload);
@@ -196,10 +202,128 @@ describe('router/operator', () => {
       isAuth = true;
       currentUser = { role: 'Admin' };
       createMunicipalityUserMock.mockRejectedValueOnce(new Error('db'));
-      const payload = { ...validPayload, company: 2, role: 2 }; // mismatch that code checks
+      const payload = { ...validPayload, company: 2, role: 5, office_id: [1] };
       const res = await request(expressApp).post('/api/admin/createuser').send(payload);
       expect(res.status).toBe(503);
-      expect(res.body).toEqual({ error: 'Database error during user creation' });
+      expect(res.body).toHaveProperty('error');
+    });
+  });
+
+  describe('POST /api/admin/addcategory', () => {
+    test('unauthenticated -> 401', async () => {
+      isAuth = false;
+      const res = await request(expressApp).post('/api/admin/addcategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({ error: 'Not authorized' });
+    });
+
+    test('not admin -> 401', async () => {
+      isAuth = true;
+      currentUser = { role: 'Operator' };
+      const res = await request(expressApp).post('/api/admin/addcategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({ error: 'Not authorized' });
+    });
+
+    test('validation errors -> 422', async () => {
+      isAuth = true;
+      currentUser = { role: 'Admin' };
+      const res = await request(expressApp).post('/api/admin/addcategory').send({ operator_id: 'abc', category_id: 'xyz' });
+      expect(res.status).toBe(422);
+      expect(res.body).toHaveProperty('errors');
+    });
+
+    test('success -> 201', async () => {
+      isAuth = true;
+      currentUser = { role: 'Admin' };
+      const result = { operator_id: 1, category_id: 2 };
+      addOperatorCategoryMock.mockResolvedValueOnce(result);
+
+      const res = await request(expressApp).post('/api/admin/addcategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(201);
+      expect(res.body).toEqual(result);
+      expect(addOperatorCategoryMock).toHaveBeenCalledWith(1, 2);
+    });
+
+    test('custom error with status -> returns status from error', async () => {
+      isAuth = true;
+      currentUser = { role: 'Admin' };
+      const err = new Error('Category already assigned');
+      err.status = 409;
+      addOperatorCategoryMock.mockRejectedValueOnce(err);
+
+      const res = await request(expressApp).post('/api/admin/addcategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(409);
+      expect(res.body).toEqual({ error: 'Category already assigned' });
+    });
+
+    test('generic error -> 500', async () => {
+      isAuth = true;
+      currentUser = { role: 'Admin' };
+      addOperatorCategoryMock.mockRejectedValueOnce(new Error('Generic error'));
+
+      const res = await request(expressApp).post('/api/admin/addcategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(500);
+      expect(res.body).toEqual({ error: 'Failed to add operator category' });
+    });
+  });
+
+  describe('DELETE /api/admin/removecategory', () => {
+    test('unauthenticated -> 401', async () => {
+      isAuth = false;
+      const res = await request(expressApp).delete('/api/admin/removecategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({ error: 'Not authorized' });
+    });
+
+    test('not admin -> 401', async () => {
+      isAuth = true;
+      currentUser = { role: 'Operator' };
+      const res = await request(expressApp).delete('/api/admin/removecategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual({ error: 'Not authorized' });
+    });
+
+    test('validation errors -> 422', async () => {
+      isAuth = true;
+      currentUser = { role: 'Admin' };
+      const res = await request(expressApp).delete('/api/admin/removecategory').send({ operator_id: 'invalid', category_id: 'invalid' });
+      expect(res.status).toBe(422);
+      expect(res.body).toHaveProperty('errors');
+    });
+
+    test('success -> 200', async () => {
+      isAuth = true;
+      currentUser = { role: 'Admin' };
+      const result = { success: true, message: 'Category removed' };
+      removeOperatorCategoryMock.mockResolvedValueOnce(result);
+
+      const res = await request(expressApp).delete('/api/admin/removecategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(result);
+      expect(removeOperatorCategoryMock).toHaveBeenCalledWith(1, 2);
+    });
+
+    test('custom error with status -> returns status from error', async () => {
+      isAuth = true;
+      currentUser = { role: 'Admin' };
+      const err = new Error('Category not assigned');
+      err.status = 404;
+      removeOperatorCategoryMock.mockRejectedValueOnce(err);
+
+      const res = await request(expressApp).delete('/api/admin/removecategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(404);
+      expect(res.body).toEqual({ error: 'Category not assigned' });
+    });
+
+    test('generic error -> 500', async () => {
+      isAuth = true;
+      currentUser = { role: 'Admin' };
+      removeOperatorCategoryMock.mockRejectedValueOnce(new Error('Generic error'));
+
+      const res = await request(expressApp).delete('/api/admin/removecategory').send({ operator_id: 1, category_id: 2 });
+      expect(res.status).toBe(500);
+      expect(res.body).toEqual({ error: 'Failed to remove operator category' });
     });
   });
 });

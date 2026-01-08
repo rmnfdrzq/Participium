@@ -31,7 +31,7 @@ router.get("/chats", async (req, res) => {
 
     return res.status(200).json(chats);
   } catch (err) {
-    console.error("Error fetching chats:", err);
+    //console.error("Error fetching chats:", err);
     return res.status(503).json({ error: "Database error during chat retrieval" });
   }
 });
@@ -48,7 +48,7 @@ router.get("/chats/unread/count", async (req, res) => {
 
     return res.status(200).json({ count });
   } catch (err) {
-    console.error("Error fetching unread count:", err);
+    //console.error("Error fetching unread count:", err);
     return res.status(503).json({ error: "Database error" });
   }
 });
@@ -101,7 +101,7 @@ router.get("/chats/:reportId", async (req, res) => {
       messages,
     });
   } catch (err) {
-    console.error("Error fetching chat details:", err);
+    //console.error("Error fetching chat details:", err);
     return res.status(503).json({ error: "Database error during chat retrieval" });
   }
 });
@@ -123,7 +123,7 @@ router.post("/chats/:reportId/read", async (req, res) => {
 
     return res.status(200).json({ success: true });
   } catch (err) {
-    console.error("Error marking chat as read:", err);
+    //console.error("Error marking chat as read:", err);
     return res.status(503).json({ error: "Database error" });
   }
 });

@@ -8,7 +8,9 @@ let insertReportMock,
   addInternalCommentMock,
   getInternalCommentsMock,
   addMessageMock,
-  getMessagesMock;
+  getMessagesMock,
+  autoAssignTechnicalOfficerMock,
+  autoAssignMaintainerMock;
 
 let requestLib, makeApp, router;
 let isAuth = false;
@@ -29,6 +31,8 @@ describe('router/report', () => {
     getInternalCommentsMock = jest.fn();
     addMessageMock = jest.fn();
     getMessagesMock = jest.fn();
+    autoAssignTechnicalOfficerMock = jest.fn();
+    autoAssignMaintainerMock = jest.fn();
 
     // mock dao before importing the router
     await jest.unstable_mockModule('../../dao.mjs', () => ({
@@ -43,6 +47,11 @@ describe('router/report', () => {
       getInternalComments: getInternalCommentsMock,
       addMessage: addMessageMock,
       getMessages: getMessagesMock,
+      autoAssignTechnicalOfficer: autoAssignTechnicalOfficerMock,
+      autoAssignMaintainer: autoAssignMaintainerMock,
+      createNotification: jest.fn(),
+      addSystemMessage: jest.fn(),
+      getReportParticipants: jest.fn(),
     }));
 
     const supertest = await import('supertest');
@@ -225,22 +234,99 @@ describe('router/report', () => {
     expect(setMainteinerByReportMock).toHaveBeenCalledWith(9, 77);
   });
 
-  test('GET /reports/approved -> requires auth and returns results', async () => {
+  test('POST /reports/:id/auto-assign-officer -> role check, validation and success', async () => {
+    isAuth = true;
+    currentUser = { id: 5, role: 'user' };
+
+    let app = makeApp();
+    let res = await requestLib(app).post('/reports/1/auto-assign-officer');
+    expect(res.status).toBe(403);
+
+    currentUser = { id: 5, role: 'Municipal public relations officer' };
+    app = makeApp();
+    res = await requestLib(app).post('/reports/abc/auto-assign-officer');
+    expect(res.status).toBe(422);
+
+    const result = {
+      assigned_officer: {
+        operator_id: 99,
+        username: 'john_tech',
+        email: 'john@example.com',
+      },
+    };
+    autoAssignTechnicalOfficerMock.mockResolvedValue(result);
+    app = makeApp();
+    res = await requestLib(app).post('/reports/42/auto-assign-officer');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      id: 99,
+      username: 'john_tech',
+      email: 'john@example.com',
+    });
+    expect(autoAssignTechnicalOfficerMock).toHaveBeenCalledWith(42);
+  });
+
+  test('POST /reports/:id/auto-assign-officer -> db error -> 503', async () => {
+    isAuth = true;
+    currentUser = { id: 5, role: 'Admin' };
+    autoAssignTechnicalOfficerMock.mockRejectedValue(new Error('db fail'));
+
+    const app = makeApp();
+    const res = await requestLib(app).post('/reports/42/auto-assign-officer');
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ error: 'Database error during officer assignment' });
+  });
+
+  test('POST /reports/:id/auto-assign-maintainer -> role check, validation and success', async () => {
     isAuth = true;
     currentUser = { id: 6, role: 'user' };
+
+    let app = makeApp();
+    let res = await requestLib(app).post('/reports/1/auto-assign-maintainer');
+    expect(res.status).toBe(403);
+
+    currentUser = { id: 6, role: 'Technical office staff member' };
+    app = makeApp();
+    res = await requestLib(app).post('/reports/xyz/auto-assign-maintainer');
+    expect(res.status).toBe(422);
+
+    const result = {
+      assigned_maintainer: {
+        operator_id: 88,
+        username: 'maint_user',
+        company_name: 'MaintCorp',
+      },
+    };
+    autoAssignMaintainerMock.mockResolvedValue(result);
+    app = makeApp();
+    res = await requestLib(app).post('/reports/50/auto-assign-maintainer');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      id: 88,
+      username: 'maint_user',
+      company: 'MaintCorp',
+    });
+    expect(autoAssignMaintainerMock).toHaveBeenCalledWith(50);
+  });
+
+  test('POST /reports/:id/auto-assign-maintainer -> db error -> 503', async () => {
+    isAuth = true;
+    currentUser = { id: 6, role: 'Admin' };
+    autoAssignMaintainerMock.mockRejectedValue(new Error('db fail'));
+
+    const app = makeApp();
+    const res = await requestLib(app).post('/reports/50/auto-assign-maintainer');
+    expect(res.status).toBe(503);
+    expect(res.body).toEqual({ error: 'Database error during maintainer assignment' });
+  });
+
+  test('GET /reports/approved -> returns results (no auth required)', async () => {
     getAllApprovedReportsMock.mockResolvedValue([{ id: 7 }]);
 
     const app = makeApp();
     const res = await requestLib(app).get('/reports/approved');
     expect(res.status).toBe(200);
     expect(res.body).toEqual([{ id: 7 }]);
-
-    // unauthenticated
-    isAuth = false;
-    currentUser = null;
-    const app2 = makeApp();
-    const res2 = await requestLib(app2).get('/reports/approved');
-    expect(res2.status).toBe(401);
   });
 
   test('GET /reports/assigned -> role check and returns assigned reports', async () => {
@@ -319,7 +405,7 @@ describe('router/report', () => {
 
   test('POST /reports/:id/messages -> validation, senderType and success', async () => {
     isAuth = true;
-    currentUser = { id: 21, type: 'citizen' };
+    currentUser = { id: 21, role: 'user' };
 
     let app = makeApp();
     let res = await requestLib(app).post('/reports/4/messages').send({ content: '' });
@@ -333,7 +419,7 @@ describe('router/report', () => {
     expect(addMessageMock).toHaveBeenCalledWith(4, 'citizen', 21, 'hey');
 
     // operator sender
-    currentUser = { id: 30, type: 'operator' };
+    currentUser = { id: 30, role: 'Technical office staff member' };
     app = makeApp();
     res = await requestLib(app).post('/reports/4/messages').send({ content: 'op msg' });
     expect(res.status).toBe(201);
@@ -342,7 +428,7 @@ describe('router/report', () => {
 
   test('GET /reports/:id/messages -> validation and dao errors', async () => {
     isAuth = true;
-    currentUser = { id: 21, type: 'citizen' };
+    currentUser = { id: 21, role: 'user' };
 
     let app = makeApp();
     let res = await requestLib(app).get('/reports/zz/messages');

@@ -561,6 +561,9 @@ function InspectReportPage() {
           onClick={(e) =>
             e.target === e.currentTarget && setShowMaintainerModal(false)
           }
+          onKeyDown={(e) => e.key === "Escape" && setShowMaintainerModal(false)}
+          role="dialog"
+          aria-modal="true"
         >
           <div className={styles.confirmModal}>
             <p className={styles.confirmQuestion}>
@@ -592,6 +595,9 @@ function InspectReportPage() {
           onClick={(e) =>
             e.target === e.currentTarget && setShowAutoAssignOfficerModal(false)
           }
+          onKeyDown={(e) => e.key === "Escape" && setShowAutoAssignOfficerModal(false)}
+          role="dialog"
+          aria-modal="true"
         >
           <div className={styles.confirmModal}>
             <p className={styles.confirmQuestion}>
@@ -623,6 +629,9 @@ function InspectReportPage() {
           onClick={(e) =>
             e.target === e.currentTarget && setShowAutoAssignModal(false)
           }
+          onKeyDown={(e) => e.key === "Escape" && setShowAutoAssignModal(false)}
+          role="dialog"
+          aria-modal="true"
         >
           <div className={styles.confirmModal}>
             <p className={styles.confirmQuestion}>

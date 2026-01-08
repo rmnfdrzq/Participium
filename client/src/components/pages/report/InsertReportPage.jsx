@@ -365,6 +365,9 @@ function InsertReportForm({
                         alt={`Preview ${index + 1}`}
                         className={styles.previewImage}
                         onClick={() => setSelectedImageIndex(index)}
+                        onKeyDown={(e) => e.key === "Enter" && setSelectedImageIndex(index)}
+                        role="button"
+                        tabIndex={0}
                       />
                       <button
                         type="button"

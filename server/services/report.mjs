@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 import {getUserInfoById} from "../dao.mjs";
 
@@ -508,7 +509,7 @@ export const autoAssignMaintainer = async (report_id) => {
     // 3. Prendi il maintainer con meno report (o random tra quelli con lo stesso numero)
     const minCount = maintainersResult.rows[0].assigned_reports_count;
     const candidates = maintainersResult.rows.filter(m => m.assigned_reports_count === minCount);
-    const selectedMaintainer = candidates[Math.floor(Math.random() * candidates.length)];
+    const selectedMaintainer = candidates[crypto.randomInt(candidates.length)];
     
     // 4. Assegna il maintainer al report e aggiorna lo stato ad "Assigned" se necessario
     const newStatusId = status_id === 1 ? 2 : status_id; // Se è "Pending Approval" (1), passa ad "Assigned" (2)
@@ -600,7 +601,7 @@ export const autoAssignTechnicalOfficer = async (report_id) => {
     // 3. Prendi il technical officer con meno report (o random tra quelli con lo stesso numero)
     const minCount = officersResult.rows[0].assigned_reports_count;
     const candidates = officersResult.rows.filter(o => o.assigned_reports_count === minCount);
-    const selectedOfficer = candidates[Math.floor(Math.random() * candidates.length)];
+    const selectedOfficer = candidates[crypto.randomInt(candidates.length)];
     
     // 4. Assegna il technical officer al report e aggiorna lo stato ad "Assigned"
     const updateQuery = `

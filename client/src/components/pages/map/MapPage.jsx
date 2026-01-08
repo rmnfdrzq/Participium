@@ -227,7 +227,7 @@ export function MapPage(props) {
       if (reportToFocus && reportToFocus.latitude && reportToFocus.longitude) {
         setMapCenter([reportToFocus.latitude, reportToFocus.longitude]);
         setMapZoom(17);
-        
+
         // Open modal with delay to allow camera to focus first
         const timer = setTimeout(() => {
           setSelectedReport(reportToFocus);
@@ -235,7 +235,7 @@ export function MapPage(props) {
           // Clear the URL parameter after modal is opened
           setSearchParams({}, { replace: true });
         }, 400);
-        
+
         return () => clearTimeout(timer);
       }
     }
@@ -296,11 +296,11 @@ export function MapPage(props) {
     const coordinates = [lat, lng];
 
     // Check if the clicked point is inside Turin city limits
-      const point = turf.point([latlng.lng, latlng.lat]);
+    const point = turf.point([latlng.lng, latlng.lat]);
     const isInside = turf.booleanPointInPolygon(point, cityBoundaries);
-      if (!isInside) {
-        dispatch(clearLocation());
-        return;
+    if (!isInside) {
+      dispatch(clearLocation());
+      return;
     }
 
     // Get address using reverse geocoding
@@ -358,14 +358,14 @@ export function MapPage(props) {
         const lng = parseFloat(result.lon);
         const newCenter = [lat, lng];
 
-         const point = turf.point([lng, lat]);
-  const isInside = turf.booleanPointInPolygon(point, cityBoundaries);
+        const point = turf.point([lng, lat]);
+        const isInside = turf.booleanPointInPolygon(point, cityBoundaries);
 
-  if (!isInside) {
-    setSearchError("The searched address is outside the city limits");
-    dispatch(clearLocation());
-    return;
-  }
+        if (!isInside) {
+          setSearchError("The searched address is outside the city limits");
+          dispatch(clearLocation());
+          return;
+        }
 
         setMapCenter(newCenter);
         setMapZoom(15);
@@ -669,34 +669,30 @@ function ApprovedReportsLayer({ reports, onViewDetails }) {
 }
 
 function ReportDetailsModal({ report, onClose }) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-const [isLoggedIn, setIsLoggedIn] = useState(false);
+  useEffect(() => {
+    let isMounted = true;
 
-useEffect(() => {
-  let isMounted = true;
-
-  const checkLogin = async () => {
-    try {
-      const loggedIn = await API.getUserInfo();
-      if (isMounted) {
-        setIsLoggedIn(loggedIn);
+    const checkLogin = async () => {
+      try {
+        const loggedIn = await API.getUserInfo();
+        if (isMounted) {
+          setIsLoggedIn(loggedIn);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setIsLoggedIn(false);
+        }
       }
-    } catch (err) {
-      if (isMounted) {
-        setIsLoggedIn(false);
-      }
-    }
-  };
+    };
 
-  checkLogin();
+    checkLogin();
 
-  return () => {
-    isMounted = false;
-  };
-}, []);
-
-
-
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const navigate = useNavigate();
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
@@ -708,15 +704,14 @@ useEffect(() => {
 
   const isAnonymous = report.anonymous === true;
 
-const isOwner =
-  !isAnonymous &&
-  isLoggedIn?.id != null &&
-  report.citizen?.id === isLoggedIn.id;
+  const isOwner =
+    !isAnonymous &&
+    isLoggedIn?.id != null &&
+    report.citizen?.id != null &&
+    Number(report.citizen.id) === Number(isLoggedIn.id);
 
-const showChatButton =
-  isOwner &&
-  report.status?.id !== 1 &&
-  report.status?.id !== 5;
+  const showChatButton =
+    isOwner && report.status?.id !== 1 && report.status?.id !== 5;
 
   return (
     <>

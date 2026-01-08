@@ -228,6 +228,9 @@ export default function ProfilePage({
               isUploadingAvatar ? styles.uploading : ""
             }`}
             onClick={handleAvatarClick}
+            onKeyDown={(e) => e.key === "Enter" && handleAvatarClick()}
+            role="button"
+            tabIndex={0}
             title={
               isUploadingAvatar ? "Uploading..." : "Click to change avatar"
             }

@@ -715,10 +715,17 @@ function ReportDetailsModal({ report, onClose }) {
 
   return (
     <>
-      <div className={styles.modalOverlay} onClick={onClose}>
+      <div
+        className={styles.modalOverlay}
+        onClick={onClose}
+        onKeyDown={(e) => e.key === "Escape" && onClose()}
+        role="dialog"
+        aria-modal="true"
+      >
         <div
           className={styles.modalContent}
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
         >
           <div className={styles.modalHeader}>
             <h2>{report.title}</h2>
@@ -764,6 +771,11 @@ function ReportDetailsModal({ report, onClose }) {
                       alt={`Report Image ${index + 1}`}
                       className={styles.reportPhoto}
                       onClick={() => setSelectedImageIndex(index)}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && setSelectedImageIndex(index)
+                      }
+                      role="button"
+                      tabIndex={0}
                     />
                   ))}
                 </div>

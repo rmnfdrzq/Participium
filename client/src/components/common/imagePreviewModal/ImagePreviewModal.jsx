@@ -42,7 +42,7 @@ export function ImagePreviewModal({ images = [], initialIndex = 0, onClose }) {
   const showNavigation = images.length > 1;
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={onClose} onKeyDown={(e) => e.key === "Escape" && onClose()} role="dialog" aria-modal="true">
       <button className={styles.closeButton} onClick={onClose}>
         <svg
           viewBox="0 0 24 24"
@@ -75,6 +75,7 @@ export function ImagePreviewModal({ images = [], initialIndex = 0, onClose }) {
         alt={`Preview ${currentIndex + 1}`}
         className={styles.image}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       />
 
       {showNavigation && (

@@ -290,6 +290,9 @@ export default function ChatsPage({ user }) {
                   parseInt(activeReportId, 10) === chat.report_id ? styles.active : ""
                 }`}
                 onClick={() => handleSelectChat(chat.report_id)}
+                onKeyDown={(e) => e.key === "Enter" && handleSelectChat(chat.report_id)}
+                role="button"
+                tabIndex={0}
               >
                 <div className={styles.chatItemHeader}>
                   <span className={styles.chatTitle}>{chat.title}</span>

@@ -305,6 +305,9 @@ function InspectReportPage() {
                   alt="Report"
                   className={styles.photo}
                   onClick={() => setSelectedImageIndex(index)}
+                  onKeyDown={(e) => e.key === "Enter" && setSelectedImageIndex(index)}
+                  role="button"
+                  tabIndex={0}
                 />
               ))}
             </div>
@@ -456,6 +459,9 @@ function InspectReportPage() {
           onClick={(e) =>
             e.target === e.currentTarget && setShowApproveModal(false)
           }
+          onKeyDown={(e) => e.key === "Escape" && setShowApproveModal(false)}
+          role="dialog"
+          aria-modal="true"
         >
           <div className={styles.confirmModal}>
             <p className={styles.confirmQuestion}>
@@ -521,6 +527,9 @@ function InspectReportPage() {
           onClick={(e) =>
             e.target === e.currentTarget && setShowStatusModal(false)
           }
+          onKeyDown={(e) => e.key === "Escape" && setShowStatusModal(false)}
+          role="dialog"
+          aria-modal="true"
         >
           <div className={styles.confirmModal}>
             <p className={styles.confirmQuestion}>

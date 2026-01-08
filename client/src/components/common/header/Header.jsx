@@ -255,6 +255,9 @@ export function Header(props) {
                               !notif.seen ? styles.unread : ""
                             }`}
                             onClick={() => handleNotificationClick(notif)}
+                            onKeyDown={(e) => e.key === "Enter" && handleNotificationClick(notif)}
+                            role="button"
+                            tabIndex={0}
                           >
                             <p>{notif.message}</p>
                             <small>{formatTime(notif.sent_at)}</small>
@@ -272,6 +275,9 @@ export function Header(props) {
               <div
                 className={styles.headerAvatar}
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onKeyDown={(e) => e.key === "Enter" && setIsMenuOpen(!isMenuOpen)}
+                role="button"
+                tabIndex={0}
                 title="Menu"
               >
                 {isCitizen && citizenProfile?.profile_photo_url ? (

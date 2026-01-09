@@ -17,7 +17,7 @@ sections:
 - Total points committed vs done 
   > 21 vs 21 (story points)
 - Nr of hours planned vs spent (as a team) 
-  > 94h 45m vs 91h 35m
+  > 94h 45m vs 95h 20m
 
 **Remember**  a story is done ONLY if it fits the Definition of Done:
  
@@ -32,7 +32,7 @@ sections:
 
 | Story  | # Tasks | Points | Hours est. | Hours actual |
 |--------|---------|--------|------------|--------------|
-| _#0_  |   20     |    -   |   60h 15m        |    57h 30m        |
+| _#0_  |   20     |    -   |   60h 15m        |    59h 45m        |
 | 28    |    5     |   2 |     5h       |    5h 20m          |
 | 15    |   4    |    1    |    4h 45m        |     4h 45m         |
 | 30   |    3     |    2    |    2h 15m        |      2h 15m        |
@@ -44,13 +44,13 @@ sections:
 |            | Mean | StDev |
 |------------|------|-------|
 | Estimation |  1.82h   | 2.22   | 
-| Actual     | 1.76h  | 1.91  |
+| Actual     | 1.83h  | 2.07  |
 
-- Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1 = **-3.34%**
+- Total estimation error ratio: sum of total hours spent / sum of total hours effort - 1 = **0.62%**
 
     $$\frac{\sum_i spent_{task_i}}{\sum_i estimation_{task_i}} - 1$$
     
-- Absolute relative task estimation error: sum( abs( spent-task-i / estimation-task-i - 1))/n = **9.62%**
+- Absolute relative task estimation error: sum( abs( spent-task-i / estimation-task-i - 1))/n = **8.68%**
 
     $$\frac{1}{n}\sum_i^n \left| \frac{spent_{task_i}}{estimation_task_i}-1 \right| $$
 
@@ -89,7 +89,7 @@ sections:
   - Total hours estimated estimated at sprint planning
     > 2h + ( 23h refactoring )
   - Total hours spent
-    > 2h + ( 23h refactoring )
+    > 2h + ( 25h refactoring )
 
 ## ASSESSMENT
 

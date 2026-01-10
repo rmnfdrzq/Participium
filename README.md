@@ -53,6 +53,9 @@ services:
       SUPABASE_URL: https://your-supabase-url.supabase.co
       SUPABASE_SERVICE_ROLE_KEY: your-supabase-service-role-key
       SUPABASE_BUCKET_NAME: your-bucket-name
+      GMAIL_USER: your-gmail
+      GMAIL_APP_PASSWORD: your-gmail-app-psw
+
     ports:
       - "3001:3001"
       - "5173:5173"

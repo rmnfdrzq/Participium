@@ -718,6 +718,7 @@ function ReportDetailsModal({ report, onClose }) {
     isOwner && 
     report.status?.id !== 1 && 
     report.status?.id !== 5 &&
+    report.status?.id != 6 &&
     report.chat_started === true;
 
   return (

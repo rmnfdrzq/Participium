@@ -13,7 +13,7 @@ import MarkerClusterGroup from "react-leaflet-markercluster";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router";
 import { setLocation, clearLocation } from "../../../store/locationSlice";
-import L from "leaflet";
+import L, { marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
@@ -536,6 +536,16 @@ const blueIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+// Green icon for resolved reports
+const greenIcon = new L.Icon({
+  iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
 /**
  * Report popup component
  * @param {Object} props - Component props
@@ -650,20 +660,24 @@ function ApprovedReportsLayer({ reports, onViewDetails }) {
       showCoverageOnHover={false}
       zoomToBoundsOnClick={true}
     >
-      {validReports.map((report) => (
-        <CenteredMarker
-          key={report.id}
-          position={[report.latitude, report.longitude]}
-          icon={blueIcon}
-        >
-          <Popup>
-            <ReportPopup
-              report={report}
-              onViewDetails={() => onViewDetails(report)}
-            />
-          </Popup>
-        </CenteredMarker>
-      ))}
+      {validReports.map((report) => {
+        const markerIcon = report.status?.id === 6 ? greenIcon : blueIcon;
+
+        return (
+          <CenteredMarker
+            key={report.id}
+            position={[report.latitude, report.longitude]}
+            icon={markerIcon}
+          >
+            <Popup>
+              <ReportPopup
+                report={report}
+                onViewDetails={() => onViewDetails(report)}
+              />
+            </Popup>
+          </CenteredMarker>
+        );
+      })}
     </MarkerClusterGroup>
   );
 }

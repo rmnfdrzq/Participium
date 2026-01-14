@@ -378,7 +378,7 @@ export const getAllApprovedReports = async () => {
       LEFT JOIN operators ext_op ON r.assigned_to_external_id = ext_op.operator_id
       LEFT JOIN companies ext_comp ON ext_op.company_id = ext_comp.company_id
       LEFT JOIN photos p ON r.report_id = p.report_id
-      WHERE r.status_id IN (2, 3, 4)
+      WHERE r.status_id IN (2, 3, 4, 6)
       GROUP BY r.report_id, c.citizen_id, c.username, c.first_name, c.last_name, cat.name, cat.office, s.name, op.operator_id, op.username, op.email, ext_op.operator_id, ext_op.username, ext_op.email, ext_comp.company_id, ext_comp.name
       ORDER BY r.created_at DESC
     `;

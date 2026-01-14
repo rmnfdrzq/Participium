@@ -608,3 +608,183 @@ WITH new_report AS (
 INSERT INTO photos (report_id, image_url)
 SELECT nr.report_id, 'https://vxofqxupvztswwxksllp.supabase.co/storage/v1/object/public/Reports/fontana_rotta.jpg'
 FROM new_report nr;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Roads and Urban Furnishings'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Pothole on the roadway',
+    'Large pothole causing danger to cars and bicycles.',
+    45.070120, 7.668450, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/pothole_road.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Water Supply – Drinking Water'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Water leak from sidewalk',
+    'Continuous water leak coming out from the pavement.',
+    45.068940, 7.662310, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/water_leak_street.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Waste'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Illegal dumping',
+    'Bulky waste abandoned on sidewalk.',
+    45.071500, 7.669820, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/illegal_dumping.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Public Lighting'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Flickering streetlight',
+    'Streetlight intermittently turns on and off at night.',
+    45.065200, 7.671900, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/flickering_streetlight.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Architectural Barriers'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Broken sidewalk ramp',
+    'Wheelchair ramp is broken and inaccessible.',
+    45.064870, 7.658930, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/sidewalk_ramp.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Road Signs and Traffic Lights'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Traffic light not working',
+    'Traffic light completely off causing traffic confusion.',
+    45.067110, 7.673500, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/traffic_light_off.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Sewer System'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Blocked manhole',
+    'Sewer is blocked and it is flooding.',
+    45.066540, 7.664880, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/manhole_sewer.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Public Green Areas and Playgrounds'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Broken playground swing',
+    'Swing structure damaged and unsafe for children.',
+    45.072300, 7.666910, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/broken_swing.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Roads and Urban Furnishings'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Damaged bench',
+    'Public bench is broken.',
+    45.069900, 7.660120, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/broken_bench.jpg' FROM new_report;
+
+WITH new_report AS (
+INSERT INTO reports (
+        citizen_id, category_id, status_id,
+        assigned_to_operator_id, title, description,
+        latitude, longitude, anonymous
+) VALUES (
+    (SELECT citizen_id FROM citizens WHERE email='melo@participium.local'),
+    (SELECT category_id FROM categories WHERE name='Other'),
+    (SELECT status_id FROM statuses WHERE name='Pending Approval'),
+    NULL,
+    'Public clock broken',
+    'City square clock is now broken.',
+    45.074100, 7.667800, TRUE
+) RETURNING report_id
+)
+INSERT INTO photos (report_id, image_url)
+SELECT report_id, 'https://example.com/public_clock.jpg' FROM new_report;
